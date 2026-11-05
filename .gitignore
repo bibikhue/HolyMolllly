@@ -1,0 +1,13 @@
+.env
+.vscode
+backup
+
+data/**
+!data/results/
+!data/results/**
+
+database/init/results/
+*.sql
+
+database/init/results/
+*.sql
