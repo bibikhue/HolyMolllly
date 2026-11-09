@@ -1,0 +1,66 @@
+name: Frontend check and deploy
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npm test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Deploy over SSH
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          if [[ -z "$EC2_HOST" ]]; then
+            echo "Secrets 미설정: EC2_HOST. 배포를 건너뜁니다."
+            exit 0
+          fi
+          if [[ -z "$EC2_USER" || -z "$EC2_SSH_KEY" ]]; then
+            echo "EC2_USER 또는 EC2_SSH_KEY Secret이 없습니다." >&2
+            exit 1
+          fi
+
+          umask 077
+          key_file="$(mktemp)"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s\n' "$EC2_SSH_KEY" > "$key_file"
+          chmod 600 "$key_file"
+          ssh -i "$key_file" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new "$EC2_USER@$EC2_HOST" 'bash ~/holymolly/frontend/deploy/deploy.sh'

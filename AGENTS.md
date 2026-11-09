@@ -120,6 +120,6 @@ Windows에서 `uvicorn` 명령을 찾지 못하면 `python -m uvicorn backend.ma
 
 ## 8. 배포
 
-- 현재 사이트는 아직 예전 저장소(bibikhue/front_code) 기준으로 배포 중이다.
-- 배포 방식을 이 저장소로 전환하기 전까지 팀원은 배포하지 않는다.
-- 전환 후에는 PR이 main에 합쳐지면 GitHub Actions가 검사와 배포를 자동으로 한다 (예정). 서버 접속 키는 공유하지 않는다.
+- 서버 전환 완료 전까지는 기존 방식 유지. 현재 사이트는 아직 예전 저장소(bibikhue/front_code) 기준으로 배포 중이며, 전환 전까지 팀원은 배포하지 않는다.
+- 전환 후에는 PR이 main에 합쳐지면 `.github/workflows/frontend.yml`이 `frontend/`의 lint, test, build를 검사하고 서버의 `~/holymolly/frontend/deploy/deploy.sh`를 자동 실행한다. 서버의 `~/holymolly`에는 `frontend/`와 `backend/`를 부분 체크아웃한다.
+- 수동 재배포는 GitHub Actions에서 `main`을 선택해 실행한다. 서버 1회 설정, 되돌리기, Secrets 설정은 `frontend/deploy/README.md`를 따른다. 서버 접속 키는 공유하거나 저장소에 넣지 않는다.

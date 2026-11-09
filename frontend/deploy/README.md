@@ -2,49 +2,68 @@
 
 현재 공개 주소: http://54.253.247.179/
 
-Nginx가 `/var/www/mapsosa/current`의 빌드 결과만 제공합니다.
-`current`는 배포 버전 디렉터리를 가리키는 심볼릭 링크입니다.
+Nginx가 `/var/www/mapsosa/current`의 빌드 결과만 제공합니다. `current`는 배포 버전 디렉터리를 가리키는 심볼릭 링크입니다.
 공개 IP는 EC2 메타데이터로 확인했으며 기존 DuckDNS 도메인은 이전 IP를 가리키므로 현재 배포에는 사용하지 않습니다.
 
-- 환경 설정: `.env.production`의 `VITE_SITE_URL`
-- Nginx 설정 원본: `deploy/mapsosa-ip.conf`
+- 빌드 환경 설정: `frontend/.env.production`의 `VITE_SITE_URL`
+- Nginx 설정 원본: `frontend/deploy/mapsosa-ip.conf`
 - 적용된 설정: `/etc/nginx/conf.d/mapsosa-ip.conf`
 - 첫 배포: `/var/www/mapsosa/releases/20261007-0710`
 
-## 한 줄로 배포하기 (권장)
+## 전환 후 자동 배포
 
-내 컴퓨터 터미널(`E:\Dashboard_Holymolly\front_code>`)에서 GitHub에 올린 뒤, 아래 한 줄을 실행합니다.
+`main`에 변경이 반영되면 `.github/workflows/frontend.yml`이 `frontend/`에서 `npm ci → lint → test → build`를 검사한 뒤 SSH로 `~/holymolly/frontend/deploy/deploy.sh`를 실행합니다. Pull Request에서는 `frontend/**` 또는 워크플로 파일이 바뀌었을 때 검사만 합니다. FastAPI 서버 배포는 이번 범위에 포함되지 않습니다.
 
-```
-ssh ec2-54-253-247-179.ap-southeast-2.compute.amazonaws.com "bash ~/my-app/deploy/deploy.sh"
-```
+배포 스크립트는 잠금 → `git pull --ff-only` → 마지막 성공 배포 이후 변경 확인 → 필요시 `npm ci` → lint → test → build → 필요시 Node 서버 재시작 및 상태 확인 → 새 release 교체 → 최근 5개 release 보관 순서로 실행합니다. 상태 확인이 실패하면 화면 링크를 교체하지 않습니다.
 
-`deploy/deploy.sh`가 최신 코드 받기 → (필요하면 npm ci) → lint → build → 새 버전 교체 → 오래된 버전 정리(최근 5개 유지)를 순서대로 실행합니다. 중간에 실패하면 바로 멈추고 공개 사이트는 이전 버전 그대로 유지됩니다. 마지막 줄에 `== 배포 완료`가 나오면 성공입니다. 아래의 수동 절차는 스크립트가 하는 일과 같습니다.
+`/var/www/mapsosa/DEPLOYED_COMMIT`은 교체와 정리가 모두 성공한 뒤에만 갱신합니다. 파일이 없는 첫 배포는 `npm ci`와 Node 서버 재시작을 모두 수행합니다. 실패한 배포의 변경은 다음 실행 때 다시 판단합니다. 이 파일은 직접 만들지 않습니다.
 
-## 수정 후 다시 배포
+## 서버 1회 설정
 
-프로젝트 루트에서 다음 명령을 실행합니다. 시스템 배포 경로에 쓰기 위해 sudo 권한이 필요합니다.
-개발 서버의 변경은 공개 사이트에 자동 반영되지 않습니다.
+새 배포 파일이 `main`에 합쳐진 뒤 EC2의 `ubuntu` 계정에서 실행합니다. Node.js 22와 `flock`, `curl`, `npm`이 필요합니다.
 
 ```bash
-npm run lint
-npm run build
+git clone --filter=blob:none --no-checkout https://github.com/bibikhue/HolyMolllly.git ~/holymolly
+cd ~/holymolly && git sparse-checkout init --cone && git sparse-checkout set frontend backend && git checkout main
+node --version
+sudo install -m 644 ~/holymolly/frontend/deploy/mapsosa-mice.service /etc/systemd/system/mapsosa-mice.service
+sudo systemctl daemon-reload
+sudo systemctl enable mapsosa-mice.service
+sudo systemctl restart mapsosa-mice.service
+curl -fsS http://127.0.0.1:4174/api/mice/health
+sudo -n true
 ```
 
-두 명령이 성공한 뒤 빌드를 새 버전으로 복사하고 링크를 교체합니다.
+필요한 서버 설정은 `~/holymolly/frontend/.env.server`에 직접 준비하고 권한을 `600`으로 설정합니다. 배포 스크립트는 `sudo -n`으로 서비스 재시작과 `/var/www/mapsosa/` 파일 작업을 하므로, 서버 계정에 해당 비밀번호 없는 권한이 있어야 합니다. Nginx는 기존 `/var/www/mapsosa/current`를 계속 제공합니다.
+
+GitHub 저장소의 Actions Secrets에 다음 세 항목을 등록합니다. 실제 값은 문서나 저장소에 기록하지 않습니다.
+
+- `EC2_HOST`: EC2 접속 호스트명 또는 IP
+- `EC2_USER`: SSH 접속 계정
+- `EC2_SSH_KEY`: 해당 계정에 접속할 수 있는 SSH 개인 키
+
+서버 계정의 `authorized_keys`에 대응하는 공개 키가 등록되어 있어야 합니다. `EC2_HOST`가 비어 있으면 "Secrets 미설정"을 출력하고 배포를 건너뜁니다. 다른 필수 Secret이 비어 있으면 배포 작업은 실패합니다.
+
+## 수동으로 다시 배포
+
+GitHub 저장소의 **Actions → Frontend check and deploy → Run workflow**에서 `main`을 선택해 실행합니다. 검사 통과 후 서버 스크립트가 다시 실행됩니다.
+
+## 화면 되돌리기
+
+서버에서 이전 release를 고른 뒤 `current` 링크를 교체합니다. `<이전-release-이름>`은 실제 디렉터리 이름으로 바꿉니다.
 
 ```bash
-mapsosa_release="/var/www/mapsosa/releases/$(date -u +%Y%m%d-%H%M%S)"
-sudo mkdir -p "$mapsosa_release"
-sudo cp -a dist/. "$mapsosa_release/"
-sudo chown -R root:root "$mapsosa_release"
-sudo chmod -R a+rX "$mapsosa_release"
-sudo ln -s "$mapsosa_release" /var/www/mapsosa/current.next
+ls -1dt /var/www/mapsosa/releases/*/
+previous_release="/var/www/mapsosa/releases/선택한-release-이름"
+sudo ln -sfn "$previous_release" /var/www/mapsosa/current.next
 sudo mv -Tf /var/www/mapsosa/current.next /var/www/mapsosa/current
 ```
 
-빌드 결과 교체만으로는 Nginx 재시작이 필요하지 않습니다.
-서버 IP나 도메인을 변경할 때는 환경 설정과 Nginx 설정을 함께 변경하고 빌드를 다시 만듭니다.
+이 방법은 Nginx가 제공하는 화면만 되돌립니다. Node 서버 변경은 별도로 처리해야 하며, 다음 자동 배포에서는 `main`의 최신 화면이 다시 반영됩니다. 화면 링크 교체에는 Nginx 재시작이 필요하지 않습니다.
+
+## 전환 전 방식
+
+서버 전환 완료 전에는 기존 `~/my-app` 배포를 유지합니다. 이전에는 내 컴퓨터에서 SSH 한 줄로 `bash ~/my-app/deploy/deploy.sh`를 실행했습니다.
 
 ## 부산 MICE 캘린더
 
@@ -54,9 +73,9 @@ sudo mv -Tf /var/www/mapsosa/current.next /var/www/mapsosa/current
 페이지의 공개 목록 조회 경로를 서버에서 읽습니다. 문서화된 OpenAPI가 아니므로 원본의 응답 구조가 변경되면 연동 코드를 수정해야 합니다.
 
 - 로컬 실행: `npm run mice:server`와 `npm run dev`를 각각 실행합니다. Vite가 `/api/mice`를 로컬 서버로 전달합니다.
-- 운영 실행: `deploy/mapsosa-mice.service`를 `/etc/systemd/system/mapsosa-mice.service`에 설치하고 `sudo systemctl daemon-reload`, `sudo systemctl enable --now mapsosa-mice.service`를 실행합니다.
+- 운영 실행: 위 서버 1회 설정에서 `frontend/deploy/mapsosa-mice.service`를 설치합니다.
 - Nginx의 `/api/mice/`는 `127.0.0.1:4174`로 전달됩니다. 백엔드는 외부 인터페이스에서 직접 수신하지 않습니다.
-- 백엔드 코드를 수정했다면 `sudo systemctl restart mapsosa-mice.service`로 반영합니다. 프런트엔드 변경은 위의 빌드 배포 절차를 따릅니다.
+- `frontend/server/` 또는 `frontend/src/data/`가 바뀌면 배포 스크립트가 Node 서버를 재시작하고 `/api/mice/health`를 확인합니다. 추적되지 않는 `.env.server` 변경은 서버에서 별도로 재시작해야 합니다.
 - 조회 범위는 이번 달 앞뒤 12개월입니다. 월별 결과를 6시간 캐시하고, 같은 월의 동시 요청은 하나로 합칩니다. 갱신 실패 시 최대 48시간 이내의 이전 결과를 표시하고 이전 자료임을 알립니다.
 - API는 행사 ID·제목·기간·장소·유형·원본 링크만 제공합니다. 불완전한 페이지 수집은 성공으로 처리하지 않습니다.
 - 원본 서버에서 빠진 중간 인증서는 발급기관 GlobalSign의 공개 인증서로 보완합니다. TLS 검증을 끄지 않습니다. 인증서 변경 시 `server/certs`의 중간 인증서를 확인합니다.
