@@ -75,10 +75,11 @@ sudo mv -Tf /var/www/mapsosa/current.next /var/www/mapsosa/current
 - 로컬 실행: `npm run mice:server`와 `npm run dev`를 각각 실행합니다. Vite가 `/api/mice`를 로컬 서버로 전달합니다.
 - 운영 실행: 위 서버 1회 설정에서 `frontend/deploy/mapsosa-mice.service`를 설치합니다.
 - Nginx의 `/api/mice/`는 `127.0.0.1:4174`로 전달됩니다. 백엔드는 외부 인터페이스에서 직접 수신하지 않습니다.
-- `frontend/server/` 또는 `frontend/src/data/`가 바뀌면 배포 스크립트가 Node 서버를 재시작하고 `/api/mice/health`를 확인합니다. 추적되지 않는 `.env.server` 변경은 서버에서 별도로 재시작해야 합니다.
-- 조회 범위는 이번 달 앞뒤 12개월입니다. 월별 결과를 6시간 캐시하고, 같은 월의 동시 요청은 하나로 합칩니다. 갱신 실패 시 최대 48시간 이내의 이전 결과를 표시하고 이전 자료임을 알립니다.
+- `frontend/server/`, `frontend/src/data/` 또는 `frontend/deploy/mapsosa-mice.service`가 바뀌면 배포 스크립트가 Node 서버를 재시작하고 `/api/mice/health`를 확인합니다. 서비스 파일이 바뀐 경우 설치와 `systemctl daemon-reload`를 먼저 실행합니다. 추적되지 않는 `.env.server` 변경은 서버에서 별도로 재시작해야 합니다.
+- 조회 범위는 이번 달 앞뒤 12개월입니다. 월별 결과를 6시간 캐시하고, 같은 월의 동시 요청은 하나로 합칩니다. 정상 조회 자료는 systemd의 `StateDirectory=mapsosa-mice`가 만든 `/var/lib/mapsosa-mice`에 최대 25개월 저장합니다. 갱신 실패 시 최대 7일 이내의 이전 결과를 표시하고 이전 자료임을 알립니다.
+- `GET /api/mice/health`는 항상 `status: "ok"`를 유지하고 `source`(`ok`, `stale`, `failing`, `unknown`), `lastSuccessAt`, `staleMonths`, `lastError`를 함께 제공합니다. 상태 확인 자체는 원본 사이트에 접속하지 않습니다.
 - API는 행사 ID·제목·기간·장소·유형·원본 링크만 제공합니다. 불완전한 페이지 수집은 성공으로 처리하지 않습니다.
-- 원본 서버에서 빠진 중간 인증서는 발급기관 GlobalSign의 공개 인증서로 보완합니다. TLS 검증을 끄지 않습니다. 인증서 변경 시 `server/certs`의 중간 인증서를 확인합니다.
+- 원본 서버에서 빠진 중간 인증서는 발급기관 GlobalSign의 공개 인증서로 보완합니다. TLS 검증을 끄지 않습니다. 인증서 변경 시 [중간 인증서 안내](../server/certs/README.md)에 따라 발급자와 CA Issuers 주소를 확인합니다.
 - 날짜별 건수는 그날 진행 중인 행사 수입니다. 장기간 행사는 각 날짜에 포함되며, 실제 관광객 수나 혼잡도를 나타내지 않습니다.
 - 검증: `npm run test:mice`.
 

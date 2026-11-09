@@ -12,17 +12,20 @@ deployment_decisions() {
   local base_commit="$1" target_commit="$2" frontend_dir="$3" path
   needs_npm_ci=false
   needs_node_restart=false
+  needs_service_install=false
   changed_files=""
 
   if [[ -z "$base_commit" ]]; then
     needs_npm_ci=true
     needs_node_restart=true
+    needs_service_install=true
   else
     changed_files="$(git -c core.quotePath=false diff --name-only "$base_commit" "$target_commit" -- frontend/)"
     while IFS= read -r path; do
       case "$path" in
         frontend/package.json|frontend/package-lock.json) needs_npm_ci=true ;;
         frontend/server/*|frontend/src/data/*) needs_node_restart=true ;;
+        frontend/deploy/mapsosa-mice.service) needs_node_restart=true; needs_service_install=true ;;
       esac
     done <<< "$changed_files"
   fi
@@ -65,7 +68,7 @@ main() {
   if [[ -n "$changed_files" ]]; then
     printf '변경 파일:\n%s\n' "$changed_files"
   fi
-  echo "npm ci 필요: $needs_npm_ci / Node 서버 재시작 필요: $needs_node_restart"
+  echo "npm ci 필요: $needs_npm_ci / 서비스 설정 설치 필요: $needs_service_install / Node 서버 재시작 필요: $needs_node_restart"
 
   cd "$frontend_dir"
   if [[ "$needs_npm_ci" == true ]]; then
@@ -79,6 +82,18 @@ main() {
   npm run lint
   npm test
   npm run build
+
+  if [[ "$needs_service_install" == true ]]; then
+    echo "== 서비스 설정 설치 및 systemd 재읽기"
+    if ! sudo -n install -m 644 "$frontend_dir/deploy/mapsosa-mice.service" /etc/systemd/system/mapsosa-mice.service; then
+      echo "서비스 설정 설치 실패: sudo 권한을 확인하세요. 화면은 교체하지 않았습니다." >&2
+      exit 1
+    fi
+    if ! sudo -n systemctl daemon-reload; then
+      echo "systemd 설정 재읽기 실패: 서비스 상태를 확인하세요. 화면은 교체하지 않았습니다." >&2
+      exit 1
+    fi
+  fi
 
   if [[ "$needs_node_restart" == true ]]; then
     echo "== 6/7 Node 서버 재시작 및 상태 확인"
