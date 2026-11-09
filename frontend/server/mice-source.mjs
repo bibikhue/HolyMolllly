@@ -1,10 +1,24 @@
 import https from 'node:https'
 import { rootCertificates } from 'node:tls'
-import { readFileSync } from 'node:fs'
+import { X509Certificate } from 'node:crypto'
+import { readFileSync, readdirSync } from 'node:fs'
 
-// The upstream omits its intermediate certificate. Add the CA's verified public
-// intermediate to the normal root store; TLS certificate verification stays on.
-const agent = new https.Agent({ keepAlive: true, ca: [...rootCertificates, readFileSync(new URL('./certs/globalsign-gcc-r6-alphassl-2025.pem', import.meta.url), 'utf8')] })
+// The upstream omits its intermediate certificate. Keep the normal trust store
+// and add only public intermediate CAs signed by one of its trusted roots.
+const roots = rootCertificates.map((pem) => new X509Certificate(pem))
+const certDirectory = new URL('./certs/', import.meta.url)
+const intermediates = readdirSync(certDirectory, { withFileTypes: true })
+  .filter((entry) => entry.isFile() && entry.name.endsWith('.pem'))
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((entry) => {
+    const pem = readFileSync(new URL(entry.name, certDirectory), 'utf8')
+    const cert = new X509Certificate(pem)
+    if (!cert.ca || !roots.some((root) => cert.checkIssued(root) && cert.verify(root.publicKey))) {
+      throw new Error(`Untrusted MICE intermediate CA: ${entry.name}`)
+    }
+    return pem
+  })
+const agent = new https.Agent({ keepAlive: true, ca: [...rootCertificates, ...intermediates] })
 export const sourceUrl = 'https://www.busanmice.or.kr/portal/evntInfo/list.do?mid=0203000000'
 
 function requestList(month, page) {
@@ -61,8 +75,22 @@ export async function loadMonth(month, requestPage = requestList) {
     records.push(...data.dataList)
   }
   if (records.length !== total) throw new Error('Source pagination incomplete')
-  const events = [...new Map(records.map((record) => { const event = normalizeEvent(record); return [event.id, event] })).values()]
+  const accepted = new Map()
+  let skipped = 0
+  for (const record of records) {
+    try {
+      const event = normalizeEvent(record)
+      accepted.set(event.id, event)
+    } catch (error) {
+      skipped++
+      const idx = String(record?.idx ?? '?').replace(/[^0-9A-Za-z_-]/g, '?').slice(0, 32)
+      const reason = /^Source event (format changed|dates\/title invalid)$/.test(error?.message) ? error.message : 'Source event invalid'
+      console.warn(`MICE skipped idx=${idx}: ${reason}`)
+    }
+  }
+  if (skipped * 5 > total) throw new Error('Source event format changed')
+  const events = [...accepted.values()]
     .filter((event) => event.start.slice(0, 7) <= month && event.end.slice(0, 7) >= month)
     .sort((a, b) => a.start.localeCompare(b.start) || a.title.localeCompare(b.title, 'ko'))
-  return { month, fetchedAt: new Date().toISOString(), sourceName: '부산 MICE 플랫폼', sourceUrl, sourceTotal: total, events }
+  return { month, fetchedAt: new Date().toISOString(), sourceName: '부산 MICE 플랫폼', sourceUrl, sourceTotal: total, skipped, events }
 }
