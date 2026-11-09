@@ -95,9 +95,21 @@ npm run build
 npm test
 ```
 
-### 새 기능 API (backend 폴더)
+### 새 기능 API (루트에서 실행)
 
-FastAPI로 만든다. 기능별 하위 폴더에 라우터를 두고, 실행 방법과 필요한 패키지는 각 폴더의 README에 적는다.
+```
+python -m pip install -r backend/requirements.txt
+uvicorn backend.main:app --reload --port 8000
+python -m pytest backend/tests
+```
+
+Windows에서 `uvicorn` 명령을 찾지 못하면 `python -m uvicorn backend.main:app --reload --port 8000`으로 실행한다.
+새 API 주소는 `/api/v1/<기능 이름>/...`이며 이름에는 하이픈을 쓴다
+(`tour-course`, `facility-map`, `store-spend-map`, `monthly-briefing`, `what-if`).
+`GET /api/v1/health`는 DB 연결 가능 여부를 `ok` 또는 `unavailable`로만 알려 준다.
+기능별 엔드포인트는 각 기능 폴더의 `router.py`에 추가한다.
+공용 `backend/main.py`와 `backend/core/`는 팀장 승인 없이 수정하지 않는다.
+설치와 개발 방법은 `backend/README.md`를 따른다.
 
 ## 7. DB
 

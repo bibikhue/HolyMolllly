@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
       __GIT_HASH__: JSON.stringify(getGitHash()),
     },
-    server: { proxy: { '/api/mice': 'http://127.0.0.1:4174', '/api/reports': { target: 'http://127.0.0.1:4174', changeOrigin: false }, '/api/chat': { target: 'http://127.0.0.1:4174', changeOrigin: false } } },
+    server: { proxy: { '/api/v1': 'http://127.0.0.1:8000', '/api/mice': 'http://127.0.0.1:4174', '/api/reports': { target: 'http://127.0.0.1:4174', changeOrigin: false }, '/api/chat': { target: 'http://127.0.0.1:4174', changeOrigin: false } } },
     plugins: [
       {
         name: 'mapsosa-sharing-metadata',
