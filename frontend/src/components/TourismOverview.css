@@ -1,0 +1,54 @@
+/* Styles are scoped to this page or opt-in tooltip/indicator classes so home
+   MetricCard and MonthlyChart keep their original default appearance. */
+.tourism-overview .overview-panel, .tourism-overview .overview-metric { border-color: #e1eaf1; border-radius: var(--radius-md); }
+.tourism-overview .overview-metric-accent { border-color: #c4dfef; }
+.tourism-overview a.overview-metric { display: block; color: inherit; text-decoration: none; }
+.tourism-overview a.overview-metric:hover { border-color: #8bc4e0; background: #f4faff; }
+.tourism-overview a.overview-metric:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.tourism-overview .metric-card-action { display: block; margin-top: 10px; color: var(--accent); font-size: var(--fs-md); font-weight: 600; }
+.tourism-data-reference { display: grid; gap: 7px; font-size: var(--fs-xs); color: var(--text); text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.tourism-data-reference strong { font-weight: 600; }.tourism-data-reference span { font-size: var(--fs-xs); color: var(--text-muted); }
+.tourism-section-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 19px; }
+.tourism-section-links a { display: flex; justify-content: space-between; gap: 6px; color: var(--text-muted); font-size: var(--fs-md); padding: 11px 14px; border: 1px solid #dde7ef; background: white; border-radius: var(--radius-md); }
+.tourism-section-links a:hover { color: var(--accent); background: #edf7fd; border-color: #bcddec; }.tourism-overview .tourism-section-links a[aria-current] { color: var(--accent); background: var(--tint); border-color: var(--accent); }.tourism-overview .tourism-section-links a[aria-current]:hover { background: var(--tint); }
+.tourism-section-links a span { color: var(--accent); }
+.tourism-section { margin-top: 24px; scroll-margin-top: 24px; }
+.tourism-section:focus { outline: none; }
+.tourism-section-heading { margin-bottom: 16px; }.tourism-section-heading h2 { font-size: var(--fs-xl); letter-spacing: -.5px; margin: 0 0 7px; }.tourism-section-heading p { color: var(--text-muted); font-size: var(--fs-base); margin: 0; }
+.tourism-overview .overview-metrics { margin-bottom: 15px; }
+.metric-value.metric-value-increase { color: var(--color-up); }.metric-value.metric-value-decrease { color: var(--color-down); }
+.metric-value > .metric-value-arrow { font-size: var(--fs-lg); color: inherit; margin: 0 5px 0 0; font-weight: 600; }
+.overview-info-anchor { display: inline-flex; vertical-align: middle; margin-left: 6px; }
+.metric-value > .overview-info-anchor { font-size: var(--fs-xs); margin-left: 6px; }
+.overview-info-button { display: inline-flex; justify-content: center; align-items: center; width: 18px; height: 18px; padding: 0; border: 1px solid #b6d0df; border-radius: 50%; background: #f2f8fc; color: var(--accent); font: 600 var(--fs-md)/1 Arial, sans-serif; }
+.overview-info-tooltip { position: fixed; left: 0; top: 0; z-index: 180; width: min(280px, calc(100vw - 24px)); padding: 12px 14px; color: #f3f9ff; background: #284d67; border: 1px solid #3a647e; border-radius: var(--radius-md); box-shadow: var(--shadow-card); font-size: var(--fs-sm); font-weight: 400; line-height: 1.85; overflow-wrap: anywhere; }
+.tourism-quick-summary { border-left: 3px solid #258eb5; background: var(--tint); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 15px 19px; }
+.tourism-quick-summary strong { font-size: var(--fs-base); color: var(--text-muted); }.tourism-quick-summary p { color: var(--text); line-height: 1.9; font-size: var(--fs-base); margin: 8px 0 0; }
+.tourism-overview .panel-heading { flex-wrap: wrap; }
+.tourism-region-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 23px 0; background: var(--surface-alt); border-radius: var(--radius-md); }.tourism-region-summary > div { padding: 15px 17px; min-width: 0; }.tourism-region-summary > div + div { border-left: 1px solid #dce9f3; }.tourism-region-summary span { display: block; font-size: var(--fs-base); color: var(--text-muted); }.tourism-region-summary strong { display: block; margin-top: 10px; font-size: var(--fs-3xl); color: var(--text-strong); font-variant-numeric: tabular-nums; }.tourism-region-summary p { font-size: var(--fs-sm); color: var(--text-muted); margin: 7px 0 0; }
+.tourism-region-bars { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; list-style: none; padding: 0; margin: 0; font-variant-numeric: tabular-nums; }
+.tourism-region-bars li { display: grid; grid-template-columns: 83px minmax(20px, 1fr) 98px; align-items: center; gap: 10px; min-width: 0; }
+.tourism-region-name { font-size: var(--fs-md); color: var(--text); white-space: nowrap; }.tourism-region-name small { font-size: var(--fs-sm); color: var(--text-muted); margin-right: 9px; }
+.tourism-bar-track { height: 8px; background: #edf3f8; border-radius: var(--radius-sm); overflow: hidden; }.tourism-bar-track > span { display: block; height: 100%; border-radius: var(--radius-sm); background: #a1cadd; }.tourism-bar-track > span.leading { background: #2791bc; }
+.tourism-region-value { display: grid; gap: 4px; text-align: right; font-size: var(--fs-md); color: var(--text); font-variant-numeric: tabular-nums; }.tourism-region-value strong { font-weight: 500; }.tourism-region-value small { font-size: var(--fs-sm); color: var(--text-muted); }
+.tourism-industry-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 28px; margin-top: 24px; }.tourism-industry-grid > div { min-width: 0; }
+.tourism-industry-share { display: flex; width: 100%; height: 17px; border-radius: var(--radius-sm); overflow: hidden; margin: 0 0 20px; }.tourism-industry-share span { display: block; }
+.tourism-industry-table { table-layout: auto; font-variant-numeric: tabular-nums; }.tourism-industry-table caption { text-align: left; font-size: var(--fs-sm); line-height: 1.8; margin-bottom: 10px; color: var(--text-muted); }.tourism-industry-table i { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: var(--radius-sm); }.tourism-industry-table thead th { position: static; }.tourism-industry-table tfoot th, .tourism-industry-table tfoot td { color: var(--text-strong); background: #f4f9fc; font-weight: 600; }
+.tourism-industry-select { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: var(--fs-md); color: var(--text-muted); }.tourism-industry-select select { color: var(--text); border: 1px solid #dbe6ee; background: white; padding: 8px 11px; border-radius: var(--radius-sm); font: inherit; min-width: 105px; }
+.tourism-chart-unit { font-size: var(--fs-md); color: var(--text-muted); margin: 16px 0 4px; }
+.tourism-industry-details { margin-top: 16px; padding: 13px; border: 1px solid #e5edf3; border-radius: var(--radius-md); background: var(--surface-alt); font-size: var(--fs-md); color: var(--text-muted); }.tourism-industry-details summary { cursor: pointer; }.tourism-industry-details table { margin-top: 10px; }
+.tourism-empty { padding: 40px 24px; background: white; border: 1px solid #e1eaf1; border-radius: var(--radius-md); font-size: var(--fs-base); color: var(--text-muted); }.tourism-empty button { color: var(--accent); text-decoration: underline; }
+@media (max-width: 1000px) { .tourism-industry-grid { grid-template-columns: 1fr; gap: 24px; }.tourism-region-bars { gap: 13px 19px; }.tourism-region-bars li { grid-template-columns: 75px minmax(15px, 1fr) 84px; gap: 7px; } }
+@media (max-width: 760px) { .tourism-data-reference { text-align: left; }.tourism-overview .overview-title-row { flex-wrap: wrap; gap: 15px; }.tourism-section-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }.tourism-region-bars { grid-template-columns: 1fr; gap: 14px; }.tourism-region-bars li { grid-template-columns: 79px minmax(20px, 1fr) 98px; gap: 11px; }.tourism-overview .chart-legend { flex-wrap: wrap; }.tourism-overview .overview-period-caption { flex-wrap: wrap; }.tourism-overview .overview-period-caption > span { line-height: 1.9; }.tourism-overview .overview-table th, .tourism-overview .overview-table td { padding: 11px 6px; } }
+@media (max-width: 480px) {
+  .tourism-overview .overview-metric { min-width: 0; }.tourism-overview .metric-value { font-size: var(--fs-3xl); line-height: 1.6; }.tourism-overview .metric-heading { min-height: 32px; line-height: 1.6; align-items: flex-start; }.tourism-overview .metric-detail { min-height: 31px; }.tourism-overview .metric-icon { width: 23px; height: 23px; }
+  .tourism-overview .overview-panel { padding: 18px 14px; }.tourism-section-links a { padding: 10px; font-size: var(--fs-md); }.tourism-section-heading h2 { font-size: var(--fs-xl); }.tourism-overview .panel-heading h2 { font-size: var(--fs-xl); }
+  .tourism-overview .overview-table { font-size: var(--fs-md); }.tourism-overview .overview-table th, .tourism-overview .overview-table td { padding: 11px 3px; }.tourism-overview .overview-table thead th { font-size: var(--fs-md); white-space: normal; }
+  .tourism-region-summary { gap: 0; }.tourism-region-summary > div { padding: 13px 11px; }.tourism-region-summary span { font-size: var(--fs-base); line-height: 1.7; }.tourism-region-summary strong { font-size: var(--fs-3xl); }.tourism-region-bars li { grid-template-columns: 78px minmax(18px, 1fr) 84px; gap: 8px; }.tourism-region-name { font-size: var(--fs-md); }.tourism-region-value { font-size: var(--fs-md); }
+  .tourism-quick-summary { padding: 13px 15px; }.tourism-quick-summary p { font-size: var(--fs-base); }.tourism-industry-table i { margin-right: 5px; width: 6px; height: 6px; }.tourism-industry-details { padding: 11px 8px; }.tourism-industry-select { font-size: var(--fs-md); }
+}
+
+@media (max-width: 720px) {
+  .tourism-overview .metric-value, .tourism-region-summary strong { font-size: var(--fs-2xl); }
+  .tourism-section-heading h2, .tourism-overview .panel-heading h2 { font-size: var(--fs-section-mobile); }
+}

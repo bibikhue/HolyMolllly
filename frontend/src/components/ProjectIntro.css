@@ -1,0 +1,76 @@
+.project-intro-page { min-width: 0; background: var(--surface); }
+.project-nav-shell { max-width: 1280px; min-width: 0; margin: 0 auto; padding: 24px 54px; }
+.project-section-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.project-section-nav a { min-width: 0; padding: 12px 8px; border: 1px solid #e5ebf1; border-radius: var(--radius-md); background: #fff; color: var(--text-muted); font-size: var(--fs-md); font-weight: 600; text-align: center; line-height: 1.4; }
+.project-section-nav a[aria-current], .project-section-nav a[aria-current]:hover { border-color: var(--accent); background: var(--tint); color: var(--accent); }
+.project-section-nav a:hover { border-color: #9dcde8; background: #eaf6fc; color: var(--accent); }
+.project-about-section, .project-detail-section { min-width: 0; }
+.project-about-section:focus, .project-detail-section:focus { outline: none; }
+.project-about { max-width: 1280px; margin: 0 auto; padding: 58px 54px 62px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 68px; background: #fff; }
+.project-about-heading h2 { margin: 0; color: var(--text-strong); font-size: var(--fs-xl); line-height: 1.5; letter-spacing: -.9px; }
+.project-about-copy > p { margin: 0 0 12px; color: var(--text-muted); font-size: var(--fs-base); line-height: 1.9; }
+.project-about-actions { display: flex; flex-wrap: wrap; gap: 25px; margin-top: 22px; }
+.project-about-actions a { display: inline-flex; gap: 15px; padding: 5px 0; color: var(--accent); font-size: var(--fs-md); border-bottom: 1px solid #b6d3e5; }
+.project-about-actions a:hover { color: var(--accent); }
+.project-content-shell { max-width: 1280px; min-width: 0; margin: 0 auto; padding: 42px 54px 64px; }
+.project-menu-guide { border-top: 1px solid #e8eff3; }
+.project-section-heading { margin-bottom: 22px; }
+.project-section-heading h1, .project-section-heading h2 { margin: 0; color: var(--text-strong); font-size: var(--fs-2xl); line-height: 1.4; letter-spacing: -.8px; }
+.project-detail-section { min-height: 400px; padding-top: 24px; }
+.project-table-region { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; border: 1px solid #e5ebf1; border-radius: var(--radius-md); background: #fff; scrollbar-width: thin; }
+#project-data .project-table-region { border: 0; }
+.project-table { width: 100%; border-collapse: collapse; color: var(--text); font-size: var(--fs-md); font-variant-numeric: tabular-nums; line-height: 1.6; text-align: left; }
+.project-table th, .project-table td { padding: 11px 15px; border-bottom: 1px solid #eaf0f4; vertical-align: top; word-break: keep-all; }
+.project-table thead th { background: var(--surface-alt); color: var(--text-strong); font-weight: 700; white-space: nowrap; }
+.project-table tbody th { color: var(--text-strong); font-weight: 700; }
+.project-table tbody tr:last-child th, .project-table tbody tr:last-child td { border-bottom: 0; }
+.project-table tbody tr:hover { background: #f9fcfe; }
+.project-table a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.project-menu-table { min-width: 690px; }
+.project-menu-table th:first-child { width: 22%; }
+.project-menu-table th:nth-child(2) { width: 44%; }
+.project-sources-table { min-width: 990px; }
+.project-sources-table th, .project-sources-table td { padding-top: 14px; padding-bottom: 14px; }
+.project-sources-table th:first-child { width: 17%; }
+.project-sources-table th:nth-child(2) { width: 24%; }
+.project-sources-table th:nth-child(3) { width: 16%; }
+.project-sources-table th:nth-child(4) { width: 23%; }
+.project-scope-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.project-info-card { min-width: 0; padding: 27px; border: 1px solid #e5ebf1; border-radius: var(--radius-md); background: #fff; }
+.project-info-card h2 { margin: 0 0 17px; color: var(--text-strong); font-size: var(--fs-xl); line-height: 1.4; }
+.project-info-card > ul { margin: 0; padding-left: 19px; }
+.project-info-card li { margin-bottom: 10px; color: var(--text); font-size: var(--fs-base); line-height: 1.7; }
+.project-info-card li:last-child { margin-bottom: 0; }
+.project-caution-card { grid-column: 1 / -1; }
+.project-principles { margin-top: 20px !important; }
+.project-terms-card { margin-top: 16px; }
+.project-terms-card dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.project-terms-card dl > div { min-width: 0; padding: 14px 0; border-top: 1px solid #eaf0f4; }
+.project-terms-card dt { color: var(--text-strong); font-size: var(--fs-base); font-weight: 700; }
+.project-terms-card dd { margin: 6px 0 0; color: var(--text); font-size: var(--fs-base); line-height: 1.7; }
+.project-section-nav a:focus-visible, .project-table-region:focus-visible, .project-intro-page a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 720px) {
+  .project-nav-shell { padding: 18px 24px; }
+  .project-section-nav a { padding: 12px 5px; font-size: var(--fs-md); }
+  .project-about { grid-template-columns: 1fr; gap: 23px; padding: 34px 24px 40px; }
+  .project-about-heading h2 { font-size: var(--fs-xl); }
+  .project-about-copy > p { font-size: var(--fs-base); }
+  .project-content-shell { padding: 34px 24px 42px; }
+  .project-detail-section { padding-top: 18px; }
+  .project-section-heading h1, .project-section-heading h2 { font-size: var(--fs-2xl); }
+  .project-scope-grid, .project-terms-card dl { grid-template-columns: 1fr; }
+  .project-caution-card { grid-column: auto; }
+  .project-info-card { padding: 20px; }
+}
+@media (max-width: 480px) {
+  .project-nav-shell { padding: 16px; }
+  .project-content-shell { padding-right: 16px; padding-left: 16px; }
+  .project-info-card { padding: 17px; }
+  .project-table th, .project-table td { padding: 12px; }
+  .project-menu-table th, .project-menu-table td { padding-top: 11px; padding-bottom: 11px; }
+}
+
+.project-section-heading h2 { font-size: var(--fs-xl); }
+@media (max-width: 720px) {
+  .project-about-heading h2, .project-section-heading h2, .project-info-card h2 { font-size: var(--fs-section-mobile); }
+}

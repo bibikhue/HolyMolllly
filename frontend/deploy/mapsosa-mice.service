@@ -1,0 +1,21 @@
+[Unit]
+Description=Mapsosa Busan MICE calendar source gateway
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/my-app
+ExecStart=/usr/bin/node /home/ubuntu/my-app/server/mice-server.mjs
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=MICE_PORT=4174
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
