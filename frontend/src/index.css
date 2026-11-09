@@ -1,0 +1,50 @@
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+
+:root {
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-menu-title: 15px;
+  --fs-base: 16px;
+  --fs-lg: 18px;
+  --fs-brand-title: 32px;
+  --fs-brand-title-mobile: 26px;
+  --fs-xl: 22px;
+  --fs-section-mobile: 20px;
+  --fs-2xl: 28px;
+  --fs-3xl: 36px;
+  --text-strong: #12324A;
+  --text: #2E4A60;
+  --text-muted: #4F6577;
+  --accent: #0068A9;
+  --surface: #F3F6FA;
+  --surface-alt: #F7FAFC;
+  --tint: #E8F2F8;
+  --color-demo: #6F6128;
+  --color-up: #0068A9;
+  --color-down: #835417;
+  --footer-text: #D6E2EB;
+  --footer-muted: #B7C9D6;
+  --footer-line: #2B4C64;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+  --shadow-card: 0 8px 24px rgba(19, 62, 91, .12);
+
+  font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: var(--fs-base);
+  color: var(--text);
+  background: #fff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 360px; }
+button, input { font: inherit; }
+button, a, input { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; color: inherit; border: 0; background: none; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+a { color: inherit; text-decoration: none; }
+table, svg text { font-variant-numeric: tabular-nums; }

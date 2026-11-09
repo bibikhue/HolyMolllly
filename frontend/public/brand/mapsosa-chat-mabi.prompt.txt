@@ -1,0 +1,3 @@
+Mode: built-in image generation; transparent background.
+Character: Holy Moly (홀리모올리), Team Mapsosa's curious Busan tourism data buddy.
+Prompt: A friendly original round white seagull with pale sky-blue wing tips, warm golden beak, expressive navy eyes and rosy cheeks. Ocean-blue scarf with turquoise accent, magnifying glass in one wing and the other wing waving hello. Premium soft 3D clay illustration, matte material, cheerful expression, full body, clear small-size silhouette, isolated on transparent background. No text or logos.

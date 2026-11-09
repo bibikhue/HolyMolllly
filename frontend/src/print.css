@@ -1,0 +1,211 @@
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+
+  :root, html, body, #root, .dashboard-main {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    background: #fff !important;
+  }
+  #root { display: block !important; }
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .print-header[hidden] { display: block !important; }
+  .print-header {
+    margin: 0 0 17px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #d6e2eb;
+    color: var(--text-strong);
+    break-inside: avoid;
+  }
+  .print-header-top, .print-brand { display: flex; align-items: center; }
+  .print-header-top { justify-content: space-between; gap: 12px; font-size: var(--fs-md); }
+  .print-brand { gap: 7px; min-width: 0; }
+  .print-brand img { display: block; width: 28px; height: 28px; object-fit: contain; }
+  .print-header-top > strong { text-align: right; }
+  .print-header-meta, .print-context {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .print-context:empty { display: none; }
+  .print-url { overflow-wrap: anywhere; }
+
+  .skip-link, .site-header, .data-chatbot, .footer-chatbot-space, .modal-backdrop,
+  .overview-info-tooltip,
+  .footer-top, .footer-top-button, .dashboard-main nav, .dashboard-main .overview-breadcrumb,
+  .dashboard-main .overview-filters, .dashboard-main .chart-view-toggle,
+  .dashboard-main .chart-compare, .dashboard-main .tourism-industry-select,
+  .dashboard-main .country-field, .dashboard-main .country-selector-group,
+  .dashboard-main .outlook-field, .dashboard-main .outlook-filters,
+  .dashboard-main .report-controls, .dashboard-main .report-process,
+  .dashboard-main .mice-calendar-toolbar, .dashboard-main .dashboard-analysis,
+  .dashboard-main .events-page-guide,
+  .dashboard-main .dashboard-detail-link, .dashboard-main .project-about-actions,
+  .dashboard-main .hero-button, .dashboard-main .metric-card-action,
+  .dashboard-main select, .dashboard-main input, .dashboard-main button:not(.mice-day),
+  .dashboard-main .overview-info-popover, .dashboard-main .overview-tooltip,
+  .dashboard-main .report-copy-status { display: none !important; }
+
+  .overview-container, .country-shell, .outlook-shell, .project-content-shell,
+  .project-nav-shell { max-width: none !important; padding: 0 !important; }
+  .visitor-overview, .country-tourism, .outlook-page, .analysis-report,
+  .events-page, .project-intro-page { min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+  .overview-title-row, .country-page-head, .outlook-page-head { margin: 0 0 15px !important; }
+  .overview-subtitle, .country-page-head p, .outlook-page-head p { line-height: 1.5 !important; }
+  .overview-demo-notice, .country-demo-notice, .outlook-demo-notice { margin-bottom: 12px !important; padding: 8px 10px !important; }
+  .overview-period-caption { margin: 8px 0 12px !important; }
+
+  .overview-metrics, .country-metrics, .report-evidence-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+  .dashboard-summary-grid, .overview-chart-grid, .tourism-industry-grid,
+  .country-detail-grid, .outlook-extremes, .mice-calendar-body,
+  .report-layout, .project-about, .project-scope-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+  .dashboard-summary-grid { display: block !important; }
+  .dashboard-summary-grid > .overview-panel + .overview-panel { margin-top: 12px !important; }
+  .dashboard-home .overview-title-row { margin-bottom: 10px !important; }
+  .dashboard-home .overview-demo-notice { margin-bottom: 8px !important; }
+  .dashboard-home .overview-metrics { margin-bottom: 8px !important; }
+  .overview-metric, .overview-panel, .country-tourism .country-panel,
+  .country-chart-card, .outlook-panel, .outlook-chart-card,
+  .project-info-card, .report-output, .events-page .mice-calendar {
+    min-width: 0 !important;
+    border: 1px solid #d6e2eb !important;
+    background: #fff !important;
+  }
+  .overview-metric, .overview-panel, .country-tourism .country-panel,
+  .outlook-panel, .outlook-chart-card, .project-info-card,
+  .report-output, .events-page .mice-calendar { padding: 12px !important; }
+  .overview-metric, .overview-panel, .country-chart-card, .outlook-chart-card,
+  .project-info-card, .report-evidence-strip > div, .mice-selected-events li,
+  .monthly-chart, .outlook-band-chart, .outlook-backtest-chart,
+  .country-bubble-chart, .country-line-chart, .country-heatmap {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, .panel-heading, .tourism-section-heading,
+  .country-section-heading, .outlook-section-heading, .project-section-heading {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .tourism-section, .country-section, .outlook-panel, .project-detail-section {
+    margin-bottom: 15px !important;
+  }
+
+  .overview-table-scroll, .country-table-scroll, .country-heatmap-scroll,
+  .outlook-chart-scroll, .outlook-table-scroll, .project-table-region,
+  .mice-selected-events ul {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .outlook-band-chart, .outlook-backtest-chart, .country-heatmap {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .overview-table, .country-table, .outlook-table, .project-table {
+    display: table !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    white-space: normal !important;
+    font-size: 10px !important;
+  }
+  .country-table thead { display: table-header-group !important; position: static !important; width: auto !important; height: auto !important; clip-path: none !important; overflow: visible !important; }
+  .country-table tbody { display: table-row-group !important; }
+  .country-table tbody tr { display: table-row !important; padding: 0 !important; border: 0 !important; }
+  .country-table tbody th, .country-table tbody td { display: table-cell !important; width: auto !important; }
+  .country-table tbody td::before { display: none !important; }
+  .overview-table th, .overview-table td, .country-table th, .country-table td,
+  .outlook-table th, .outlook-table td, .project-table th, .project-table td {
+    padding: 4px 3px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: normal !important;
+  }
+  .overview-table thead th { position: static !important; }
+  .overview-table tr, .country-table tr, .outlook-table tr, .project-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #visitor-region .tourism-region-bars {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(8, auto);
+    grid-auto-flow: column;
+    gap: 9px 15px !important;
+  }
+  #visitor-region .tourism-region-bars li {
+    grid-template-columns: 63px minmax(10px, 1fr) 77px !important;
+    gap: 4px !important;
+    break-inside: avoid;
+  }
+  #visitor-region .tourism-region-name, #visitor-region .tourism-region-value { font-size: 11px !important; }
+  #visitor-region .tourism-region-name small, #visitor-region .tourism-region-value small { font-size: 10px !important; }
+  #visitor-region .tourism-region-name small { margin-right: 4px !important; }
+  .tourism-industry-grid > div, .tourism-industry-trend { break-inside: avoid; }
+  .tourism-industry-details { margin-top: 8px !important; padding: 7px !important; }
+  .tourism-industry-details .overview-table th,
+  .tourism-industry-details .overview-table td { padding: 2px 3px !important; line-height: 1.2 !important; }
+  #visitor-industry .tourism-industry-grid { margin-top: 8px !important; gap: 8px !important; }
+  #visitor-industry .tourism-industry-share { margin-bottom: 8px !important; }
+  #visitor-industry .tourism-industry-table caption { margin-bottom: 0 !important; }
+  #visitor-industry .tourism-chart-unit { margin-top: 8px !important; }
+  #visitor-industry .panel-footnote { margin-top: 8px !important; padding-top: 6px !important; }
+
+  .report-output, .report-empty { min-height: 0 !important; }
+  .report-empty { padding: 20px 0 !important; }
+  .report-evidence-strip > div { display: block !important; }
+  .report-evidence-strip span { margin-bottom: 5px !important; }
+  .report-summary { padding: 12px !important; }
+  .report-summary p { line-height: 1.6 !important; }
+  .report-sections > section { padding: 12px 0 !important; }
+  .report-sections h3 { margin-bottom: 7px !important; }
+  .report-sections p { font-size: 12px !important; line-height: 1.55 !important; margin-top: 6px !important; }
+  .report-evidence { margin-top: 12px !important; padding: 10px !important; }
+  .report-evidence dl > div {
+    padding: 2px 0 !important;
+    line-height: 1.5 !important;
+    font-size: 11px !important;
+    break-inside: avoid;
+  }
+  .report-sources { margin-top: 12px !important; }
+  .events-page .mice-calendar-body { margin-top: 10px !important; }
+  .events-page .mice-day { height: 58px !important; padding: 7px !important; cursor: default; }
+  .mice-selected-events { border-left: 0 !important; border-top: 1px solid #d6e2eb; padding: 12px 0 0 !important; }
+
+  .project-about { max-width: none !important; padding: 14px 0 !important; }
+  .project-detail-section { min-height: 0 !important; }
+  .busan-hero { min-height: 0 !important; overflow: visible !important; background: #fff !important; color: var(--text-strong) !important; }
+  .busan-hero::before { display: none !important; }
+  .hero-content { max-width: none !important; padding: 14px 0 !important; }
+  .hero-description { color: var(--text) !important; margin-top: 10px !important; }
+  .hero-bottom { position: static !important; display: flex !important; flex-direction: row !important; justify-content: space-between; padding: 0 0 12px; color: var(--text-muted) !important; }
+  .project-table-region { border: 0 !important; }
+  .project-menu-table a { color: inherit !important; text-decoration: none !important; }
+  .project-menu-table a span { display: none !important; }
+
+  .overview-source-note { margin-top: 8px !important; }
+  .site-footer { margin-top: 4px; border-top: 1px solid #d6e2eb; background: #fff !important; color: var(--text-muted) !important; break-inside: avoid; }
+  .footer-inner { max-width: none !important; padding: 0 !important; }
+  .footer-bottom { display: flex !important; min-height: 0 !important; flex-wrap: wrap; gap: 3px 12px !important; border: 0 !important; }
+  .footer-copyright, .footer-data-note, .footer-build-info { color: var(--text-muted) !important; font-size: var(--fs-xs) !important; white-space: normal !important; }
+  .footer-data-desktop { display: inline !important; }
+  .footer-data-mobile { display: none !important; }
+}
