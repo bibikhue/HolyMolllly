@@ -6,8 +6,8 @@ After=network-online.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/my-app
-ExecStart=/usr/bin/node /home/ubuntu/my-app/server/mice-server.mjs
+WorkingDirectory=/home/ubuntu/holymolly/frontend
+ExecStart=/usr/bin/node /home/ubuntu/holymolly/frontend/server/mice-server.mjs
 Restart=on-failure
 RestartSec=5
 Environment=NODE_ENV=production
