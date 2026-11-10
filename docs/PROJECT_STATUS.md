@@ -58,9 +58,10 @@
 
 - 11월 9일: 대시보드 코드를 이 저장소 `frontend/`로 옮김 (예전 저장소 bibikhue/front_code의 커밋 기록 포함)
 - 11월 9일: FastAPI 공용 뼈대 추가 (PR #3). `backend/main.py`에 기능 5개 라우터를 `/api/v1/<기능>`으로 연결했으며, 각 담당자는 `backend/<기능>/router.py`를 채운다. FastAPI 서버는 아직 배포하지 않았다.
-- 11월 9~10일: HolyMolllly 기준 배포 전환과 자동 배포 적용. 서버의 `~/holymolly`에는 `frontend/`와 `backend/`만 부분 체크아웃한다. `frontend/` 변경 PR은 검사만 하고, main에 합쳐지면 GitHub Actions가 lint, test, build 후 `deploy.sh`를 실행한다. 수동 재배포는 Actions 탭의 Run workflow를 사용한다.
-  - 팀원은 PR을 올리고 알리며, main Merge는 팀장이 한다. 팀원은 서버 키를 받거나 서버에 접속하지 않는다. 배포 전용 키는 GitHub Secrets(`EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`)에만 있고 배포 스크립트 실행으로 제한된다.
+- 11월 9~10일: HolyMolllly 기준 배포 전환과 자동 배포 적용. 서버의 `~/holymolly`에는 `frontend/`와 `backend/`만 부분 체크아웃한다. `frontend/` 변경이 main에 push되면 GitHub Actions가 lint, test, build를 검사하고, 통과하면 `deploy.sh`를 실행한다. 검사에 실패하면 배포하지 않는다. 수동 재배포는 Actions 탭의 Run workflow를 사용한다.
+  - 팀원은 각자 맡은 부분을 main에 직접 올린다. 팀원은 서버 키를 받거나 서버에 접속하지 않는다. 배포 전용 키는 GitHub Secrets(`EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`)에만 있고 배포 스크립트 실행으로 제한된다.
   - 서버 보안 그룹의 5173번 포트는 닫았다. 22번(SSH)은 자동 배포용으로 열려 있으며 비밀번호 접속 없이 키로만 접속한다.
+- 11월 10일: 강사님 의견에 따라 PR 대신 main 직접 push로 작업 방식 변경. 자동 배포의 사전 검사(lint, test, build)는 유지.
 - 11월 6일 팀 논의
   - 백엔드는 Node.js 대신 FastAPI로 새로 만든다 (`backend/`)
   - DB는 서버형 DB를 쓴다. 데이터 팀은 이미 MariaDB를 쓰고 있음 (최종 확정 필요)

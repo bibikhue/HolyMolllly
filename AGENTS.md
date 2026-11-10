@@ -36,18 +36,26 @@
 
 - 자기 기능 폴더 안에서는 자유롭게 작업한다.
 - 다른 사람의 폴더는 고치지 않는다. 고쳐야 하면 담당자에게 먼저 알린다.
-- 공용 파일(아래 4번)은 PR 설명에 "공용 파일 수정"이라고 적고, 담당자 확인을 받은 뒤 합친다.
+- 공용 파일(아래 4번)은 고치기 전에 팀장에게 먼저 알리고, 커밋 메시지에 "공용 파일 수정"이라고 적는다.
 
 ## 3. 작업 순서 (AI 도구 포함)
 
-1. 작업 전 `git checkout main` 후 `git pull`로 최신 상태를 받는다.
-2. 브랜치를 만든다. 이름: `feature/<기능이름>-<짧은설명>` (예: `feature/facility-map-data`)
-3. AI 도구는 먼저 관련 파일을 조사해 계획을 짧게 보고하고, 사람이 승인한 뒤 구현한다.
-4. 작업이 끝나면 아래 6번의 검사를 통과시킨다.
-5. 브랜치를 올리고(`git push -u origin <브랜치>`) GitHub에서 Pull Request를 만든다.
-6. main에는 PR로만 합친다. main에 직접 push하지 않는다.
+팀원은 브랜치와 PR 없이 각자 맡은 부분을 main에 직접 올린다.
 
-AI 도구는 사람이 요청하지 않는 한 commit, push, merge, 배포, 서버 접속(ssh)을 하지 않는다.
+1. 작업 전 main에서 `git pull`로 최신 상태를 받는다.
+2. 자기 담당 폴더에서 작업한다.
+3. `frontend/`를 고쳤다면 아래 6번의 검사를 모두 통과시킨다.
+4. `git add`로 자신이 수정한 파일만 올린다.
+5. `git commit`한다. 커밋 메시지는 무엇을 바꿨는지 한국어로 짧게 쓴다.
+6. `git pull`로 최신 상태를 다시 받는다.
+7. `git push`로 main에 올린다.
+
+AI 도구는 먼저 관련 파일을 조사해 계획을 짧게 보고하고, 사람이 승인한 뒤 구현한다.
+`git push`가 rejected 되면 `git pull`을 다시 하고 `git push`한다. 충돌이 나거나 해결이 안 되면 멈추고 단톡방에 묻는다. `git push --force`는 절대 쓰지 않는다.
+`frontend/`를 올린 뒤에는 GitHub Actions 탭에서 검사 결과(초록 체크 또는 빨간 X)를 확인하고, 2~3분 뒤 사이트에서 반영을 확인한다. 빨간 X면 팀장에게 알린다.
+잘못 올렸으면 `git revert`로 되돌리고 팀장에게 알린다. 이미 올린 커밋을 고쳐 쓰지 않는다.
+
+AI 도구는 사람이 요청하지 않는 한 commit, push, 배포, 서버 접속(ssh)을 하지 않는다.
 
 ## 4. 공용 파일 (함부로 고치지 않음)
 
@@ -56,7 +64,7 @@ AI 도구는 사람이 요청하지 않는 한 commit, push, merge, 배포, 서�
 - `frontend/src/App.jsx`, `frontend/src/App.css`, `frontend/src/index.css`, `frontend/package.json`, `frontend/vite.config.js`
 - `frontend/deploy/` (배포 설정)
 
-새 기능을 메뉴에 연결하려면 `frontend/src/App.jsx`를 고쳐야 한다. 이 경우 메뉴 연결 부분만 최소로 고치고 PR에 적는다.
+새 기능을 메뉴에 연결하려면 `frontend/src/App.jsx`를 고쳐야 한다. 이 경우 메뉴 연결 부분만 최소로 고치고, 2번의 공용 파일 수정 규칙을 따른다.
 
 ## 5. 절대 하지 않는 것
 
@@ -87,7 +95,7 @@ npm ci
 npm run dev
 ```
 
-PR 전 검사 (모두 통과해야 함):
+`frontend/` 변경 후 main에 올리기 전 검사 (모두 통과해야 함):
 
 ```
 npm run lint
@@ -121,7 +129,6 @@ Windows에서 `uvicorn` 명령을 찾지 못하면 `python -m uvicorn backend.ma
 ## 8. 배포
 
 - 11월 9일 배포 전환 완료. 사이트는 이 저장소의 `frontend/`에서 배포하며, 서버의 `~/holymolly`에는 `frontend/`와 `backend/`만 부분 체크아웃한다.
-- `frontend/` 변경이 main에 합쳐지면 `.github/workflows/frontend.yml`이 lint, test, build를 검사하고 서버의 `deploy.sh`를 자동 실행한다. PR에서는 검사만 하며, 수동 재배포는 Actions 탭의 Run workflow를 사용한다.
-- 팀원은 PR을 올리고 알린다. main에 합치는 Merge는 팀장만 한다.
+- `frontend/` 변경이 main에 push되면 `.github/workflows/frontend.yml`이 lint, test, build를 검사하고, 통과하면 서버의 `deploy.sh`를 자동 실행한다. 검사에 실패하면 배포하지 않는다. 수동 재배포는 Actions 탭의 Run workflow를 사용한다.
 - 팀원은 서버에 접속하거나 배포 키를 요청하지 않는다. 서버에 VS Code Remote-SSH나 Codex를 사용하지 않는다.
 - 배포 전용 키는 GitHub Secrets(`EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`)에만 두고 서버에서 배포 스크립트만 실행하도록 제한한다. 자세한 절차는 `frontend/deploy/README.md`를 따른다.
