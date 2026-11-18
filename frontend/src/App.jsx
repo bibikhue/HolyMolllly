@@ -96,9 +96,9 @@ function Footer({ onOpen, dataStatus }) {
   return <footer className="site-footer">
     <div className="footer-inner">
       <div className="footer-top">
-        <a className="footer-brand" href={appHashHref('#/')} aria-label="팀 맙소사 홈">
+        <a className="footer-brand" href={appHashHref('#/')} aria-label={`${SITE_NAME} 홈`}>
           <img className="footer-emblem" src="/brand/mapsosa-emblem-clear.png" alt="" width="44" height="44" />
-          <span className="footer-brand-copy"><strong>맙소사</strong><span>데이터로 읽는 부산 관광</span></span>
+          <span className="footer-brand-copy"><strong>{SITE_NAME}</strong><span>외국인 관광 데이터로 읽는 부산</span></span>
         </a>
         <nav className="footer-links" aria-label="푸터 메뉴">
           <a href={appHashHref('#/project?focus=about')} onClick={event => { event.preventDefault(); onOpen('프로젝트 소개') }}>프로젝트 소개</a>
