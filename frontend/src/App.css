@@ -1,6 +1,6 @@
 .skip-link { position: fixed; top: 0; left: 12px; z-index: 200; display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; transform: translateY(-150%); border: 2px solid var(--accent); border-radius: var(--radius-sm); background: #fff; color: var(--text-strong); font-size: var(--fs-md); font-weight: 700; }
 .skip-link:focus { transform: translateY(12px); }
-.site-header { --header-height: 80px; --brand-width: 270px; --side-width: 56px; --header-pad: max(24px, calc((100% - 1392px) / 2)); position: sticky; top: 0; z-index: 90; flex-shrink: 0; border-bottom: 1px solid #E1E8EE; background: #fff; box-shadow: 0 3px 8px rgba(18, 50, 74, .05); }
+.site-header { --header-height: 80px; --brand-width: 270px; --side-width: 132px; --header-pad: max(24px, calc((100% - 1392px) / 2)); position: sticky; top: 0; z-index: 90; flex-shrink: 0; border-bottom: 1px solid #E1E8EE; background: #fff; box-shadow: 0 3px 8px rgba(18, 50, 74, .05); }
 .header-bar { display: grid; grid-template-columns: var(--brand-width) minmax(0, 1fr) var(--side-width); align-items: center; height: var(--header-height); padding: 0 var(--header-pad); }
 .brand { display: inline-flex; align-items: center; gap: 10px; min-width: 0; color: var(--text-strong); }
 .brand-emblem { display: block; width: 46px; height: 46px; flex: none; object-fit: contain; }
@@ -26,6 +26,13 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
 .dropdown-pending { flex: none; padding: 2px 6px; border-radius: var(--radius-sm); background: var(--tint); color: var(--text-muted); font-size: var(--fs-xs); font-weight: 600; white-space: nowrap; }
 .all-menu-button { display: inline-flex; align-items: center; justify-content: center; justify-self: end; width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--tint); color: var(--accent); }
 .all-menu-button:hover { background: #D6EAF6; }
+.header-actions { display: flex; align-items: center; justify-content: flex-end; justify-self: end; gap: 8px; }
+.login-button { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border: 1px solid #C9D9E5; border-radius: var(--radius-sm); color: var(--text-strong); font-size: var(--fs-md); font-weight: 700; white-space: nowrap; }
+.login-button:hover { border-color: var(--accent); color: var(--accent); }
+.modal.modal-small { width: 420px; }
+.login-notice p { margin: 0; color: var(--text-strong); font-size: var(--fs-base); line-height: 1.6; }
+.login-notice .login-notice-sub { margin-top: 6px; color: var(--text-muted); font-size: var(--fs-md); }
+.login-notice-close { display: block; margin: 24px 0 0 auto; min-width: 88px; height: 40px; padding: 0 18px; border-radius: var(--radius-sm); background: var(--accent); color: #fff; font-size: var(--fs-md); font-weight: 700; }
 .all-menu-button svg { width: 22px; height: 22px; fill: currentColor; stroke: none; }
 .sitemap-pending { display: block; padding: 5px 0; color: var(--text-muted); font-size: var(--fs-md); }
 #root { display: flex; flex-direction: column; min-height: 100svh; }
@@ -64,7 +71,7 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
 .sitemap button { display: block; padding: 5px 0; font-size: var(--fs-md); text-align: left; }
 .sitemap button:hover { text-decoration: underline; }
 @media (min-width: 801px) and (max-width: 1020px) {
-  .site-header { --brand-width: 196px; --side-width: 48px; --header-pad: 16px; }
+  .site-header { --brand-width: 196px; --side-width: 116px; --header-pad: 16px; }
   .brand-copy > span { display: none; }
   .brand-copy strong { font-size: 18px; }
   .navigation-button { padding-left: 8px; font-size: var(--fs-md); white-space: normal; word-break: keep-all; }
@@ -83,7 +90,8 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
   .brand { grid-area: brand; height: 64px; padding-left: 6px; }
   .brand-emblem { width: 40px; height: 40px; }
   .brand-copy strong { font-size: 18px; }
-  .all-menu-button { grid-area: all; }
+  .header-actions { grid-area: all; gap: 6px; }
+  .login-button { height: 38px; padding: 0 10px; font-size: var(--fs-sm); }
   .main-navigation { grid-area: nav; height: auto; border-top: 1px solid #E1E8EE; }
   .navigation-inner { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(44px, auto); height: auto; }
   .navigation-button { justify-self: stretch; justify-content: center; min-height: 44px; padding: 0 2px; font-size: var(--fs-md); white-space: normal; text-align: center; }

@@ -279,7 +279,7 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'instant' })
       return
     }
-    if (title === '사이트맵') setDialog(title)
+    if (title === '사이트맵' || title === '관계자 로그인') setDialog(title)
   }
 
   return <>
@@ -310,7 +310,11 @@ function App() {
             </div>
           </div>
         </nav>
-        <button className="all-menu-button" type="button" aria-label="전체메뉴 (사이트맵)" onClick={() => openDialog('사이트맵')}><Icon name="grid" /></button>
+        <div className="header-actions">
+          {/* FR-01 로그인 자리. 실제 로그인은 FR-10(11/26~, 황지원)에서 연결 */}
+          <button className="login-button" type="button" onClick={() => openDialog('관계자 로그인')}>로그인</button>
+          <button className="all-menu-button" type="button" aria-label="전체메뉴 (사이트맵)" onClick={() => openDialog('사이트맵')}><Icon name="grid" /></button>
+        </div>
       </div>
     </header>
     <main className="dashboard-main" id="main-content" tabIndex={-1} aria-label={page === 'notFound' ? '잘못된 주소 안내' : '대시보드'} onClick={() => setActiveMenu(null)}>
@@ -319,8 +323,9 @@ function App() {
     <Footer onOpen={openDialog} dataStatus={dataStatus} />
     <DataChatbot />
     {dialog && <div className="modal-backdrop" onClick={() => setDialog(null)}>
-      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}>
+      <section className={`modal${dialog === '관계자 로그인' ? ' modal-small' : ''}`} role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}>
         <div className="modal-heading"><h1 id="dialog-title">{dialog}</h1><button autoFocus aria-label="닫기" onClick={() => setDialog(null)}><Icon name="close" /></button></div>
+        {dialog === '관계자 로그인' && <div className="login-notice"><p>부산시 관계자 로그인은 준비 중입니다.</p><p className="login-notice-sub">지금은 로그인 없이 모든 화면을 볼 수 있습니다.</p><button type="button" className="login-notice-close" onClick={() => setDialog(null)}>확인</button></div>}
         {dialog === '사이트맵' && <div className="sitemap">{sitemapGroups.map(([title, items]) => <div key={title}><h2>{title}</h2>{items.map((item) => pendingMenus.has(item) ? <span className="sitemap-pending" key={item}>{item} (준비 중)</span> : <button key={item} onClick={() => openDialog(item)}>{itemLabels[item] || item}</button>)}</div>)}</div>}
       </section>
     </div>}
