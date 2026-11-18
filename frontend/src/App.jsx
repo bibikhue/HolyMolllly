@@ -93,6 +93,28 @@ function Logo() {
 }
 
 function Footer({ onOpen, dataStatus }) {
+  const [relatedOpen, setRelatedOpen] = useState(false)
+  const relatedMenu = useRef(null)
+  const relatedButton = useRef(null)
+  useEffect(() => {
+    if (!relatedOpen) return undefined
+    const closeOutside = event => {
+      if (!relatedMenu.current?.contains(event.target)) setRelatedOpen(false)
+    }
+    const closeOnEscape = event => {
+      if (event.key !== 'Escape') return
+      event.stopPropagation()
+      setRelatedOpen(false)
+      relatedButton.current?.focus()
+    }
+    document.addEventListener('pointerdown', closeOutside)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [relatedOpen])
+
   return <footer className="site-footer">
     <div className="footer-inner">
       <div className="footer-top">
@@ -104,7 +126,15 @@ function Footer({ onOpen, dataStatus }) {
           <a href={appHashHref('#/project?focus=about')} onClick={event => { event.preventDefault(); onOpen('프로젝트 소개') }}>프로젝트 소개</a>
           <a href={appHashHref('#/project?focus=scope')} onClick={event => { event.preventDefault(); onOpen('분석 범위 안내') }}>분석 범위 안내</a>
           <a className="footer-data-link" href={appHashHref('#/project?focus=data')} onClick={event => { event.preventDefault(); onOpen('데이터 출처·기준') }}>데이터 출처·기준</a>
-          <button onClick={() => onOpen('사이트맵')}>사이트맵</button>
+          <div className="footer-related-menu" ref={relatedMenu}>
+            <button type="button" ref={relatedButton} aria-expanded={relatedOpen} aria-controls="footer-related-list" onClick={() => setRelatedOpen(open => !open)}>관련 사이트 <span className="footer-related-chevron" aria-hidden="true">{relatedOpen ? '▴' : '▾'}</span></button>
+            <ul className="footer-related-popover" id="footer-related-list" hidden={!relatedOpen}>
+              <li><a href="https://datalab.visitkorea.or.kr/" target="_blank" rel="noopener noreferrer" onClick={() => setRelatedOpen(false)}>한국관광 데이터랩<span className="footer-external-mark" aria-hidden="true">↗</span><span className="footer-visually-hidden"> (새 창)</span></a></li>
+              <li><a href="https://know.tour.go.kr/" target="_blank" rel="noopener noreferrer" onClick={() => setRelatedOpen(false)}>관광지식정보시스템<span className="footer-external-mark" aria-hidden="true">↗</span><span className="footer-visually-hidden"> (새 창)</span></a></li>
+              <li><a href="https://www.visitbusan.net/kr/index.do" target="_blank" rel="noopener noreferrer" onClick={() => setRelatedOpen(false)}>비짓부산<span className="footer-external-mark" aria-hidden="true">↗</span><span className="footer-visually-hidden"> (새 창)</span></a></li>
+              <li><a href="https://www.busan.go.kr/" target="_blank" rel="noopener noreferrer" onClick={() => setRelatedOpen(false)}>부산광역시<span className="footer-external-mark" aria-hidden="true">↗</span><span className="footer-visually-hidden"> (새 창)</span></a></li>
+            </ul>
+          </div>
         </nav>
       </div>
       <div className="footer-bottom">

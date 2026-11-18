@@ -43,7 +43,7 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
 }
 .site-footer { flex-shrink: 0; background: var(--text-strong); color: var(--footer-text); }
 .footer-inner { max-width: 1440px; margin: 0 auto; padding: 8px 24px; }
-.footer-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 60px; }
+.footer-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 60px; padding-right: max(0px, calc(68px - max(0px, (100vw - 1440px) / 2))); }
 .footer-brand { display: inline-flex; align-items: center; flex: none; gap: 9px; }
 .footer-emblem { display: block; width: 44px; height: 44px; flex: none; object-fit: contain; }
 .footer-brand-copy strong { color: #fff; font-size: var(--fs-lg); font-weight: 800; line-height: 1.2; }
@@ -53,6 +53,15 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
 .footer-links a:hover, .footer-links button:hover, .footer-top-button:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .site-footer a:focus-visible, .site-footer button:focus-visible { outline-color: #fff; }
 .footer-links .footer-data-link { color: #fff; font-weight: 700; }
+.footer-related-menu { position: relative; }
+.footer-related-chevron { margin-left: 4px; font-size: var(--fs-xs); line-height: 1; }
+.footer-related-popover { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 81; width: 240px; margin: 0; padding: 6px; list-style: none; border: 1px solid #dce8f0; border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-card); }
+.footer-related-popover[hidden] { display: none; }
+.footer-links .footer-related-popover a { display: flex; align-items: center; gap: 5px; min-height: 44px; padding: 8px 12px; border-radius: var(--radius-sm); color: var(--text-strong); font-size: var(--fs-md); white-space: nowrap; }
+.footer-links .footer-related-popover a:hover, .footer-links .footer-related-popover a:focus-visible { background: var(--tint); color: var(--accent); text-decoration: none; }
+.footer-links .footer-related-popover a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.footer-external-mark { font-size: var(--fs-xs); line-height: 1; }
+.footer-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .footer-bottom { display: flex; align-items: center; flex-wrap: wrap; column-gap: 20px; row-gap: 0; min-height: 49px; border-top: 1px solid var(--footer-line); padding-right: max(0px, calc(68px - max(0px, (100vw - 1440px) / 2))); }
 .footer-copyright, .footer-data-note { margin: 0; font-size: var(--fs-sm); line-height: 1.4; white-space: nowrap; }
 .footer-copyright { color: var(--footer-muted); }
@@ -78,7 +87,7 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
   .navigation-button.current::after, .navigation-button.active::after { left: 8px; }
   .mega-column { padding-left: 8px; }
   .footer-inner { padding-right: 16px; padding-left: 16px; }
-  .footer-top { gap: 12px; }
+  .footer-top { gap: 12px; padding-right: 76px; }
   .footer-links { gap: 10px; }
   .footer-links a, .footer-links button, .footer-top-button { font-size: var(--fs-sm); }
   .footer-bottom { column-gap: 12px; row-gap: 0; padding-right: 76px; }
@@ -100,7 +109,7 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
   .mega-menu { display: none !important; }
   .dashboard-main { min-height: 220px; }
   .footer-inner { padding: 10px 18px; }
-  .footer-top { flex-direction: column; align-items: flex-start; gap: 7px; padding-bottom: 8px; }
+  .footer-top { flex-direction: column; align-items: flex-start; gap: 7px; padding-right: 74px; padding-bottom: 8px; }
   .footer-links { flex-wrap: wrap; column-gap: 16px; row-gap: 0; }
   .footer-links a, .footer-links button { min-height: 40px; }
   .footer-bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'note note' 'build build' 'copy top'; gap: 4px 8px; padding-top: 10px; padding-right: 74px; }
@@ -113,6 +122,11 @@ button.mega-item:hover, button.mega-item:focus-visible { color: var(--accent); t
   .modal { padding: 22px; }
   .sitemap { gap: 18px; }
   .sitemap h2 { font-size: var(--fs-section-mobile); }
+}
+@media (max-width: 600px) {
+  .footer-links { width: 100%; }
+  .footer-related-menu { flex-basis: 100%; }
+  .footer-related-popover { right: auto; left: 0; width: min(240px, 100%); max-height: min(240px, calc(100dvh - 160px)); overflow-y: auto; }
 }
 
 /* Busan coastal main visual. */
