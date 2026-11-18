@@ -16,36 +16,20 @@ import { resolvePage } from './utils/route'
 
 const buildInfoLabel = formatBuildInfo(__BUILD_TIME__, __GIT_HASH__)
 
+const SITE_NAME = '부산 관광 나침반'
+// 주 메뉴. lead는 메뉴를 펼쳤을 때 칸 위에 보이는 부제(왼쪽부터 이어 읽힘).
 const menus = [
-  ['부산 관광 한눈에', '핵심 지표 요약', '월별 방문 추이', '지역별 현황', '업종별 소비'],
-  ['국가별 관광', '국가 비교', '국가별 상세', '계절성 비교', '언어권별 관심 관광지'],
-  ['관광수요 전망', '부산 방문객 전망', '국가별 방문객 전망', '예측 정확도'],
-  ['분석 리포트', '자동 리포트', '관광수요 주요 변화', '국가별 수요 특징', '정책·마케팅 시사점'],
-  ['부산 행사 캘린더', '부산 행사 캘린더'],
-  ['프로젝트 소개', '프로젝트 소개', '분석 범위 안내', '데이터 출처·기준'],
+  { title: '부산 관광 한눈에', page: 'visitors', lead: '지금 부산 관광을 한눈에 보고', items: ['핵심 지표 요약', '월별 방문 추이', '지역별 현황', '업종별 소비'] },
+  { title: '국가별 관광', page: 'countries', lead: '어느 나라에서 오는지 비교하고', items: ['국가 비교', '국가별 상세', '계절성 비교'] },
+  { title: '관광수요 전망', page: 'outlook', lead: '앞으로 얼마나 올지 내다보고', items: ['부산 방문객 전망', '국가별 방문객 전망', '예측 정확도', 'What-if 시뮬레이터'] },
+  { title: '분석 리포트', page: 'reports', lead: '매달 달라진 점을 정리하고', items: ['자동 리포트'] },
+  { title: '부산 행사 캘린더', page: 'events', lead: '관광객을 부르는 행사를 챙기는', items: ['부산 행사 캘린더'] },
+  { title: '지도로 보기', page: null, soon: true, lead: `가 볼 곳까지 찾아 주는 ${SITE_NAME}`, items: ['편의시설 지도', '추천 코스'] },
 ]
-const menuDescriptions = {
-  '핵심 지표 요약': '최근 한 달 방문객 수와 소비액',
-  '월별 방문 추이': '월별 방문객 수의 변화',
-  '지역별 현황': '구·군별 방문객과 소비액',
-  '업종별 소비': '업종별 소비액과 비중',
-  '국가 비교': '국가별 방문객 수와 1인당 소비액',
-  '국가별 상세': '국가별 방문 추이와 소비 특성',
-  '계절성 비교': '국가별 성수기와 비수기',
-  '언어권별 관심 관광지': '언어권별 관광지 검색 순위',
-  '부산 방문객 전망': '향후 12개월 방문객 예측',
-  '국가별 방문객 전망': '다음 달 국가별 방문객 예측',
-  '예측 정확도': '예측값과 실제값의 비교',
-  '자동 리포트': '기간과 국가를 골라 만드는 요약 보고서',
-  '관광수요 주요 변화': '선택 기간의 주요 변화 요약',
-  '국가별 수요 특징': '국가별 수요 규모와 비중',
-  '정책·마케팅 시사점': '분석 결과에 따른 대응 방향',
-  '프로젝트 소개': '프로젝트의 목적과 메뉴 구성',
-  '분석 범위 안내': '제공 범위와 해석 시 유의사항',
-  '데이터 출처·기준': '데이터 출처와 용어 설명',
-}
-const pendingMenus = new Set(['언어권별 관심 관광지'])
-const menuPages = ['visitors', 'countries', 'outlook', 'reports', 'events', 'project']
+// 프로젝트 소개는 주 메뉴에서 숨기고(11/11 결정) 사이트맵과 푸터에서만 연결함.
+const sitemapGroups = [...menus.map(menu => [menu.title, menu.items]), ['프로젝트 소개', ['프로젝트 소개', '분석 범위 안내', '데이터 출처·기준']]]
+const itemLabels = { '부산 행사 캘린더': '행사 일정' }
+const pendingMenus = new Set(['What-if 시뮬레이터', '편의시설 지도', '추천 코스'])
 const visitorRoutes = { '핵심 지표 요약': 'kpi', '월별 방문 추이': 'trend', '지역별 현황': 'region', '업종별 소비': 'industry' }
 const visitorFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(visitorRoutes).includes(focus) ? focus : 'kpi' }
 const countryRoutes = { '국가 비교': 'compare', '국가별 상세': 'detail', '계절성 비교': 'season', '언어권별 관심 관광지': 'interest' }
@@ -96,87 +80,16 @@ function Icon({ name }) {
   const paths = {
     chevron: <path d="m5 9 7 7 7-7" />,
     close: <path d="m6 6 12 12M6 18 18 6" />,
-    link: <><path d="M10 13a4.5 4.5 0 0 0 6.4 0l2-2A4.5 4.5 0 0 0 12 4.6l-1.2 1.2" /><path d="M14 11a4.5 4.5 0 0 0-6.4 0l-2 2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" /></>,
-    print: <><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><path d="M6 14h12v7H6zM17 12h2" /></>,
+    grid: <><rect x="4" y="4" width="6.5" height="6.5" rx="1.6" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6" /></>,
   }
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>
 }
 
 function Logo() {
-  return <a className="brand" href={appHashHref('#/')} aria-label="팀 맙소사 홈">
-    <img className="brand-emblem" src="/brand/mapsosa-emblem-clear.png" alt="" width="64" height="64" />
-    <span className="brand-copy"><strong>맙소사</strong><span>데이터로 읽는 부산 관광</span></span>
+  return <a className="brand" href={appHashHref('#/')} aria-label={`${SITE_NAME} 홈`}>
+    <img className="brand-emblem" src="/brand/mapsosa-emblem-clear.png" alt="" width="46" height="46" />
+    <span className="brand-copy"><strong>{SITE_NAME}</strong><span>외국인 관광 데이터로 읽는 부산</span></span>
   </a>
-}
-
-function CopyLinkButton({ mobile = false }) {
-  const [copied, setCopied] = useState(false)
-  const [manualUrl, setManualUrl] = useState('')
-  const [announcement, setAnnouncement] = useState('')
-  const resetTimer = useRef(null)
-  const manualInput = useRef(null)
-  const copyButton = useRef(null)
-
-  useEffect(() => {
-    const clearManualUrl = () => setManualUrl('')
-    window.addEventListener('hashchange', clearManualUrl)
-    return () => {
-      window.removeEventListener('hashchange', clearManualUrl)
-      window.clearTimeout(resetTimer.current)
-    }
-  }, [])
-
-  const copyLink = async () => {
-    const url = window.location.href
-    let success = false
-    setManualUrl('')
-
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(url)
-        success = true
-      } catch { /* Use the selection-based fallback below. */ }
-    }
-
-    if (!success) {
-      const area = document.createElement('textarea')
-      area.value = url
-      area.readOnly = true
-      area.tabIndex = -1
-      Object.assign(area.style, { position: 'fixed', top: '0', left: '0', width: '1px', height: '1px', opacity: '0' })
-      document.body.appendChild(area)
-      try {
-        area.focus()
-        area.select()
-        success = document.execCommand('copy')
-      } catch { /* Offer a selected address when copying is blocked. */ }
-      finally { area.remove() }
-    }
-
-    window.clearTimeout(resetTimer.current)
-    if (success) {
-      copyButton.current?.focus()
-      setCopied(true)
-      setAnnouncement('현재 화면 링크를 복사했습니다')
-      resetTimer.current = window.setTimeout(() => setCopied(false), 2000)
-      return
-    }
-
-    setCopied(false)
-    setManualUrl(url)
-    setAnnouncement('주소가 선택되었습니다. 직접 복사해 주세요')
-    requestAnimationFrame(() => {
-      manualInput.current?.focus()
-      manualInput.current?.select()
-    })
-  }
-
-  return <span className={`copy-link-control${mobile ? ' copy-link-mobile' : ''}`}>
-    <button ref={copyButton} type="button" className="copy-link-button" aria-label={mobile ? copied ? '현재 화면 링크 복사됨' : '현재 화면 링크 복사' : undefined} onClick={copyLink}><Icon name="link" /><span className="copy-link-label">{copied ? '복사됨' : '링크 복사'}</span></button>
-    {mobile && copied && <span className="copy-link-feedback" aria-hidden="true">복사됨</span>}
-    <span className="copy-link-announcement" aria-live="polite">{announcement}</span>
-    {manualUrl && <input className="copy-link-manual" ref={manualInput} aria-label="현재 화면 주소, 직접 복사" value={manualUrl} readOnly onFocus={event => event.target.select()} />}
-  </span>
 }
 
 function Footer({ onOpen, dataStatus }) {
@@ -225,7 +138,8 @@ function App() {
     return () => controller.abort()
   }, [])
   useEffect(() => {
-    document.title = page === 'notFound' ? '화면을 찾을 수 없음 | 맙소사' : page === 'events' ? '부산 행사 캘린더 | 맙소사' : page === 'reports' ? '자동 분석 리포트 | 맙소사' : page === 'project' ? '프로젝트 소개 | 맙소사' : page === 'visitors' ? '부산 관광 한눈에 | 맙소사' : page === 'countries' ? '국가별 관광 | 맙소사' : page === 'outlook' ? '관광수요 전망 | 맙소사' : '맙소사 | 부산 관광 대시보드'
+    const pageTitles = { notFound: '화면을 찾을 수 없음', events: '부산 행사 캘린더', reports: '자동 분석 리포트', project: '프로젝트 소개', visitors: '부산 관광 한눈에', countries: '국가별 관광', outlook: '관광수요 전망' }
+    document.title = pageTitles[page] ? `${pageTitles[page]} | ${SITE_NAME}` : `${SITE_NAME} | 외국인 관광 대시보드`
   }, [page])
   useEffect(() => {
     if (page !== 'notFound') return undefined
@@ -277,7 +191,7 @@ function App() {
   useEffect(() => {
     const beforePrint = () => {
       const title = document.title
-      printTitle.current.textContent = title.startsWith('맙소사 | ') ? title.slice('맙소사 | '.length) : title.replace(/ \| 맙소사$/, '')
+      printTitle.current.textContent = title.startsWith(`${SITE_NAME} | `) ? title.slice(`${SITE_NAME} | `.length) : title.replace(` | ${SITE_NAME}`, '')
       printTime.current.textContent = printTimeLabel(new Date())
       printUrl.current.textContent = window.location.href
       printSelections.current.textContent = printSelectionLabel()
@@ -344,7 +258,7 @@ function App() {
       } else navigateToAppHash(`#${destination}`)
       return
     }
-    if (title === '부산 행사 캘린더') {
+    if (title === '부산 행사 캘린더' || title === '행사 일정') {
       setDialog(null)
       if (getPage() !== 'notFound') setPage('events')
       navigateToAppHash('#/events')
@@ -371,48 +285,43 @@ function App() {
   return <>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문 바로가기</a>
     <div className="print-header" hidden>
-      <div className="print-header-top"><div className="print-brand"><img src="/brand/mapsosa-emblem-clear.png" alt="" width="28" height="28" /><strong>맙소사 · 데이터로 읽는 부산 관광</strong></div><strong ref={printTitle} /></div>
+      <div className="print-header-top"><div className="print-brand"><img src="/brand/mapsosa-emblem-clear.png" alt="" width="28" height="28" /><strong>{SITE_NAME}</strong></div><strong ref={printTitle} /></div>
       <p className="print-header-meta">방문객 자료 기준 {dataStatus?.asOf ? monthLabel(dataStatus.asOf) : '확인 중'} · {dataStatus ? dataStatus.isMock ? '예시 자료' : '실제 자료' : '자료 확인 중'} · 출력 <time ref={printTime} /> · <span ref={printUrl} className="print-url" /></p>
       <p className="print-context" ref={printSelections} />
     </div>
     <header className="site-header">
-      <div className="header-main">
+      <div className="header-bar">
         <Logo />
-        <div className="header-status">
-          {dataStatus?.isMock && <span className="status-badge">예시 자료</span>}
-          <span className="status-description">방문객 자료 기준 <strong>{dataStatus?.asOf ? monthLabel(dataStatus.asOf) : '확인 중'}</strong></span>
-          <a className="status-source" href={appHashHref('#/project?focus=data')} onClick={event => { event.preventDefault(); openDialog('데이터 출처·기준') }}>데이터 출처·기준</a>
-          <CopyLinkButton />
-          <button className="copy-link-button print-button" type="button" onClick={() => window.print()}><Icon name="print" />인쇄</button>
-        </div>
-      </div>
-      <nav className="main-navigation" aria-label="주 메뉴" ref={navigation}>
+        <nav className="main-navigation" aria-label="주 메뉴" ref={navigation} onMouseLeave={() => setActiveMenu(null)} onBlur={event => { if (!navigation.current?.contains(event.relatedTarget)) setActiveMenu(null) }}>
           <div className="navigation-inner">
-            {menus.map(([title, ...items], index) => {
-              const current = page === menuPages[index]
-              const expanded = activeMenu === index
-              return <div className="navigation-item" key={title}>
-                <button ref={element => { menuButtons.current[index] = element }} className={`navigation-button${current ? ' current' : ''}${expanded ? ' active' : ''}`} aria-current={current ? 'page' : undefined} aria-expanded={title === '부산 행사 캘린더' ? undefined : expanded} aria-controls={title === '부산 행사 캘린더' ? undefined : `menu-${index}`} onClick={() => title === '부산 행사 캘린더' ? openDialog(title) : setActiveMenu(expanded ? null : index)}>{title}{title !== '부산 행사 캘린더' && <Icon name="chevron" />}</button>
-                {expanded && <div className="dropdown" id={`menu-${index}`}>{items.map(item => <button key={item} onClick={() => openDialog(item)}><span className="dropdown-copy"><strong>{item}</strong><span>{menuDescriptions[item]}</span></span>{pendingMenus.has(item) && <span className="dropdown-pending">준비 중</span>}</button>)}</div>}
-              </div>
+            {menus.map((menu, index) => {
+              const current = page === menu.page
+              return <button key={menu.title} ref={element => { menuButtons.current[index] = element }} type="button" className={`navigation-button${current ? ' current' : ''}${activeMenu === index ? ' active' : ''}`} aria-current={current ? 'page' : undefined} aria-expanded={activeMenu !== null} aria-controls="mega-menu" onMouseEnter={() => setActiveMenu(index)} onFocus={() => setActiveMenu(index)} onClick={() => menu.page ? openDialog(menu.items[0]) : setActiveMenu(index)}>{menu.title}{menu.soon && <span className="navigation-soon">예정</span>}</button>
             })}
           </div>
-      </nav>
-      <div className="status-mobile-bar">
-        <span className="status-mobile"><span>{dataStatus?.isMock ? '미리보기용 수치' : '방문객·소비 수치'} · 기준 {dataStatus?.asOf ? monthLabel(dataStatus.asOf) : '확인 중'} · </span><a href={appHashHref('#/project?focus=data')} onClick={event => { event.preventDefault(); openDialog('데이터 출처·기준') }}>출처 보기</a></span>
-        <CopyLinkButton mobile />
+          <div className="mega-menu" id="mega-menu" hidden={activeMenu === null}>
+            <div className="mega-columns">
+              {menus.map((menu, index) => <div className={`mega-column${activeMenu === index ? ' active' : ''}`} key={menu.title} onMouseEnter={() => setActiveMenu(index)}>
+                <p className="mega-lead">{menu.lead}</p>
+                {menu.items.map(item => pendingMenus.has(item)
+                  ? <span className="mega-item pending" key={item}>{item}<span className="dropdown-pending">준비 중</span></span>
+                  : <button className="mega-item" type="button" key={item} onClick={() => openDialog(item)}>{itemLabels[item] || item}</button>)}
+              </div>)}
+            </div>
+          </div>
+        </nav>
+        <button className="all-menu-button" type="button" aria-label="전체메뉴 (사이트맵)" onClick={() => openDialog('사이트맵')}><Icon name="grid" /></button>
       </div>
     </header>
     <main className="dashboard-main" id="main-content" tabIndex={-1} aria-label={page === 'notFound' ? '잘못된 주소 안내' : '대시보드'} onClick={() => setActiveMenu(null)}>
       {page === 'notFound' ? <NotFound key={pageHash} requestedAddress={`${window.location.pathname}${window.location.search}${pageHash}`} onOpenSitemap={() => openDialog('사이트맵')} /> : page === 'events' ? <EventCalendarPage /> : page === 'reports' ? <AnalysisReport key={pageHash} initialFocus={reportFocus(pageHash)} /> : page === 'project' ? <ProjectIntro focus={projectFocus(pageHash)} navigationKey={pageHash} /> : page === 'visitors' ? <VisitorOverview onOpen={openDialog} focus={visitorFocus(pageHash)} navigationKey={pageHash} /> : page === 'countries' ? <CountryTourism focus={countryFocus(pageHash)} country={countryCode(pageHash)} navigationKey={pageHash} onOpen={openDialog} /> : page === 'outlook' ? <ForecastOutlook focus={outlookFocus(pageHash)} navigationKey={pageHash} /> : <DashboardHome onOpen={openDialog} />}
     </main>
     <Footer onOpen={openDialog} dataStatus={dataStatus} />
-    <div className="footer-chatbot-space" aria-hidden="true" />
     <DataChatbot />
     {dialog && <div className="modal-backdrop" onClick={() => setDialog(null)}>
       <section className="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}>
         <div className="modal-heading"><h1 id="dialog-title">{dialog}</h1><button autoFocus aria-label="닫기" onClick={() => setDialog(null)}><Icon name="close" /></button></div>
-        {dialog === '사이트맵' && <div className="sitemap">{menus.map(([title, ...items]) => <div key={title}><h2>{title}</h2>{items.map((item) => <button key={item} onClick={() => openDialog(item)}>{item}</button>)}</div>)}</div>}
+        {dialog === '사이트맵' && <div className="sitemap">{sitemapGroups.map(([title, items]) => <div key={title}><h2>{title}</h2>{items.map((item) => pendingMenus.has(item) ? <span className="sitemap-pending" key={item}>{item} (준비 중)</span> : <button key={item} onClick={() => openDialog(item)}>{itemLabels[item] || item}</button>)}</div>)}</div>}
       </section>
     </div>}
   </>
