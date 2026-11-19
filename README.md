@@ -42,6 +42,7 @@ conda env update -f environment.yml --prune
 
 ### 3. 데이터베이스 실행하기 (DB 사용 시)
 
+[데이터 백업 파일](http://ducj.iptime.org:5000/sharing/yIEc5KfNn)
 Docker Compose가 설치되어 있고 `database/.env`를 작성했다면:
 
 ```bash
