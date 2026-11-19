@@ -1,7 +1,7 @@
 -- data/results CSV 통합 스키마
 --
 -- 기존 초기화 파일에서 생성되는 지역 차원 테이블
---   sidos, districts, umds: region_code.csv
+--   sidos, `sigungu`, umds: region_code.csv
 --
 -- 적재 전 정리 사항
 --   1. 기준 연월은 YYYY-MM 형식으로 통일한다.
@@ -12,19 +12,19 @@
 
 
 -- 국가 차원
-CREATE TABLE IF NOT EXISTS nationalities (
-    nationality_id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '국가 ID',
-    nationality_cd CHAR(3)     NULL COMMENT '외국인 국가 코드',
-    nationality_nm VARCHAR(50) NOT NULL COMMENT '국가명',
+CREATE TABLE IF NOT EXISTS countries (
+    country_id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '국가 ID',
+    country_cd CHAR(3)     NULL COMMENT '외국인 국가 코드',
+    country_nm VARCHAR(50) NOT NULL COMMENT '국가명',
 
-    PRIMARY KEY (nationality_id),
-    UNIQUE KEY uq_nationality_code (nationality_cd),
-    UNIQUE KEY uq_nationality_name (nationality_nm),
+    PRIMARY KEY (country_id),
+    UNIQUE KEY uq_country_code (country_cd),
+    UNIQUE KEY uq_country_name (country_nm),
 
-    CONSTRAINT chk_nationality_cd
+    CONSTRAINT chk_country_cd
         CHECK (
-            nationality_cd IS NULL
-            OR nationality_cd REGEXP '^[0-9]{3}$'
+            country_cd IS NULL
+            OR country_cd REGEXP '^[0-9]{3}$'
         )
 )
 ENGINE = InnoDB
@@ -37,17 +37,20 @@ COMMENT = '국가 기준정보';
 CREATE TABLE IF NOT EXISTS tourist_counts (
     base_ym       CHAR(7)      NOT NULL COMMENT '기준 연월(YYYY-MM)',
     sgg_cd        CHAR(5)      NOT NULL COMMENT '방문 시군구 코드',
-    nationality_id SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
+    country_id SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
     tourist_cnt   BIGINT UNSIGNED NOT NULL COMMENT '관광객 수',
 
-    PRIMARY KEY (base_ym, sgg_cd, nationality_id),
-    KEY idx_tourist_nationality (nationality_id),
+    PRIMARY KEY (base_ym, sgg_cd, country_id),
+    KEY idx_tourist_country (country_id),
 
-    CONSTRAINT fk_tourist_nationality
-        FOREIGN KEY (nationality_id) REFERENCES nationalities (nationality_id)
+    CONSTRAINT fk_tourist_country
+        FOREIGN KEY (country_id) REFERENCES countries (country_id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT chk_tourist_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_tourist_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -72,7 +75,10 @@ CREATE TABLE IF NOT EXISTS visitor_residence_counts (
     KEY idx_residence_origin (origin_region_nm, origin_detail_nm),
 
     CONSTRAINT chk_residence_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_residence_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -92,7 +98,10 @@ CREATE TABLE IF NOT EXISTS visitor_demographics (
     KEY idx_demographics_group (age_group, gender),
 
     CONSTRAINT chk_demographics_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_demographics_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -101,20 +110,23 @@ COMMENT = '월별 성별·연령대별 방문자 수';
 
 
 -- 국가별관광소비.csv
-CREATE TABLE IF NOT EXISTS nationality_tourism_spending (
+CREATE TABLE IF NOT EXISTS country_tourism_spending (
     base_ym       CHAR(7)     NOT NULL COMMENT '기준 연월(YYYY-MM)',
     sgg_cd        CHAR(5)     NOT NULL COMMENT '소비 발생 시군구 코드',
-    nationality_id SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
+    country_id SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
     spend_amt     BIGINT UNSIGNED NOT NULL COMMENT '관광소비 금액',
 
-    PRIMARY KEY (base_ym, sgg_cd, nationality_id),
-    KEY idx_nationality_spending_nationality (nationality_id),
+    PRIMARY KEY (base_ym, sgg_cd, country_id),
+    KEY idx_country_spending_country (country_id),
 
-    CONSTRAINT fk_nationality_spending_nationality
-        FOREIGN KEY (nationality_id) REFERENCES nationalities (nationality_id)
+    CONSTRAINT fk_country_spending_country
+        FOREIGN KEY (country_id) REFERENCES countries (country_id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT chk_nationality_spending_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+    CONSTRAINT chk_country_spending_base_ym
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_country_spending_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -150,7 +162,10 @@ CREATE TABLE IF NOT EXISTS industry_tourism_spending (
         FOREIGN KEY (industry_id) REFERENCES tourism_industries (industry_id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT chk_industry_spending_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_industry_spending_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -181,23 +196,26 @@ COMMENT = '관광 세부업종 기준정보';
 CREATE TABLE IF NOT EXISTS foreign_epay_spending (
     base_ym            CHAR(7)     NOT NULL COMMENT '기준 연월(YYYY-MM)',
     sgg_cd             CHAR(5)     NOT NULL COMMENT '소비 발생 시군구 코드',
-    nationality_id     SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
+    country_id     SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
     detail_industry_id SMALLINT UNSIGNED NOT NULL COMMENT '관광 세부업종 ID',
     spend_amt          BIGINT UNSIGNED NOT NULL COMMENT '간편결제 관광소비 금액(천원)',
 
-    PRIMARY KEY (base_ym, sgg_cd, nationality_id, detail_industry_id),
-    KEY idx_epay_spending_nationality (nationality_id),
+    PRIMARY KEY (base_ym, sgg_cd, country_id, detail_industry_id),
+    KEY idx_epay_spending_country (country_id),
     KEY idx_epay_spending_detail_industry (detail_industry_id),
 
-    CONSTRAINT fk_epay_spending_nationality
-        FOREIGN KEY (nationality_id) REFERENCES nationalities (nationality_id)
+    CONSTRAINT fk_epay_spending_country
+        FOREIGN KEY (country_id) REFERENCES countries (country_id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT fk_epay_spending_detail_industry
         FOREIGN KEY (detail_industry_id)
         REFERENCES tourism_detail_industries (detail_industry_id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT chk_epay_spending_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_epay_spending_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -215,7 +233,10 @@ CREATE TABLE IF NOT EXISTS paid_attractions (
     PRIMARY KEY (attraction_id),
     UNIQUE KEY uq_paid_attraction_name (sgg_cd, attraction_nm),
     UNIQUE KEY uq_paid_attraction_district (sgg_cd, attraction_id),
-    KEY idx_paid_attraction_name (attraction_nm)
+    KEY idx_paid_attraction_name (attraction_nm),
+    CONSTRAINT fk_paid_attraction_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -266,6 +287,11 @@ CREATE TABLE IF NOT EXISTS tourism_places (
     latitude      DECIMAL(10, 7) NULL COMMENT '위도(WGS84)',
     longitude     DECIMAL(10, 7) NULL COMMENT '경도(WGS84)',
 
+    address       VARCHAR(500) NULL COMMENT '주소',
+    hompage_url   VARCHAR(1000) NULL COMMENT '홈페이지 URL',
+    usage_amount  TEXT NULL COMMENT '이용요금 안내',
+    main_img      VARCHAR(1000) NULL COMMENT '대표 이미지 URL',
+
     PRIMARY KEY (poi_id),
     UNIQUE KEY uq_tourism_place_source (source_poi_id),
     KEY idx_tourism_place_district (sgg_cd, place_type),
@@ -283,7 +309,10 @@ CREATE TABLE IF NOT EXISTS tourism_places (
         CHECK (
             (latitude IS NULL AND longitude IS NULL)
             OR (latitude IS NOT NULL AND longitude IS NOT NULL)
-        )
+        ),
+    CONSTRAINT fk_tourism_place_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -311,7 +340,10 @@ CREATE TABLE IF NOT EXISTS navigation_search_counts (
     CONSTRAINT chk_navigation_base_ym
         CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
     CONSTRAINT chk_navigation_rank
-        CHECK (ranking BETWEEN 1 AND 100)
+        CHECK (ranking BETWEEN 1 AND 100),
+    CONSTRAINT fk_navigation_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -434,7 +466,10 @@ CREATE TABLE IF NOT EXISTS tourism_interest_counts (
         FOREIGN KEY (small_cat_cd) REFERENCES kto_small_categories (small_cat_cd)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT chk_interest_base_ym
-        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT fk_interest_region_code
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -476,52 +511,139 @@ COLLATE = utf8mb4_unicode_ci
 COMMENT = '부산 MICE 행사 정보';
 
 
-ALTER TABLE tourist_counts
-    ADD CONSTRAINT fk_tourist_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
+-- source/기타/bus_stops.csv: 버스 정류장 기준정보
+CREATE TABLE IF NOT EXISTS bus_stops (
+    station_name VARCHAR(100) NOT NULL COMMENT '정류소명',
+    longitude DECIMAL(10, 7) NOT NULL COMMENT '경도(WGS84)',
+    latitude DECIMAL(10, 7) NOT NULL COMMENT '위도(WGS84)',
+    PRIMARY KEY (station_name, longitude, latitude),
+    CONSTRAINT chk_bus_stop_longitude CHECK (longitude BETWEEN -180 AND 180),
+    CONSTRAINT chk_bus_stop_latitude CHECK (latitude BETWEEN -90 AND 90)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '버스 정류소명 및 위치 좌표';
 
-ALTER TABLE visitor_residence_counts
-    ADD CONSTRAINT fk_residence_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
-
-ALTER TABLE visitor_demographics
-    ADD CONSTRAINT fk_demographics_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
-
-ALTER TABLE nationality_tourism_spending
-    ADD CONSTRAINT fk_nationality_spending_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
-
-ALTER TABLE industry_tourism_spending
-    ADD CONSTRAINT fk_industry_spending_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
-
-ALTER TABLE foreign_epay_spending
-    ADD CONSTRAINT fk_epay_spending_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
-
-ALTER TABLE paid_attractions
-    ADD CONSTRAINT fk_paid_attraction_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
-
+-- 덤프로 먼저 생성된 tourism_places에도 상세정보 컬럼 추가 (MariaDB)
 ALTER TABLE tourism_places
-    ADD CONSTRAINT fk_tourism_place_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
+    ADD COLUMN IF NOT EXISTS address VARCHAR(500) NULL COMMENT '주소',
+    ADD COLUMN IF NOT EXISTS hompage_url VARCHAR(1000) NULL COMMENT '홈페이지 URL',
+    ADD COLUMN IF NOT EXISTS usage_amount TEXT NULL COMMENT '이용요금 안내',
+    ADD COLUMN IF NOT EXISTS main_img VARCHAR(1000) NULL COMMENT '대표 이미지 URL';
 
-ALTER TABLE navigation_search_counts
-    ADD CONSTRAINT fk_navigation_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
+-- source/기타/busan_marine_experiences.csv: 체험형 관광
+CREATE TABLE IF NOT EXISTS busan_marine_experiences (
+    place_nm VARCHAR(100) NOT NULL COMMENT '체험형 관광 명칭',
+    sgg_cd CHAR(5) NOT NULL COMMENT '소재 시군구 코드',
+    longitude DECIMAL(10, 7) NOT NULL COMMENT '경도(WGS84)',
+    latitude DECIMAL(10, 7) NOT NULL COMMENT '위도(WGS84)',
+    address VARCHAR(500) NULL COMMENT '주소',
+    hompage_url VARCHAR(1000) NULL COMMENT '홈페이지 URL',
+    main_img VARCHAR(1000) NULL COMMENT '대표 이미지 URL',
+    PRIMARY KEY (place_nm, sgg_cd, longitude, latitude),
+    CONSTRAINT fk_marine_experience_region
+        FOREIGN KEY (sgg_cd) REFERENCES sigungu (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '부산 체험형 관광 정보';
 
-ALTER TABLE tourism_interest_counts
-    ADD CONSTRAINT fk_interest_region_code
-    FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
-    ON UPDATE CASCADE ON DELETE RESTRICT;
+-- source/기타/busan_shopping.csv: 쇼핑
+CREATE TABLE IF NOT EXISTS busan_shopping (
+    place_nm VARCHAR(100) NOT NULL COMMENT '쇼핑 장소명',
+    sgg_cd CHAR(5) NOT NULL COMMENT '소재 시군구 코드',
+    longitude DECIMAL(10, 7) NOT NULL COMMENT '경도(WGS84)',
+    latitude DECIMAL(10, 7) NOT NULL COMMENT '위도(WGS84)',
+    address VARCHAR(500) NULL COMMENT '주소',
+    hompage_url VARCHAR(1000) NULL COMMENT '홈페이지 URL',
+    main_img VARCHAR(1000) NULL COMMENT '대표 이미지 URL',
+    PRIMARY KEY (place_nm, sgg_cd, longitude, latitude),
+    CONSTRAINT fk_shopping_region
+        FOREIGN KEY (sgg_cd) REFERENCES sigungu (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '부산 쇼핑 장소 정보';
+
+-- source/기타/busan_tourist_info.csv: 관광안내소
+CREATE TABLE IF NOT EXISTS busan_tourist_info (
+    place_nm VARCHAR(100) NOT NULL COMMENT '관광안내소명',
+    longitude DECIMAL(10, 7) NOT NULL COMMENT '경도(WGS84)',
+    latitude DECIMAL(10, 7) NOT NULL COMMENT '위도(WGS84)',
+    op_time VARCHAR(255) NULL COMMENT '운영시간 안내',
+    address VARCHAR(500) NULL COMMENT '주소',
+    supported_languages VARCHAR(255) NULL COMMENT '안내 가능한 외국어(FGGG)',
+    PRIMARY KEY (place_nm, longitude, latitude)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '부산 관광안내소 정보';
+
+-- source/기타/busan_walking_trails.csv: 도보여행
+CREATE TABLE IF NOT EXISTS busan_walking_trails (
+    place_nm VARCHAR(100) NOT NULL COMMENT '도보여행 명칭',
+    sgg_cd CHAR(5) NULL COMMENT '대표 지점 시군구 코드',
+    longitude DECIMAL(10, 7) NOT NULL COMMENT '대표 지점 경도(WGS84)',
+    latitude DECIMAL(10, 7) NOT NULL COMMENT '대표 지점 위도(WGS84)',
+    main_img VARCHAR(1000) NULL COMMENT '대표 이미지 URL',
+    PRIMARY KEY (place_nm, longitude, latitude),
+    CONSTRAINT fk_walking_trail_region
+        FOREIGN KEY (sgg_cd) REFERENCES sigungu (sgg_cd)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '부산 도보여행 정보';
+
+-- 김해공항_국적 및 월별 외국인 입국자_201801~202610.csv
+-- 원천 연월(YYYYMM)은 적재 시 YYYY-MM으로 변환
+-- 입국자 수 공란은 0으로 치환하지 않고 NULL로 보존
+CREATE TABLE IF NOT EXISTS gimhae_airport_arrivals (
+    base_ym CHAR(7) NOT NULL COMMENT '기준 연월(YYYY-MM)',
+    country_id SMALLINT UNSIGNED NOT NULL COMMENT '국가 ID',
+    gender ENUM('남성', '여성') NOT NULL COMMENT '성별',
+    continent_nm VARCHAR(20) NOT NULL COMMENT '원천 대륙 구분명',
+    arrival_cnt BIGINT UNSIGNED NULL COMMENT '외국인 입국자 수(명), 원천 공란은 NULL',
+    PRIMARY KEY (base_ym, country_id, gender),
+    KEY idx_gimhae_arrival_country (country_id),
+    CONSTRAINT fk_gimhae_arrival_country
+        FOREIGN KEY (country_id) REFERENCES countries (country_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT chk_gimhae_arrival_base_ym
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$')
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '월별 국가·성별 김해공항 외국인 입국자 수';
+
+-- 부산직접입국_관광상용_2013_2026.csv
+-- 관광·상용 자료이며, 성별이 있는 gimhae_airport_arrivals와 별도 관리
+CREATE TABLE IF NOT EXISTS busan_direct_arrivals (
+    base_ym CHAR(7) NOT NULL COMMENT '기준 연월(YYYY-MM)',
+    country_id SMALLINT UNSIGNED NOT NULL COMMENT '국가·국적 분류 ID',
+    gimhae_airport_cnt BIGINT UNSIGNED NOT NULL COMMENT '김해공항 직접 입국자 수(명)',
+    busan_port_cnt BIGINT UNSIGNED NOT NULL COMMENT '부산항 직접 입국자 수(명)',
+    gamcheon_port_cnt BIGINT UNSIGNED NOT NULL COMMENT '감천항 직접 입국자 수(명)',
+    total_cnt BIGINT UNSIGNED NOT NULL COMMENT '3개 입국 지점 합계(y_busan_tour_biz)',
+    PRIMARY KEY (base_ym, country_id),
+    KEY idx_busan_direct_arrival_country (country_id),
+    CONSTRAINT fk_busan_direct_arrival_country
+        FOREIGN KEY (country_id) REFERENCES countries (country_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT chk_busan_direct_arrival_base_ym
+        CHECK (base_ym REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])$'),
+    CONSTRAINT chk_busan_direct_arrival_total
+        CHECK (total_cnt = gimhae_airport_cnt + busan_port_cnt + gamcheon_port_cnt)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '월별 국가별 부산 직접 입국자 수(관광·상용)';

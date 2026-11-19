@@ -11,7 +11,7 @@ COLLATE = utf8mb4_unicode_ci
 COMMENT = '시도 기준정보';
 
 
-CREATE TABLE IF NOT EXISTS districts (
+CREATE TABLE IF NOT EXISTS `sigungu` (
     sgg_cd  CHAR(5)     NOT NULL COMMENT '시군구 코드',
     sido_cd CHAR(2)     NOT NULL COMMENT '시도 코드',
     sgg_nm  VARCHAR(50) NOT NULL COMMENT '시군구명',
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS umds (
     KEY idx_umd_district (sgg_cd),
 
     CONSTRAINT fk_umd_district
-        FOREIGN KEY (sgg_cd) REFERENCES districts (sgg_cd)
+        FOREIGN KEY (sgg_cd) REFERENCES `sigungu` (sgg_cd)
         ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE = InnoDB
