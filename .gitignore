@@ -14,3 +14,4 @@ database/init/dump-rise_db-202611041708.sql
 docs/~!*
 
 *.pyc
+__pycache__
