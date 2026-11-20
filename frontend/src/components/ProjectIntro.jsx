@@ -9,6 +9,7 @@ import {
   projectTerms,
 } from '../data/projectInfo.js'
 import './ProjectIntro.css'
+import Faq from './Faq.jsx'
 
 const validFocus = value => projectSections.some(section => section.id === value) ? value : 'about'
 
@@ -78,6 +79,7 @@ export default function ProjectIntro({ focus = 'about', navigationKey }) {
 
   return <div className="project-intro-page">
     <div className="project-nav-shell"><ProjectTabs activeFocus={activeFocus} /></div>
+    {activeFocus === 'faq' && <Faq />}
     {activeFocus === 'about' && <AboutSection />}
     {activeFocus === 'scope' && <ScopeSection />}
     {activeFocus === 'data' && <DataSection />}

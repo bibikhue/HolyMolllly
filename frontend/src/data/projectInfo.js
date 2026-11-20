@@ -1,4 +1,5 @@
 export const projectSections = [
+  { id: 'faq', label: 'FAQ' },
   { id: 'about', label: '프로젝트 소개' },
   { id: 'scope', label: '분석 범위 안내' },
   { id: 'data', label: '데이터 출처·기준' },
