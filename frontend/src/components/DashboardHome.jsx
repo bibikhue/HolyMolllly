@@ -1,54 +1,131 @@
 import { useState } from 'react'
-import DemandOutlook from './DemandOutlook'
-import { groupMarkets } from '../data/tourismMarkets'
 import { MetricCard, MonthlyChart } from './VisitorOverview'
-import { getOverview, selectableMonths, monthLabel, numberLabel, rateLabel } from '../data/visitorDemo'
+import { getOverview, selectableMonths, monthLabel, numberLabel } from '../data/visitorDemo'
+import { tourismOverviewMock } from '../data/tourismOverviewMock.js'
+import { billionWonLabel, billionWonNumber } from '../data/displayFormat.js'
 import './DashboardHome.css'
 
-export default function DashboardHome({ onOpen }) {
-  const [marketView, setMarketView] = useState('country')
+const flagColors = {
+  JP: ['#fff', '#bc002d'],
+  CN: ['#de2910', '#ffde00'],
+  TW: ['#fe0000', '#000095'],
+  US: ['#b22234', '#fff', '#3c3b6e'],
+  HK: ['#de2910', '#fff'],
+}
+
+function CountryFlag({ code }) {
+  const colors = flagColors[code] || ['#d7e3ed', '#64809a']
+  return <svg className={`dashboard-country-flag flag-${code}`} viewBox="0 0 30 20" role="img" aria-label={`${code} 국기`}>
+    <rect width="30" height="20" rx="2" fill={colors[0]} />
+    {code === 'JP' && <circle cx="15" cy="10" r="4.4" fill={colors[1]} />}
+    {code === 'CN' && <><path d="m7 3 1 2 2 .2-1.6 1.3.5 2-1.9-1.1-1.8 1.1.5-2L5 5.2 7 5Z" fill={colors[1]} /><circle cx="13" cy="4" r=".8" fill={colors[1]} /><circle cx="16" cy="6" r=".8" fill={colors[1]} /><circle cx="16" cy="9" r=".8" fill={colors[1]} /><circle cx="13" cy="11" r=".8" fill={colors[1]} /></>}
+    {code === 'TW' && <><rect width="13" height="9" rx="1" fill={colors[1]} /><circle cx="6.5" cy="4.5" r="2.2" fill="#fff" /></>}
+    {code === 'US' && <><path d="M0 2h30M0 5h30M0 8h30M0 11h30M0 14h30M0 17h30" stroke="#b22234" strokeWidth="1.5" /><rect width="13" height="10" rx="1" fill={colors[2]} />{Array.from({ length: 6 }, (_, i) => <circle key={i} cx={2 + i % 3 * 3.5} cy={2 + Math.floor(i / 3) * 4} r=".55" fill="#fff" />)}</>}
+    {code === 'HK' && <><path d="M15 10c-5-8-8 0 0 0 4-7 7-1 0 0 9-1 6 5 0 0 6 7-1 8 0 0-4 8-8 3 0 0-8 3-8-4 0 0-7-5 0-9 0 0Z" fill={colors[1]} transform="translate(15 10) scale(.52) translate(-15 -10)" /></>}
+    {!flagColors[code] && <text x="15" y="14" textAnchor="middle" fontSize="9" fill={colors[1]}>{code}</text>}
+  </svg>
+}
+
+function TouristTools({ onBack }) {
+  const [activeTab, setActiveTab] = useState('course')
+  const tabs = [
+    { id: 'course', label: '추천 코스 생성' },
+    { id: 'map', label: '관광 지도' },
+  ]
+  const handleTabKeyDown = (event, index) => {
+    const nextIndex = event.key === 'ArrowRight' ? (index + 1) % tabs.length
+      : event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length
+        : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1
+    if (nextIndex < 0) return
+    event.preventDefault()
+    setActiveTab(tabs[nextIndex].id)
+    event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[nextIndex]?.focus()
+  }
+
+  return <div className="visitor-overview dashboard-home tourist-tools-page">
+    <div className="overview-container">
+      <button className="tourist-tools-back" type="button" onClick={onBack}>← 메인 화면</button>
+      <div className="tourist-tools-heading"><p className="tourist-tools-eyebrow">외국인 관광객</p><h1>부산 여행 도우미</h1><p>부산 여행 코스를 만들고 관광 정보를 지도에서 확인할 수 있는 기능을 소개합니다.</p></div>
+      <div className="tourist-tools-tabs" role="tablist" aria-label="외국인 관광객 기능">
+        {tabs.map((tab, index) => <button key={tab.id} id={`tourist-tab-${tab.id}`} type="button" role="tab" aria-selected={activeTab === tab.id} aria-controls={`tourist-panel-${tab.id}`} tabIndex={activeTab === tab.id ? 0 : -1} onClick={() => setActiveTab(tab.id)} onKeyDown={event => handleTabKeyDown(event, index)}>{tab.label}</button>)}
+      </div>
+      <section className="tourist-tools-panel" id="tourist-panel-course" role="tabpanel" aria-labelledby="tourist-tab-course" tabIndex={0} hidden={activeTab !== 'course'}>
+        <span className="tourist-tools-icon" aria-hidden="true">✦</span><h2>내 여행에 맞는 추천 코스</h2><p>여행 기간과 관심 주제, 이동 방식에 맞춰 부산의 관광지를 잇는 일정을 구성할 수 있습니다.</p>
+        <ul><li>해변·문화·미식 등 관심 주제로 코스 구성</li><li>여행 일수와 하루 일정에 맞춘 방문 순서 제안</li><li>장소별 이동 정보와 간단한 여행 안내 제공</li></ul>
+        <p className="tourist-tools-note">추천 코스 생성 기능을 준비하고 있습니다.</p>
+      </section>
+      <section className="tourist-tools-panel" id="tourist-panel-map" role="tabpanel" aria-labelledby="tourist-tab-map" tabIndex={0} hidden={activeTab !== 'map'}>
+        <span className="tourist-tools-icon" aria-hidden="true">⌖</span><h2>부산 관광 지도</h2><p>관광지와 여행에 필요한 편의시설을 지도에서 찾아볼 수 있는 화면을 제공할 수 있습니다.</p>
+        <ul><li>관광 명소와 구·군별 주요 장소 확인</li><li>관광 안내소·편의시설 등 주변 정보 탐색</li><li>선택한 장소의 위치와 여행 정보 확인</li></ul>
+        <p className="tourist-tools-note">관광 지도 기능을 준비하고 있습니다.</p>
+      </section>
+    </div>
+  </div>
+}
+
+export default function DashboardHome() {
+  const [activeView, setActiveView] = useState('home')
+  if (activeView === 'tourist') return <TouristTools onBack={() => setActiveView('home')} />
   const end = selectableMonths.at(-1)
   const start = `${end.slice(0, 4)}-01`
   const annual = getOverview(start, end)
-  const visitorTrend = getOverview(selectableMonths[Math.max(0, selectableMonths.length - 12)], end).rows.map(row => ({ month: row.month, value: row.visitors }))
-  const recent = getOverview(selectableMonths.at(-6), end)
+  const annualSpending = tourismOverviewMock.monthly.filter(row => row.month >= start && row.month <= end).reduce((sum, row) => sum + row.spending, 0)
+  const trendRows = getOverview(selectableMonths[Math.max(0, selectableMonths.length - 12)], end).rows
   const current = getOverview(end, end)
-  const topMarkets = current.countries.filter((country) => country.code !== 'ETC').slice(0, 3)
-  const marketRows = marketView === 'country' ? topMarkets : groupMarkets(current.countries)
-  const latest = annual.latest
+  const topMarkets = current.countries.filter(country => country.code !== 'ETC').slice(0, 3)
+  const latestSpend = tourismOverviewMock.monthly.find(row => row.month === end)
+  const industries = [...latestSpend.industries].sort((a, b) => b.spending - a.spending)
+  const districts = [...latestSpend.districts].sort((a, b) => b.spending - a.spending)
+  const industryMax = Math.max(...industries.map(row => row.spending))
+  const districtMax = Math.max(...districts.map(row => row.spending))
 
   return <div className="visitor-overview dashboard-home">
     <div className="overview-container">
-      <div className="overview-title-row"><div><h1>부산 관광 대시보드</h1><p className="overview-subtitle">최근 방문 흐름을 확인하고, 필요한 분석으로 바로 이동하세요.</p></div><span className="dashboard-reference">방문 지표 기준월 <strong>{monthLabel(end)}</strong></span></div>
-      <div className="overview-demo-notice"><span>미리보기</span><p>방문객 지표는 <strong>예시 데이터</strong>입니다. 실제 관광 통계 연동 전 화면 미리보기용 자료입니다.</p><button onClick={() => onOpen('데이터 출처·기준')}>데이터 안내 ↗</button></div>
-      <section className="overview-metrics" aria-label="최근 주요 방문 지표">
-        <MetricCard icon="visitors" label="최근 월 방문객" value={numberLabel(latest.visitors)} unit="명" change={latest.yoy} detail="전년 동월 대비" accent trend={visitorTrend} />
-        <MetricCard icon="calendar" label={`${end.slice(0, 4)}년 누적 방문객`} value={(annual.total / 10000).toFixed(1)} unit="만 명" change={annual.totalGrowth} detail="전년 동일 기간 대비" />
-        <MetricCard icon="trend" label="최근 월 증감률" value={rateLabel(latest.mom)} detail="전월 대비" />
-        <MetricCard icon="globe" label="최근 월 주요 방문 국가" value={topMarkets[0].name} unit={`${topMarkets[0].share.toFixed(1)}%`} detail="최근 월 전체 방문객 중 비중" />
-      </section>
-      <div className="dashboard-summary-grid">
-        <section className="overview-panel" aria-labelledby="home-trend-title">
-          <div className="panel-heading"><div><h2 id="home-trend-title">최근 방문 흐름</h2><p>최근 6개월 · 예시 데이터</p></div><a className="dashboard-detail-link" href="#/visitors">부산 관광 한눈에 ↗</a></div>
-          <MonthlyChart rows={recent.rows} compare={false} />
-        </section>
-        <section className="overview-panel" aria-labelledby="home-markets-title">
-          <div className="panel-heading"><div><h2 id="home-markets-title">주요 관광 시장</h2><p>{monthLabel(end)} 방문 비중 · 예시 데이터</p></div></div><div className="chart-view-toggle market-view-toggle" aria-label="관광 시장 구분"><button aria-pressed={marketView === 'country'} onClick={() => setMarketView('country')}>국가별</button><button aria-pressed={marketView === 'region'} onClick={() => setMarketView('region')}>권역별</button></div>
-          <ol className="dashboard-market-list">{marketRows.map((country, index) => <li key={country.code}><span className="dashboard-market-rank">0{index + 1}</span><div className="dashboard-market-info"><div><strong>{country.name}</strong><span>{country.share.toFixed(1)}%</span></div><div className="dashboard-market-track"><span style={{ width: `${country.share}%`, background: country.color }} /></div></div></li>)}</ol>
-          {marketView === 'region' && <p className="dashboard-region-note">출발 시장의 지리적 권역 기준입니다. 기타 국가는 권역을 알 수 없어 미분류로 유지합니다.</p>}
-          <button className="dashboard-detail-link" onClick={() => onOpen('국가별 방문 규모')}>국가별 관광 살펴보기 ↗</button>
-        </section>
-      </div>
-      <DemandOutlook onOpen={onOpen} />
-      <section className="dashboard-analysis" aria-labelledby="home-analysis-title">
-        <div className="dashboard-section-heading"><h2 id="home-analysis-title">분석 이어보기</h2><p>방문 현황에서 수요 전망과 분석 결과까지</p></div>
-        <div className="dashboard-analysis-grid">
-          <a className="dashboard-analysis-card" href="#/visitors"><span className="dashboard-card-category">방문 현황 <span>↗</span></span><h3>기간별로 자세히 살펴보기</h3><p>조회 기간을 선택하고 전년 비교, 상세 표와 CSV를 확인하세요.</p><span className="dashboard-card-action">부산 관광 한눈에</span></a>
-          <a className="dashboard-analysis-card" href="#/outlook?focus=busan"><span className="dashboard-card-category">관광수요 전망 <span>기준 예측 제공</span></span><h3>관광의 다음 흐름</h3><p>기준 예측과 80%·95% 예측 범위, 예측 정확도를 확인하세요.</p><span className="dashboard-card-action">부산 방문객 전망 보기 ↗</span></a>
-          <button className="dashboard-analysis-card" onClick={() => onOpen('자동 리포트')}><span className="dashboard-card-category">분석 리포트 <span>자동 요약</span></span><h3>변화를 읽는 인사이트</h3><p>기간과 국가를 선택해 방문 흐름과 시장 구성을 요약하세요.</p><span className="dashboard-card-action">자동 리포트 만들기 ↗</span></button>
+      <nav className="dashboard-audience-actions" aria-label="대상별 대시보드">
+        <button type="button">부산시 관계자</button>
+        <button type="button">소상공인</button>
+        <button type="button" onClick={() => setActiveView('tourist')}>외국인 관광객</button>
+      </nav>
+      <div className="dashboard-home-grid">
+        <aside className="dashboard-home-sidebar" aria-label="주요 관광 지표">
+          <MetricCard icon="visitors" label="최근 1년 누적 방문객" value={(annual.total / 10000).toFixed(1)} unit="만 명" detail={`${monthLabel(start)} — ${monthLabel(end)} · 예시 자료`} accent />
+          <section className="overview-panel dashboard-top-countries" aria-labelledby="home-countries-title">
+            <div className="panel-heading"><div><h2 id="home-countries-title">방문객 수 상위 3개국</h2></div></div>
+            <ol className="dashboard-country-row">{topMarkets.map((country, index) => <li key={country.code}>
+              <span className="dashboard-country-rank">{String(index + 1).padStart(2, '0')}</span>
+              <CountryFlag code={country.code} />
+              <strong>{country.name}</strong>
+              <span className="dashboard-country-visitors">{numberLabel(country.visitors)}<small>명</small></span>
+            </li>)}</ol>
+          </section>
+          <MetricCard icon="spending" label="최근 1년 카드 소비액" value={billionWonLabel(annualSpending)} detail={`${monthLabel(start)} — ${monthLabel(end)} · 예시 자료`} />
+          <section className="overview-panel dashboard-spending-panel" aria-labelledby="home-industry-title">
+            <div className="panel-heading"><div><h2 id="home-industry-title">업종별 소비액</h2></div><span className="dashboard-chart-unit">단위: 억 원</span></div>
+            <ol className="dashboard-spending-bars">{industries.map((item, index) => <li key={item.code}>
+              <span className="dashboard-spending-rank">{String(index + 1).padStart(2, '0')}</span>
+              <span className="dashboard-spending-name">{item.name}</span>
+              <span className="dashboard-spending-track" aria-hidden="true"><span style={{ width: `${item.spending / industryMax * 100}%`, background: item.color }} /></span>
+              <strong>{billionWonNumber(item.spending)}</strong>
+            </li>)}</ol>
+          </section>
+        </aside>
+        <div className="dashboard-home-main">
+          <section className="overview-panel dashboard-home-trend" aria-labelledby="home-trend-title">
+            <div className="panel-heading"><div><h2 id="home-trend-title">최근 1년간 외국인 관광객 방문</h2></div></div>
+            <MonthlyChart rows={trendRows} compare={false} compact />
+          </section>
+          <section className="overview-panel dashboard-spending-panel" aria-labelledby="home-district-title">
+            <div className="panel-heading"><div><h2 id="home-district-title">구·군별 소비액</h2></div><span className="dashboard-chart-unit">단위: 억 원</span></div>
+            <ol className="dashboard-spending-bars dashboard-district-bars">{districts.map((item, index) => <li key={item.name}>
+              <span className="dashboard-spending-rank">{String(index + 1).padStart(2, '0')}</span>
+              <span className="dashboard-spending-name">{item.name}</span>
+              <span className="dashboard-spending-track" aria-hidden="true"><span style={{ width: `${item.spending / districtMax * 100}%` }} /></span>
+              <strong>{billionWonNumber(item.spending)}</strong>
+            </li>)}</ol>
+            <p className="dashboard-spending-footnote">구·군별 소비액은 예시 배분값입니다.</p>
+          </section>
         </div>
-      </section>
-      <div className="overview-source-note"><span>방문 지표: 월별 합산 기준 · 실제 자료 연동 전 · 화면 미리보기용 예시</span><button onClick={() => onOpen('분석 범위 안내')}>분석 범위 확인 ↗</button></div>
+      </div>
     </div>
   </div>
 }
