@@ -4,6 +4,10 @@
 .mice-month-controls button:disabled { opacity: .35; cursor: default; }
 .mice-month-controls .mice-current-month { font-size: var(--fs-base); padding: 0 9px; margin-left: 4px; }
 .mice-calendar select { font: inherit; font-size: var(--fs-md); color: var(--text); padding: 7px 9px; border: 1px solid #dce6ee; border-radius: var(--radius-sm); background: white; }
+.mice-user-filters { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin: 0 0 13px; }
+.mice-user-filters-label { color: var(--text-muted); font-size: var(--fs-md); margin-right: 3px; }
+.mice-user-toggle { padding: 6px 10px; border: 1px solid #dce6ee; border-radius: 999px; background: white; color: var(--text); font-size: var(--fs-md); }
+.mice-user-toggle.active { border-color: var(--accent); background: #e6f3fc; color: var(--accent); font-weight: 600; }
 .mice-status { font-size: var(--fs-base); color: var(--text-muted); line-height: 1.8; min-height: 22px; margin-bottom: 12px; }
 .mice-status strong { color: var(--accent); font-weight: 600; }
 .mice-status button { color: var(--accent); text-decoration: underline; font-size: var(--fs-md); }
@@ -36,6 +40,8 @@
 .mice-selected-events a { font-size: var(--fs-md); color: var(--accent); line-height: 1.7; overflow-wrap: anywhere; }
 .mice-selected-events a:hover { text-decoration: underline; }
 .mice-selected-events p { margin: 5px 0 0; color: var(--text-muted); font-size: var(--fs-base); line-height: 1.8; }
+.mice-event-assignee { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; color: var(--text-muted); font-size: var(--fs-sm); }
+.mice-event-assignee select { padding: 4px 6px; font-size: var(--fs-sm); }
 .mice-selected-events .mice-empty { padding: 10px 0 15px; font-size: var(--fs-base); }
 .mice-source-note { margin: 17px 0 0; }
 .mice-source-note strong { color: var(--color-down); font-weight: 600; }
