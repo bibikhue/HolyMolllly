@@ -153,8 +153,10 @@ function App() {
   const [activeMenu, setActiveMenu] = useState(null)
   const [dialog, setDialog] = useState(null)
   const [dataStatus, setDataStatus] = useState(null)
+  const [visitorDataStatus, setVisitorDataStatus] = useState(null)
   const [page, setPage] = useState(getPage)
   const [pageHash, setPageHash] = useState(() => window.location.hash)
+  const visibleDataStatus = page === 'visitors' ? visitorDataStatus : dataStatus
   const menuButtons = useRef([])
   const navigation = useRef(null)
   const printTitle = useRef(null)
@@ -319,7 +321,7 @@ function App() {
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>본문 바로가기</a>
     <div className="print-header" hidden>
       <div className="print-header-top"><div className="print-brand"><img src="/brand/mapsosa-emblem-clear.png" alt="" width="28" height="28" /><strong>{SITE_NAME}</strong></div><strong ref={printTitle} /></div>
-      <p className="print-header-meta">방문객 자료 기준 {dataStatus?.asOf ? monthLabel(dataStatus.asOf) : '확인 중'} · {dataStatus ? dataStatus.isMock ? '예시 자료' : '실제 자료' : '자료 확인 중'} · 출력 <time ref={printTime} /> · <span ref={printUrl} className="print-url" /></p>
+      <p className="print-header-meta">방문객 자료 기준 {visibleDataStatus?.asOf ? monthLabel(visibleDataStatus.asOf) : '확인 중'} · {visibleDataStatus ? visibleDataStatus.isMock ? '예시 자료' : '실제 자료' : '자료 확인 중'} · 출력 <time ref={printTime} /> · <span ref={printUrl} className="print-url" /></p>
       <p className="print-context" ref={printSelections} />
     </div>
     <header className="site-header">
@@ -351,9 +353,9 @@ function App() {
       </div>
     </header>
     <main className="dashboard-main" id="main-content" tabIndex={-1} aria-label={page === 'notFound' ? '잘못된 주소 안내' : '대시보드'} onClick={() => setActiveMenu(null)}>
-      {page === 'notFound' ? <NotFound key={pageHash} requestedAddress={`${window.location.pathname}${window.location.search}${pageHash}`} onOpenSitemap={() => openDialog('사이트맵')} /> : page === 'events' ? <EventCalendarPage /> : page === 'reports' ? <AnalysisReport key={pageHash} initialFocus={reportFocus(pageHash)} /> : page === 'project' ? <ProjectIntro focus={projectFocus(pageHash)} navigationKey={pageHash} /> : page === 'visitors' ? <VisitorOverview onOpen={openDialog} focus={visitorFocus(pageHash)} navigationKey={pageHash} /> : page === 'countries' ? <CountryTourism focus={countryFocus(pageHash)} country={countryCode(pageHash)} navigationKey={pageHash} onOpen={openDialog} /> : page === 'outlook' ? <ForecastOutlook focus={outlookFocus(pageHash)} navigationKey={pageHash} /> : <DashboardHome onOpen={openDialog} />}
+      {page === 'notFound' ? <NotFound key={pageHash} requestedAddress={`${window.location.pathname}${window.location.search}${pageHash}`} onOpenSitemap={() => openDialog('사이트맵')} /> : page === 'events' ? <EventCalendarPage /> : page === 'reports' ? <AnalysisReport key={pageHash} initialFocus={reportFocus(pageHash)} /> : page === 'project' ? <ProjectIntro focus={projectFocus(pageHash)} navigationKey={pageHash} /> : page === 'visitors' ? <VisitorOverview focus={visitorFocus(pageHash)} navigationKey={pageHash} onDataStatus={setVisitorDataStatus} /> : page === 'countries' ? <CountryTourism focus={countryFocus(pageHash)} country={countryCode(pageHash)} navigationKey={pageHash} onOpen={openDialog} /> : page === 'outlook' ? <ForecastOutlook focus={outlookFocus(pageHash)} navigationKey={pageHash} /> : <DashboardHome onOpen={openDialog} />}
     </main>
-    <Footer onOpen={openDialog} dataStatus={dataStatus} />
+    <Footer onOpen={openDialog} dataStatus={visibleDataStatus} />
     <DataChatbot />
     {dialog && <div className="modal-backdrop" onClick={() => setDialog(null)}>
       <section className={`modal${dialog === '관계자 로그인' ? ' modal-small' : ''}`} role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}>

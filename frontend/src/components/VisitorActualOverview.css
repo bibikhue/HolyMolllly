@@ -1,0 +1,38 @@
+.actual-overview { background: var(--surface); color: var(--text-strong); }
+.actual-container { max-width: 1440px; margin: 0 auto; padding: 30px 32px 54px; }
+.actual-heading { margin: 25px 0 20px; }
+.actual-heading-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 9px; }
+.actual-heading h1 { margin: 0; font-size: var(--fs-2xl); }
+.actual-heading-line span { color: var(--text-muted); font-size: var(--fs-sm); }
+.actual-heading p, .actual-section > p { margin: 0; color: var(--text-muted); font-size: var(--fs-md); line-height: 1.6; }
+.actual-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-bottom: 22px; padding: 16px; border: 1px solid #dce5ec; border-radius: var(--radius-md); background: #fff; }
+.actual-filters label, .actual-country-filter { display: grid; gap: 6px; color: var(--text-muted); font-size: var(--fs-sm); font-weight: 700; }
+.actual-filters select, .actual-country-filter select { min-width: 150px; height: 39px; padding: 0 10px; border: 1px solid #cbd9e3; border-radius: var(--radius-sm); background: #fff; color: var(--text-strong); font-size: var(--fs-md); }
+.actual-filters button { min-height: 39px; padding: 0 12px; border: 1px solid #cbd9e3; border-radius: var(--radius-sm); font-size: var(--fs-md); }
+.actual-section { margin: 18px 0; padding: 22px; border: 1px solid #dce5ec; border-radius: var(--radius-md); background: #fff; }
+.actual-section h2 { margin: 0 0 13px; font-size: var(--fs-xl); }
+.actual-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.actual-kpi { min-width: 0; min-height: 155px; padding: 15px; border: 1px solid #dce5ec; border-radius: var(--radius-sm); background: #fff; }
+.actual-kpi > span { display: block; color: var(--text-muted); font-size: var(--fs-sm); font-weight: 700; }
+.actual-kpi strong { display: block; margin: 11px 0 7px; font-size: clamp(22px, 2.3vw, 29px); line-height: 1; font-variant-numeric: tabular-nums; }
+.actual-kpi strong small { margin-left: 3px; font-size: var(--fs-md); }
+.actual-kpi p { margin: 0; color: var(--text-muted); font-size: var(--fs-xs); line-height: 1.45; }
+.actual-kpi .actual-kpi-support { margin-bottom: 5px; color: var(--text-strong); font-weight: 700; }
+.actual-up { color: #0068a9; font-weight: 700; }.actual-down { color: #a35b1a; font-weight: 700; }
+.actual-note { margin-top: 12px !important; color: var(--text-muted); font-size: var(--fs-xs) !important; }
+.actual-trend-chart { display: block; width: 100%; max-height: 320px; margin: 16px 0; }
+.actual-trend-chart text { fill: var(--text-muted); font-size: var(--fs-xs); }
+.actual-section > .actual-chart-source { font-size: var(--fs-xs); }
+.actual-table-wrap { max-width: 100%; overflow-x: auto; margin-top: 16px; }
+.actual-table-wrap table { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
+.actual-table-wrap caption { padding: 8px 0; color: var(--text-muted); text-align: left; font-size: var(--fs-sm); }
+.actual-table-wrap th, .actual-table-wrap td { padding: 10px 12px; border-bottom: 1px solid #e5edf2; text-align: right; white-space: nowrap; }
+.actual-table-wrap th:first-child { text-align: left; }.actual-table-wrap thead { background: var(--surface-alt); }
+.actual-bars { display: grid; gap: 10px; margin-top: 18px; }
+.actual-bar { display: grid; grid-template-columns: 130px minmax(0, 1fr) 140px; align-items: center; gap: 12px; font-size: var(--fs-md); }
+.actual-bar > div { height: 14px; border-radius: 3px; background: var(--surface); overflow: hidden; }
+.actual-bar i { display: block; height: 100%; background: #1687ca; }
+.actual-bar strong { text-align: right; font-variant-numeric: tabular-nums; }
+.actual-country-filter { margin-top: 12px; width: fit-content; }
+@media (max-width: 800px) { .actual-container { padding: 22px 18px 40px; } .actual-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .actual-bar { grid-template-columns: 90px minmax(0, 1fr) 100px; gap: 6px; font-size: var(--fs-sm); } }
+@media (max-width: 480px) { .actual-container { padding: 18px 14px 32px; } .actual-section { padding: 16px; } .actual-kpi { padding: 11px; min-height: 135px; } .actual-kpi strong { font-size: 23px; overflow-wrap: anywhere; } .actual-filters label { flex: 1 1 130px; } .actual-filters select { min-width: 0; width: 100%; } .actual-bar { grid-template-columns: 75px minmax(0, 1fr); } .actual-bar strong { grid-column: 2; font-size: var(--fs-xs); } }

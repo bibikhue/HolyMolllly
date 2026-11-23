@@ -8,6 +8,7 @@ import Sparkline from './Sparkline'
 import { getRecentMonths } from './sparklineUtils.js'
 import './VisitorOverview.css'
 import './TourismOverview.css'
+import VisitorActualOverview from './VisitorActualOverview'
 
 function OverviewIcon({ name }) {
   const paths = {
@@ -63,7 +64,7 @@ export function MonthlyChart({ rows, compare, isExample = true, color = '#1687ca
 
 const sections = [['kpi', '핵심 지표 요약'], ['trend', '월별 방문 추이'], ['region', '지역별 현황'], ['industry', '업종별 소비']]
 
-export default function VisitorOverview({ onOpen, focus = 'kpi', navigationKey }) {
+export function VisitorOverviewPreview({ onOpen, focus = 'kpi', navigationKey }) {
   const [load, setLoad] = useState(null)
   const [retry, setRetry] = useState(0)
   const [period, setPeriod] = useState({ start: '', end: '' })
@@ -161,3 +162,5 @@ export default function VisitorOverview({ onOpen, focus = 'kpi', navigationKey }
     </div>
   </div>
 }
+
+export default VisitorActualOverview
