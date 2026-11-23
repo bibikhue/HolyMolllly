@@ -3,6 +3,7 @@ import { MetricCard, MonthlyChart } from './VisitorOverview'
 import { getOverview, selectableMonths, monthLabel, numberLabel } from '../data/visitorDemo'
 import { tourismOverviewMock } from '../data/tourismOverviewMock.js'
 import { billionWonLabel, billionWonNumber } from '../data/displayFormat.js'
+import ForeignTouristPage from '../features/tour-course/ForeignTouristPage.jsx'
 import './DashboardHome.css'
 
 const flagColors = {
@@ -26,46 +27,9 @@ function CountryFlag({ code }) {
   </svg>
 }
 
-function TouristTools({ onBack }) {
-  const [activeTab, setActiveTab] = useState('course')
-  const tabs = [
-    { id: 'course', label: '추천 코스 생성' },
-    { id: 'map', label: '관광 지도' },
-  ]
-  const handleTabKeyDown = (event, index) => {
-    const nextIndex = event.key === 'ArrowRight' ? (index + 1) % tabs.length
-      : event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length
-        : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1
-    if (nextIndex < 0) return
-    event.preventDefault()
-    setActiveTab(tabs[nextIndex].id)
-    event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[nextIndex]?.focus()
-  }
-
-  return <div className="visitor-overview dashboard-home tourist-tools-page">
-    <div className="overview-container">
-      <button className="tourist-tools-back" type="button" onClick={onBack}>← 메인 화면</button>
-      <div className="tourist-tools-heading"><p className="tourist-tools-eyebrow">외국인 관광객</p><h1>부산 여행 도우미</h1><p>부산 여행 코스를 만들고 관광 정보를 지도에서 확인할 수 있는 기능을 소개합니다.</p></div>
-      <div className="tourist-tools-tabs" role="tablist" aria-label="외국인 관광객 기능">
-        {tabs.map((tab, index) => <button key={tab.id} id={`tourist-tab-${tab.id}`} type="button" role="tab" aria-selected={activeTab === tab.id} aria-controls={`tourist-panel-${tab.id}`} tabIndex={activeTab === tab.id ? 0 : -1} onClick={() => setActiveTab(tab.id)} onKeyDown={event => handleTabKeyDown(event, index)}>{tab.label}</button>)}
-      </div>
-      <section className="tourist-tools-panel" id="tourist-panel-course" role="tabpanel" aria-labelledby="tourist-tab-course" tabIndex={0} hidden={activeTab !== 'course'}>
-        <span className="tourist-tools-icon" aria-hidden="true">✦</span><h2>내 여행에 맞는 추천 코스</h2><p>여행 기간과 관심 주제, 이동 방식에 맞춰 부산의 관광지를 잇는 일정을 구성할 수 있습니다.</p>
-        <ul><li>해변·문화·미식 등 관심 주제로 코스 구성</li><li>여행 일수와 하루 일정에 맞춘 방문 순서 제안</li><li>장소별 이동 정보와 간단한 여행 안내 제공</li></ul>
-        <p className="tourist-tools-note">추천 코스 생성 기능을 준비하고 있습니다.</p>
-      </section>
-      <section className="tourist-tools-panel" id="tourist-panel-map" role="tabpanel" aria-labelledby="tourist-tab-map" tabIndex={0} hidden={activeTab !== 'map'}>
-        <span className="tourist-tools-icon" aria-hidden="true">⌖</span><h2>부산 관광 지도</h2><p>관광지와 여행에 필요한 편의시설을 지도에서 찾아볼 수 있는 화면을 제공할 수 있습니다.</p>
-        <ul><li>관광 명소와 구·군별 주요 장소 확인</li><li>관광 안내소·편의시설 등 주변 정보 탐색</li><li>선택한 장소의 위치와 여행 정보 확인</li></ul>
-        <p className="tourist-tools-note">관광 지도 기능을 준비하고 있습니다.</p>
-      </section>
-    </div>
-  </div>
-}
-
 export default function DashboardHome() {
   const [activeView, setActiveView] = useState('home')
-  if (activeView === 'tourist') return <TouristTools onBack={() => setActiveView('home')} />
+  if (activeView === 'tourist') return <ForeignTouristPage onBack={() => setActiveView('home')} />
   const end = selectableMonths.at(-1)
   const start = `${end.slice(0, 4)}-01`
   const annual = getOverview(start, end)

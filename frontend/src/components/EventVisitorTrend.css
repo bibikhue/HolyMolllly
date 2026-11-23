@@ -1,0 +1,28 @@
+.event-visitor-trend { min-width: 0; padding: 23px; }
+.event-visitor-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.event-visitor-eyebrow { margin: 0 0 5px; color: var(--accent); font-size: var(--fs-xs); font-weight: 600; }
+.event-visitor-heading h2 { margin: 0; color: var(--text-strong); font-size: var(--fs-lg); }
+.event-visitor-demo-badge { flex: 0 0 auto; padding: 4px 7px; border-radius: var(--radius-pill); background: #efeccf; color: var(--color-demo); font-size: var(--fs-xs); font-weight: 600; }
+.event-visitor-country-label { display: block; margin: 20px 0 6px; color: var(--text-muted); font-size: var(--fs-sm); }
+.event-visitor-country-select { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #dce6ee; border-radius: var(--radius-sm); background: #fff; color: var(--text); font: inherit; }
+.event-visitor-median { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 16px; padding: 12px; border-radius: var(--radius-sm); background: var(--surface-alt); }
+.event-visitor-median span { color: var(--text-muted); font-size: var(--fs-xs); }
+.event-visitor-median strong { color: var(--country-color); font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
+.event-visitor-months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 13px 0 0; padding: 0; list-style: none; }
+.event-visitor-month { display: grid; justify-items: start; gap: 4px; min-width: 0; min-height: 78px; padding: 9px; border: 1px solid #e3eaf0; border-radius: var(--radius-sm); background: #fff; }
+.event-visitor-month-name { color: var(--text-muted); font-size: var(--fs-xs); }
+.event-visitor-month strong { font-size: var(--fs-xs); }
+.event-visitor-count { max-width: 100%; color: var(--text); font-size: 10px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.event-visitor-up { border-color: #c5e4d3; background: #f0faf4; }
+.event-visitor-up strong { color: #247444; }
+.event-visitor-usual { background: #f6f8fa; }
+.event-visitor-usual strong { color: #596b7c; }
+.event-visitor-down { border-color: #f0d5c8; background: #fff6f1; }
+.event-visitor-down strong { color: #a34b2c; }
+.event-visitor-note { margin: 13px 0 0; color: var(--text-muted); font-size: var(--fs-xs); line-height: 1.7; }
+@media (max-width: 480px) {
+  .event-visitor-trend { padding: 18px; }
+  .event-visitor-months { gap: 6px; }
+  .event-visitor-month { min-height: 72px; padding: 7px; }
+  .event-visitor-count { font-size: 9px; }
+}
