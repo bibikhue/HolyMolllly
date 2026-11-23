@@ -28,7 +28,7 @@ export default function MiceCalendar() {
   const [month, setMonth] = useState(thisMonth)
   const [selected, setSelected] = useState(today)
   const [category, setCategory] = useState('전체')
-  const [users, setUsers] = useState(() => [...new Set([...defaultUsers, ...readStored(rosterStorageKey, [])])])
+  const [users] = useState(() => [...new Set([...defaultUsers, ...readStored(rosterStorageKey, [])])])
   const [assignments, setAssignments] = useState(() => readStored(assignmentStorageKey, {}))
   const [activeUsers, setActiveUsers] = useState([])
   const [result, setResult] = useState(null)
