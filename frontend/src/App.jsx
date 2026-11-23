@@ -13,6 +13,7 @@ import { loadTourismOverviewData } from './data/tourismOverviewData'
 import { monthLabel } from './data/visitorDemo'
 import { formatBuildInfo } from './utils/buildInfo'
 import { resolvePage } from './utils/route'
+import { projectSections } from './data/projectInfo'
 
 const buildInfoLabel = formatBuildInfo(__BUILD_TIME__, __GIT_HASH__)
 
@@ -27,7 +28,7 @@ const menus = [
   { title: '지도로 보기', page: null, soon: true, lead: `가 볼 곳까지 찾아 주는 ${SITE_NAME}`, items: ['편의시설 지도', '추천 코스'] },
 ]
 // 프로젝트 소개는 주 메뉴에서 숨기고(11/11 결정) 사이트맵과 푸터에서만 연결함.
-const sitemapGroups = [...menus.map(menu => [menu.title, menu.items]), ['프로젝트 소개', ['프로젝트 소개', '분석 범위 안내', '데이터 출처·기준']]]
+const sitemapGroups = [...menus.map(menu => [menu.title, menu.items]), ['프로젝트 소개', projectSections.map(section => section.label)]]
 const itemLabels = { '부산 행사 캘린더': '행사 일정' }
 const pendingMenus = new Set(['What-if 시뮬레이터', '편의시설 지도', '추천 코스'])
 const visitorRoutes = { '핵심 지표 요약': 'kpi', '월별 방문 추이': 'trend', '지역별 현황': 'region', '업종별 소비': 'industry' }
@@ -37,7 +38,7 @@ const countryFocus = hash => { const focus = new URLSearchParams(hash.split('?')
 const countryCode = hash => new URLSearchParams(hash.split('?')[1] || '').get('country')
 const outlookRoutes = { '부산 방문객 전망': 'busan', '국가별 방문객 전망': 'countries', '예측 정확도': 'accuracy' }
 const outlookFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(outlookRoutes).includes(focus) ? focus : 'busan' }
-const projectRoutes = { '프로젝트 소개': 'about', '분석 범위 안내': 'scope', '데이터 출처·기준': 'data' }
+const projectRoutes = Object.fromEntries(projectSections.map(section => [section.label, section.id]))
 const projectFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(projectRoutes).includes(focus) ? focus : 'about' }
 const reportRoutes = { '자동 리포트': 'overview', '관광수요 주요 변화': 'overview', '국가별 수요 특징': 'markets', '국가별 분석 결과': 'markets', '정책·마케팅 시사점': 'implications' }
 const reportFocus = (hash) => new URLSearchParams(hash.split('?')[1] || '').get('focus') || 'overview'
@@ -123,6 +124,7 @@ function Footer({ onOpen, dataStatus }) {
           <span className="footer-brand-copy"><strong>{SITE_NAME}</strong><span>외국인 관광 데이터로 읽는 부산</span></span>
         </a>
         <nav className="footer-links" aria-label="푸터 메뉴">
+          <a href={appHashHref('#/project?focus=faq')} onClick={event => { event.preventDefault(); onOpen('FAQ') }}>FAQ</a>
           <a href={appHashHref('#/project?focus=about')} onClick={event => { event.preventDefault(); onOpen('프로젝트 소개') }}>프로젝트 소개</a>
           <a href={appHashHref('#/project?focus=scope')} onClick={event => { event.preventDefault(); onOpen('분석 범위 안내') }}>분석 범위 안내</a>
           <a className="footer-data-link" href={appHashHref('#/project?focus=data')} onClick={event => { event.preventDefault(); onOpen('데이터 출처·기준') }}>데이터 출처·기준</a>
@@ -169,8 +171,9 @@ function App() {
   }, [])
   useEffect(() => {
     const pageTitles = { notFound: '화면을 찾을 수 없음', events: '부산 행사 캘린더', reports: '자동 분석 리포트', project: '프로젝트 소개', visitors: '부산 관광 한눈에', countries: '국가별 관광', outlook: '관광수요 전망' }
-    document.title = pageTitles[page] ? `${pageTitles[page]} | ${SITE_NAME}` : `${SITE_NAME} | 외국인 관광 대시보드`
-  }, [page])
+    const title = page === 'project' && projectFocus(pageHash) === 'faq' ? '자주 묻는 질문 FAQ' : pageTitles[page]
+    document.title = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | 외국인 관광 대시보드`
+  }, [page, pageHash])
   useEffect(() => {
     if (page !== 'notFound') return undefined
     const meta = document.createElement('meta')
