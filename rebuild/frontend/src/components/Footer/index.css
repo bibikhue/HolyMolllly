@@ -19,6 +19,11 @@ footer .logo-text span {
   padding: 16px 96px 16px 40px;
 }
 
+.footer-top {
+  display: flex;
+  align-items: center;
+}
+
 .footer-links > ul {
   display: flex;
   align-items: center;

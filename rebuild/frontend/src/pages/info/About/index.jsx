@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Hero from "./Hero";
 import Need from "./Need";
 import Features from "./Features";
@@ -6,23 +6,25 @@ import Team from "./Team";
 import Members from "./Members";
 import "./About.css";
 
-const SECTION_COUNT = 5;
-const SCROLL_DELAY = 850;
-
 function About() {
   const pageRef = useRef(null);
   const moveRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useLayoutEffect(() => {
+    pageRef.current.closest("main").scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   useEffect(() => {
     const sections = Array.from(pageRef.current.children);
     const main = pageRef.current.closest("main");
-    const lastIndex = sections.length - 1;
+    const listeners = new AbortController();
     let currentIndex = 0;
     let touchStartY = 0;
-    let unlockTimer;
+    let lockedUntil = 0;
 
-    const getViewport = () => {
+    const viewport = () => {
       const scrollRoot = main.scrollHeight > main.clientHeight + 1 ? main : window;
       return {
         scrollRoot,
@@ -31,82 +33,58 @@ function About() {
       };
     };
 
-    const updateCurrentSection = () => {
-      if (unlockTimer) return;
-      const { top, height } = getViewport();
-      const visibleIndex = sections.reduce((index, section, nextIndex) =>
-        section.getBoundingClientRect().top - top <= height * 0.35
-          ? nextIndex
-          : index, 0);
-      currentIndex = visibleIndex;
-      setActiveIndex(visibleIndex);
+    const syncIndex = () => {
+      if (performance.now() < lockedUntil) return;
+      const { top, height } = viewport();
+      currentIndex = sections.findLastIndex((section) =>
+        section.getBoundingClientRect().top - top <= height * 0.35);
+      currentIndex = Math.max(0, currentIndex);
+      setActiveIndex(currentIndex);
     };
 
     const move = (direction, distance) => {
-      if (unlockTimer) return true;
-
-      const { scrollRoot, top, height } = getViewport();
+      if (performance.now() < lockedUntil) return true;
+      const { scrollRoot, top, height } = viewport();
       const bounds = sections[currentIndex].getBoundingClientRect();
-      if (direction > 0 && bounds.bottom > top + height + 8) {
-        scrollRoot.scrollBy({ top: Math.min(distance, bounds.bottom - top - height) });
-        return true;
-      }
-      if (direction < 0 && bounds.top < top - 8) {
-        scrollRoot.scrollBy({ top: -Math.min(distance, top - bounds.top) });
+      const remaining = direction > 0 ? bounds.bottom - top - height : top - bounds.top;
+
+      if (remaining > 8) {
+        scrollRoot.scrollBy({ top: direction * Math.min(distance, remaining) });
         return true;
       }
 
-      const nextIndex = Math.max(0, Math.min(lastIndex, currentIndex + direction));
-      if (nextIndex === currentIndex) return false;
-
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= sections.length) return false;
       currentIndex = nextIndex;
       setActiveIndex(nextIndex);
       sections[nextIndex].scrollIntoView({ behavior: "smooth", block: "start" });
-      unlockTimer = window.setTimeout(() => {
-        unlockTimer = undefined;
-        updateCurrentSection();
-      }, SCROLL_DELAY);
+      lockedUntil = performance.now() + 850;
       return true;
     };
     moveRef.current = move;
 
-    const onWheel = (event) => {
+    window.addEventListener("scroll", syncIndex, { signal: listeners.signal });
+    main.addEventListener("scroll", syncIndex, { signal: listeners.signal });
+    window.addEventListener("wheel", (event) => {
       if (event.ctrlKey || Math.abs(event.deltaY) < 8) return;
-      if (move(Math.sign(event.deltaY), Math.max(80, Math.abs(event.deltaY)))) {
-        event.preventDefault();
-      }
-    };
-    const onTouchStart = (event) => {
+      if (move(Math.sign(event.deltaY), Math.max(80, Math.abs(event.deltaY)))) event.preventDefault();
+    }, { passive: false, signal: listeners.signal });
+    window.addEventListener("touchstart", (event) => {
       touchStartY = event.touches[0].clientY;
-    };
-    const onTouchMove = (event) => {
+    }, { passive: true, signal: listeners.signal });
+    window.addEventListener("touchmove", (event) => {
       const direction = Math.sign(touchStartY - event.touches[0].clientY);
-      if ((direction > 0 && currentIndex < lastIndex) ||
-          (direction < 0 && currentIndex > 0)) {
-        event.preventDefault();
-      }
-    };
-    const onTouchEnd = (event) => {
+      if ((direction > 0 && currentIndex < sections.length - 1) ||
+          (direction < 0 && currentIndex > 0)) event.preventDefault();
+    }, { passive: false, signal: listeners.signal });
+    window.addEventListener("touchend", (event) => {
       const distance = touchStartY - event.changedTouches[0].clientY;
       if (Math.abs(distance) > 50) move(Math.sign(distance), Math.abs(distance));
-    };
-
-    window.addEventListener("scroll", updateCurrentSection);
-    main.addEventListener("scroll", updateCurrentSection);
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd);
+    }, { signal: listeners.signal });
 
     return () => {
-      window.clearTimeout(unlockTimer);
+      listeners.abort();
       moveRef.current = null;
-      window.removeEventListener("scroll", updateCurrentSection);
-      main.removeEventListener("scroll", updateCurrentSection);
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
     };
   }, []);
 
@@ -119,13 +97,8 @@ function About() {
         <Team />
         <Members />
       </article>
-      {activeIndex < SECTION_COUNT - 1 && (
-        <button
-          className="about-page__scroll-cue"
-          type="button"
-          onClick={() => moveRef.current?.(1, window.innerHeight)}
-          aria-label="다음 섹션으로 이동"
-        >
+      {activeIndex < 4 && (
+        <button className="about-page__scroll-cue" type="button" onClick={() => moveRef.current?.(1, window.innerHeight)} aria-label="다음 섹션으로 이동">
           <span>SCROLL DOWN</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 8 6 6 6-6" />

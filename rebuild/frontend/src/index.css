@@ -23,12 +23,6 @@ body {
   color: var(--text-primary);
 }
 
-div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 strong,
 span {
   text-align: left;
@@ -45,6 +39,7 @@ strong {
 }
 
 #root {
+  display: flex;
   font-family:
     Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic",
     sans-serif;

@@ -16,9 +16,7 @@ function Team() {
           <span>놀라운 통찰</span>
         </div>
       </div>
-      <div className="about-page__team-logo">
-        <img src="/logo-transparent.png" alt="팀 맙소사 로고" />
-      </div>
+      <img src="/logo-transparent.png" alt="팀 맙소사 로고" />
     </section>
   );
 }
