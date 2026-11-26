@@ -1,0 +1,36 @@
+.logo,
+.logo-text {
+  min-width: 0;
+}
+
+.logo {
+  display: block;
+}
+
+.logo > a {
+  display: flex;
+  gap: 10px;
+}
+.logo img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.logo-text {
+  flex-direction: column;
+  align-items: stretch;
+  white-space: nowrap;
+}
+
+.logo-text strong {
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.logo-text span {
+  font-size: 12px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

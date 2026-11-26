@@ -1,0 +1,88 @@
+:root {
+  --text-primary: rgb(79, 101, 119);
+  --text-strong: rgb(18, 50, 74);
+  --text-hover: rgb(0, 104, 169);
+  --text-muted: rgb(183, 201, 214);
+  --white: #fff;
+  --bg-primary: var(--text-strong);
+  --bg-secondary: var(--text-primary);
+  --bg-light: rgb(237, 247, 251);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+strong,
+span {
+  text-align: left;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong {
+  color: var(--text-strong);
+}
+
+#root {
+  font-family:
+    Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic",
+    sans-serif;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+ul {
+  list-style: none;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  caret-color: transparent;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
