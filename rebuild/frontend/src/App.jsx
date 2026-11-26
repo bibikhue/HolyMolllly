@@ -4,6 +4,10 @@ import { Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import Home from "./pages/Home";
+import FAQ from "./pages/info/FAQ";
+import About from "./pages/info/About";
+import AnalysisScope from "./pages/info/AnalysisScope";
+import DataSources from "./pages/info/DataSources";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
@@ -25,7 +29,7 @@ import { PATHS } from "./constants/paths";
 import { getCurrentUser } from "./apis/auth";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isCheckingLogin, setIsCheckingLogin] = useState(!isLoggedIn);
 
@@ -60,6 +64,10 @@ function App() {
       <main>
         <Routes>
           <Route path={PATHS.HOME} element={<Home />} />
+          <Route path={PATHS.FAQ} element={<FAQ />} />
+          <Route path={PATHS.ABOUT} element={<About />} />
+          <Route path={PATHS.ANALYSIS_SCOPE} element={<AnalysisScope />} />
+          <Route path={PATHS.DATA_SOURCES} element={<DataSources />} />
           <Route
             element={
               <ProtectedRoute
