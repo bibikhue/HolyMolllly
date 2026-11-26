@@ -1,8 +1,8 @@
-import { useState } from 'react'
 import { MetricCard, MonthlyChart } from './VisitorOverview'
 import { getOverview, selectableMonths, monthLabel, numberLabel } from '../data/visitorDemo'
 import { tourismOverviewMock } from '../data/tourismOverviewMock.js'
 import { billionWonLabel, billionWonNumber } from '../data/displayFormat.js'
+import { buildM1Rows } from '../data/forecastM1.js'
 import ForeignTouristPage from '../features/tour-course/ForeignTouristPage.jsx'
 import './DashboardHome.css'
 
@@ -27,14 +27,16 @@ function CountryFlag({ code }) {
   </svg>
 }
 
-export default function DashboardHome() {
-  const [activeView, setActiveView] = useState('home')
-  if (activeView === 'tourist') return <ForeignTouristPage onBack={() => setActiveView('home')} />
+export default function DashboardHome({ touristTab, onTouristTabChange }) {
+  if (touristTab) return <ForeignTouristPage initialTab={touristTab} onBack={() => onTouristTabChange(null)} />
   const end = selectableMonths.at(-1)
   const start = `${end.slice(0, 4)}-01`
   const annual = getOverview(start, end)
   const annualSpending = tourismOverviewMock.monthly.filter(row => row.month >= start && row.month <= end).reduce((sum, row) => sum + row.spending, 0)
   const trendRows = getOverview(selectableMonths[Math.max(0, selectableMonths.length - 12)], end).rows
+  const trendForecastRows = buildM1Rows().forecasts
+    .filter(row => row.country_code === 'ALL' && row.horizon <= 3)
+    .sort((a, b) => a.horizon - b.horizon)
   const current = getOverview(end, end)
   const topMarkets = current.countries.filter(country => country.code !== 'ETC').slice(0, 3)
   const latestSpend = tourismOverviewMock.monthly.find(row => row.month === end)
@@ -45,11 +47,6 @@ export default function DashboardHome() {
 
   return <div className="visitor-overview dashboard-home">
     <div className="overview-container">
-      <nav className="dashboard-audience-actions" aria-label="대상별 대시보드">
-        <button type="button">부산시 관계자</button>
-        <button type="button">소상공인</button>
-        <button type="button" onClick={() => setActiveView('tourist')}>외국인 관광객</button>
-      </nav>
       <div className="dashboard-home-grid">
         <aside className="dashboard-home-sidebar" aria-label="주요 관광 지표">
           <MetricCard icon="visitors" label="최근 1년 누적 방문객" value={(annual.total / 10000).toFixed(1)} unit="만 명" detail={`${monthLabel(start)} — ${monthLabel(end)} · 예시 자료`} accent />
@@ -76,7 +73,7 @@ export default function DashboardHome() {
         <div className="dashboard-home-main">
           <section className="overview-panel dashboard-home-trend" aria-labelledby="home-trend-title">
             <div className="panel-heading"><div><h2 id="home-trend-title">최근 1년간 외국인 관광객 방문</h2></div></div>
-            <MonthlyChart rows={trendRows} compare={false} compact />
+            <MonthlyChart rows={trendRows} compare={false} wide forecastRows={trendForecastRows} />
           </section>
           <section className="overview-panel dashboard-spending-panel" aria-labelledby="home-district-title">
             <div className="panel-heading"><div><h2 id="home-district-title">구·군별 소비액</h2></div><span className="dashboard-chart-unit">단위: 억 원</span></div>

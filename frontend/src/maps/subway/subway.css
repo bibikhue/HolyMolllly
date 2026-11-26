@@ -1,0 +1,66 @@
+.subway-map {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: clamp(360px, 43vw, 560px);
+  overflow: hidden;
+  border: 1px solid #dce7e9;
+  border-radius: var(--radius-sm, 8px);
+  isolation: isolate;
+}
+
+.subway-route-filter {
+  flex: none;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 6px 10px;
+  border: 0;
+  border-bottom: 1px solid #d6dbe2;
+  background: rgba(255, 255, 255, .96);
+}
+
+.subway-route-filter legend {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subway-route-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.subway-route-filter label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.subway-route-filter input {
+  accent-color: var(--accent, #326b9a);
+}
+
+.subway-route-swatch {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.subway-map-canvas {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .subway-map {
+    height: clamp(350px, 75vw, 500px);
+  }
+}

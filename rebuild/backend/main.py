@@ -1,8 +1,11 @@
-import sys, uvicorn
-from fastapi import FastAPI
+import uvicorn
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import file
+from services.health import check_db
+
 
 app = FastAPI()
 
@@ -14,14 +17,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(file.router, prefix="/file")
+api_router = APIRouter(prefix="/api")
+api_router.include_router(file.router, prefix="/file")
+api_router.add_api_route("/health", check_db, methods=["GET"])
+app.include_router(api_router)
+
 
 if __name__ == "__main__":
-    try:
-        uvicorn.run(
-            "main:app", 
-            host="0.0.0.0",
-            port=5000,
-            reload=True)
-    except Exception as e:
-        sys.exit(1)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

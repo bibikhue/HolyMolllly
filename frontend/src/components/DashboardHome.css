@@ -1,8 +1,5 @@
 .dashboard-reference { display: flex; flex-direction: column; gap: 6px; color: var(--text-muted); font-size: var(--fs-xs); flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .dashboard-reference strong { color: var(--text-strong); font-size: var(--fs-md); font-weight: 600; }
-.dashboard-audience-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 12px 0 20px; }
-.dashboard-audience-actions button { min-height: 48px; padding: 11px 16px; border: 1px solid #d6e1eb; border-radius: var(--radius-sm); background: #fff; color: var(--text-strong); font-size: var(--fs-base); font-weight: 600; text-align: center; transition: background-color .15s, border-color .15s, color .15s; }
-.dashboard-audience-actions button:hover { border-color: var(--accent); background: var(--tint); color: var(--accent); }
 .dashboard-home-grid { display: grid; grid-template-columns: minmax(290px, 1fr) minmax(0, 2.15fr); gap: 20px; align-items: start; }
 .dashboard-home-sidebar, .dashboard-home-main { display: grid; gap: 16px; min-width: 0; }
 .dashboard-home-main { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; align-items: stretch; }
@@ -30,7 +27,7 @@
 .dashboard-spending-track > span { display: block; height: 100%; border-radius: inherit; background: #5b78c5; }
 .dashboard-spending-bars strong { min-width: 49px; color: var(--text-strong); font-size: var(--fs-sm); text-align: right; font-variant-numeric: tabular-nums; }
 .dashboard-spending-footnote { margin: 14px 0 0; color: var(--text-muted); font-size: var(--fs-xs); }
-.dashboard-home-trend .monthly-chart { width: 100%; height: auto; min-height: 0; max-height: 190px; }
+.dashboard-home-trend .monthly-chart { width: 100%; height: auto; min-height: 0; max-height: none; }
 .dashboard-home-trend .chart-readout { margin-top: 10px; }
 .dashboard-home-trend .chart-legend { margin-top: 10px; }
 .dashboard-home-trend .chart-unit { font-size: 0; }
@@ -70,6 +67,6 @@
 .dashboard-event-empty { margin: 30px 0; }
 @media (max-width: 900px) { .dashboard-home-grid { grid-template-columns: minmax(260px, .9fr) minmax(0, 1.3fr); gap: 14px; } .dashboard-home-main { grid-template-columns: 1fr; } .dashboard-country-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .dashboard-home-grid { grid-template-columns: 1fr; } .dashboard-home-main { grid-template-columns: 1fr; } .dashboard-analysis-grid { grid-template-columns: 1fr; gap: 10px; } .dashboard-analysis-card { padding: 19px; } .dashboard-section-heading { flex-wrap: wrap; gap: 7px; } .dashboard-home-sidebar { grid-template-columns: 1fr; } .dashboard-home-trend .monthly-chart { min-height: 0; } }
-@media (max-width: 480px) { .dashboard-audience-actions { grid-template-columns: 1fr; gap: 8px; } .dashboard-audience-actions button { min-height: 44px; } .dashboard-reference { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 8px; text-align: left; } .dashboard-reference strong { font-size: var(--fs-md); } .dashboard-detail-link { font-size: var(--fs-md); } .dashboard-country-row li { padding-inline: 2px; } .dashboard-country-visitors { font-size: var(--fs-xs); } .dashboard-spending-bars li { grid-template-columns: 22px minmax(68px, .9fr) minmax(60px, 1.4fr) auto; gap: 7px; } .dashboard-spending-bars strong { min-width: 43px; font-size: var(--fs-xs); } }
+@media (max-width: 480px) { .dashboard-reference { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 8px; text-align: left; } .dashboard-reference strong { font-size: var(--fs-md); } .dashboard-detail-link { font-size: var(--fs-md); } .dashboard-country-row li { padding-inline: 2px; } .dashboard-country-visitors { font-size: var(--fs-xs); } .dashboard-spending-bars li { grid-template-columns: 22px minmax(68px, .9fr) minmax(60px, 1.4fr) auto; gap: 7px; } .dashboard-spending-bars strong { min-width: 43px; font-size: var(--fs-xs); } }
 @media (max-width: 480px) { .dashboard-chart-unit { align-self: flex-start; } }
 @media (max-width: 720px) { .dashboard-section-heading h2 { font-size: var(--fs-section-mobile); } }

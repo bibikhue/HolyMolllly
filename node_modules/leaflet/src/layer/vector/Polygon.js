@@ -1,0 +1,181 @@
+import {Polyline} from './Polyline.js';
+import * as LineUtil from '../../geometry/LineUtil.js';
+import {Point} from '../../geometry/Point.js';
+import {Bounds} from '../../geometry/Bounds.js';
+import * as PolyUtil from '../../geometry/PolyUtil.js';
+import {latLngsToCoords, getFeature} from '../GeoJSONUtil.js';
+
+/** @import {Feature, MultiPolygon, Polygon as GeoJSONPolygon} from 'geojson' */
+/** @import {LatLng} from '../../geo/LatLng.js' */
+/** @import {Defaults, InteractiveLayerEventMap, LatLngExpression, NestedCoords, PolylineOptions} from '../../types.js' */
+
+/** @satisfies {Defaults<PolylineOptions>} */
+const defaultOptions = {
+	fill: true
+};
+
+/**
+ * A class for drawing polygon overlays on a map. Extends `Polyline`.
+ *
+ * Note that points you pass when creating a polygon shouldn't have an additional
+ * last point equal to the first one — it's better to filter out such points.
+ * @constructorDescription Instantiates a polygon given an array of geographical points (or arrays of rings, as
+ * shown below) and optionally an options object.
+ * @example
+ * ```js
+ * // create a red polygon from an array of LatLng points
+ * const latlngs = [[37, -109.05],[41, -109.03],[41, -102.05],[37, -102.04]];
+ *
+ * const polygon = new Polygon(latlngs, {color: 'red'}).addTo(map);
+ *
+ * // zoom the map to the polygon
+ * map.fitBounds(polygon.getBounds());
+ * ```
+ *
+ * You can also pass an array of arrays of latlngs, with the first array representing the outer shape and the other arrays representing holes in the outer shape:
+ *
+ * ```js
+ * const latlngs = [
+ *   [[37, -109.05],[41, -109.03],[41, -102.05],[37, -102.04]], // outer ring
+ *   [[37.29, -108.58],[40.71, -108.58],[40.71, -102.50],[37.29, -102.50]] // hole
+ * ];
+ * ```
+ *
+ * Additionally, you can pass a multi-dimensional array to represent a MultiPolygon shape.
+ *
+ * ```js
+ * const latlngs = [
+ *   [ // first polygon
+ *     [[37, -109.05],[41, -109.03],[41, -102.05],[37, -102.04]], // outer ring
+ *     [[37.29, -108.58],[40.71, -108.58],[40.71, -102.50],[37.29, -102.50]] // hole
+ *   ],
+ *   [ // second polygon
+ *     [[41, -111.03],[45, -111.04],[45, -104.05],[41, -104.05]]
+ *   ]
+ * ];
+ * ```
+ * @template {PolylineOptions} [O=PolylineOptions]
+ * @template {InteractiveLayerEventMap} [E=InteractiveLayerEventMap]
+ * @extends {Polyline<O, E, GeoJSONPolygon | MultiPolygon>}
+ */
+export class Polygon extends Polyline {
+
+	/** @type {Defaults<PolylineOptions>} */
+	static defaultOptions = defaultOptions;
+
+	isEmpty() {
+		return !this._latlngs.length || !this._latlngs[0].length;
+	}
+
+	/** Returns the center ([centroid](http://en.wikipedia.org/wiki/Centroid)) of the Polygon. */
+	getCenter() {
+		// throws error when not yet added to map as this center calculation requires projected coordinates
+		if (!this._map) {
+			throw new Error('Must add layer to map before using getCenter()');
+		}
+		return PolyUtil.polygonCenter(this._defaultShape(), this._map.options.crs);
+	}
+
+	/**
+	 * Coordinates values are rounded with [`formatNum`](#util-formatnum) function with given
+	 * `precision`. Returns a [`GeoJSON`](https://en.wikipedia.org/wiki/GeoJSON) representation
+	 * of the polygon (as a GeoJSON `Polygon` or `MultiPolygon` Feature).
+	 * @param {number | false} [precision]
+	 * @returns {Feature<GeoJSONPolygon | MultiPolygon>}
+	 */
+	toGeoJSON(precision) {
+		const holes = !LineUtil.isFlat(this._latlngs),
+		multi = holes && !LineUtil.isFlat(this._latlngs[0]),
+		coords = latLngsToCoords(this._latlngs, 0, true, precision);
+
+		return getFeature(this, /** @type {GeoJSONPolygon | MultiPolygon} */ ({
+			type: `${multi ? 'Multi' : ''}Polygon`,
+			coordinates: holes ? coords : [coords]
+		}));
+	}
+
+	/** @param {NestedCoords<LatLngExpression>} latlngs */
+	_convertLatLngs(latlngs) {
+		const result = super._convertLatLngs(latlngs),
+		len = result.length;
+
+		// remove last point if it equals first one
+		if (len >= 2 && LineUtil.isFlat(result) && result[0].equals(result[len - 1])) {
+			result.pop();
+		}
+		return result;
+	}
+
+	/** @param {NestedCoords<LatLngExpression>} latlngs */
+	_setLatLngs(latlngs) {
+		super._setLatLngs(latlngs);
+		if (LineUtil.isFlat(this._latlngs)) {
+			/** @type {LatLng[][] | LatLng[][][]} */
+			this._latlngs = [this._latlngs];
+		}
+	}
+
+	_defaultShape() {
+		return LineUtil.isFlat(this._latlngs[0]) ? this._latlngs[0] : this._latlngs[0][0];
+	}
+
+	_clipPoints() {
+		// polygons need a different clipping algorithm so we redefine that
+
+		let bounds = this._renderer._bounds;
+		const w = +this.options.weight || 0,
+		p = new Point(w, w);
+
+		// increase clip padding by stroke width to avoid stroke on clip edges
+		bounds = new Bounds(bounds.min.subtract(p), bounds.max.add(p));
+
+		this._parts = [];
+		if (!this._pxBounds?.intersects(bounds)) {
+			return;
+		}
+
+		if (this.options.noClip) {
+			this._parts = this._rings;
+			return;
+		}
+
+		for (const ring of this._rings) {
+			const clipped = PolyUtil.clipPolygon(ring, bounds);
+			if (clipped.length) {
+				this._parts.push(clipped);
+			}
+		}
+	}
+
+	_updatePath() {
+		this._renderer._updatePoly(this, true);
+	}
+
+	_isClosed() {
+		return true;
+	}
+
+	// Needed by the `Canvas` renderer for interactivity
+	/** @param {Point} p */
+	_containsPoint(p) {
+		let inside = false;
+
+		if (!this._pxBounds?.contains(p)) { return false; }
+
+		// ray casting algorithm for detecting if point is in polygon
+		for (const part of this._parts) {
+			for (let j = 0, len = part.length, k = len - 1; j < len; k = j++) {
+				const p1 = part[j],
+				p2 = part[k];
+
+				if (((p1.y > p.y) !== (p2.y > p.y)) && (p.x < (p2.x - p1.x) * (p.y - p1.y) / (p2.y - p1.y) + p1.x)) {
+					inside = !inside;
+				}
+			}
+		}
+
+		// also check if it's on polygon stroke
+		return inside || super._containsPoint(p, true);
+	}
+
+}

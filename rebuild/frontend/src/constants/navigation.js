@@ -8,7 +8,10 @@ export const FOOTER_LIST = [
 ];
 
 export const RELATED_SITES = [
-  { name: "한국관광 데이터랩", link: "https://datalab.visitkorea.or.kr/datalab/portal/main/getMainForm.do" },
+  {
+    name: "한국관광 데이터랩",
+    link: "https://datalab.visitkorea.or.kr/datalab/portal/main/getMainForm.do",
+  },
   { name: "관광지식정보시스템", link: "https://www.tour.go.kr/" },
   { name: "비짓부산", link: "https://www.visitbusan.net/" },
   { name: "부산광역시 홈페이지", link: "https://www.busan.go.kr/index" },
@@ -16,7 +19,7 @@ export const RELATED_SITES = [
 
 export const HEADER_LIST = [
   {
-    name: "부산시 관계자",
+    name: "관광 정책 지원",
     link: PATHS.ADMIN,
     children: [
       { name: "국가별 방문", link: PATHS.ADMIN_VISITS },
@@ -29,7 +32,7 @@ export const HEADER_LIST = [
     ],
   },
   {
-    name: "소상공인",
+    name: "상권 분석 지원",
     link: PATHS.OWNERS,
     children: [
       { name: "방문 패턴 분석", link: PATHS.OWNERS_VISIT },
@@ -37,7 +40,7 @@ export const HEADER_LIST = [
     ],
   },
   {
-    name: "외국인 관광객",
+    name: "관광 안내",
     link: PATHS.VISITORS,
     children: [
       { name: "교통이 편리한 숙박시설", link: PATHS.VISITORS_STAYS },

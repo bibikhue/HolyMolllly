@@ -1,0 +1,221 @@
+import * as Util from '../core/Util.js';
+import {LatLngBounds} from './LatLngBounds.js';
+
+/** @typedef {[number, number, number?]} LatLngTuple */
+/**
+ * A geographical point as a plain object.
+ * @typedef {Object} LatLngLiteral
+ * @property {number} lat Latitude in degrees.
+ * @property {number} lng Longitude in degrees.
+ * @property {number} [alt] Altitude in meters.
+ */
+
+/**
+ * A `LatLng`, or its array (`[lat, lng]`, `[lat, lng, alt]`) or object (`{lat, lng}`, `{lat, lon}`) form.
+ * @typedef {LatLng | LatLngTuple | LatLngLiteral | {lat: number, lon: number, alt?: number}} LatLngExpression
+ */
+
+/**
+ * Represents a geographical point with a certain latitude and longitude.
+ *
+ * @example
+ * ```js
+ * const latlng = new LatLng(50.5, 30.5);
+ * ```
+ *
+ * All Leaflet methods that accept LatLng objects also accept them in a simple Array form and simple object form
+ * (unless noted otherwise), so these lines are equivalent:
+ *
+ * ```js
+ * map.panTo([50, 30]);
+ * map.panTo({lat: 50, lng: 30});
+ * map.panTo({lat: 50, lon: 30});
+ * map.panTo(new LatLng(50, 30));
+ * ```
+ *
+ * Note that `LatLng` does not inherit from Leaflet's `Class` object, which means new classes can't inherit from it,
+ * and new methods can't be added to it with the `include` function.
+ *
+ * @categoryDescription Functions
+ * There are several static functions which can be called without instantiating LatLng:
+ */
+export class LatLng {
+	/**
+	 * Creates an object representing a geographical point with the given latitude and longitude (and optionally
+	 * altitude).
+	 * @overload
+	 * @param {number} lat
+	 * @param {number} lng
+	 * @param {number} [alt]
+	 */
+	/**
+	 * Expects an array of the form `[Number, Number]` or `[Number, Number, Number]`, or a plain object of the form
+	 * `{lat: Number, lng: Number}` or `{lat: Number, lng: Number, alt: Number}` instead. You can also use `lon` in
+	 * place of `lng` in the object form.
+	 * @overload
+	 * @param {LatLngExpression} coords
+	 */
+	/**
+	 * @param {any} lat
+	 * @param {number} [lng]
+	 * @param {number} [alt]
+	 */
+	constructor(lat, lng, alt) {
+		if (lat instanceof LatLng) {
+			// We can use the same object, no need to clone it
+			// eslint-disable-next-line no-constructor-return
+			return lat;
+		}
+
+		let _lat = lat, _lng = lng, _alt = alt;
+		if (Array.isArray(lat)) {
+			_lat = lat.length <= 3 ? lat[0] : NaN;
+			_lng = lat[1];
+			_alt = lat[2];
+		} else if (typeof lat === 'object' && lat !== null) {
+			_lat = lat.lat;
+			_lng = 'lng' in lat ? lat.lng : lat.lon;
+			_alt = lat.alt;
+		}
+
+		/**
+		 * Latitude in degrees
+		 * @type {number}
+		 */
+		this.lat = Util.toNumber(_lat);
+
+		/**
+		 * Longitude in degrees
+		 * @type {number}
+		 */
+		this.lng = Util.toNumber(_lng);
+
+		if (isNaN(this.lat) || isNaN(this.lng)) {
+			throw new Error(`Invalid LatLng object: (${_lat}, ${_lng})`);
+		}
+
+		if (_alt != null) {
+			/**
+			 * Altitude in meters (optional)
+			 * @type {number | undefined}
+			 */
+			this.alt = Util.toNumber(_alt);
+
+			if (isNaN(this.alt)) {
+				throw new Error(`Invalid LatLng altitude: ${_alt}`);
+			}
+		}
+	}
+
+	/**
+	 * Returns `true` if the LatLng object can be properly initialized.
+	 * @category Functions
+	 * @overload
+	 * @param {number} lat
+	 * @param {number} [lng]
+	 * @param {number} [alt]
+	 * @returns {boolean}
+	 */
+	/**
+	 * Expects an array of the form `[Number, Number]` or `[Number, Number, Number]`, or a plain object of the form
+	 * `{lat: Number, lng: Number}`. Returns `true` if the LatLng object can be properly initialized.
+	 * @overload
+	 * @param {LatLngExpression} coords
+	 * @returns {boolean}
+	 */
+	/**
+	 * @param {any} lat
+	 * @param {any} [lng]
+	 * @param {any} [alt]
+	 */
+	static validate(lat, lng, alt) {
+		try {
+			return !!new LatLng(lat, lng, alt);
+		} catch {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns `true` if the given `LatLng` point is at the same position (within a small margin of
+	 * error). The margin of error can be overridden by setting `maxMargin` to a small number.
+	 * @param {LatLngExpression} [obj]
+	 * @param {number} [maxMargin]
+	 */
+	equals(obj, maxMargin) {
+		if (!obj) { return false; }
+
+		obj = new LatLng(obj);
+
+		const margin = Math.max(
+			Math.abs(this.lat - obj.lat),
+			Math.abs(this.lng - obj.lng));
+
+		return margin <= (maxMargin ?? 1.0E-9);
+	}
+
+	/**
+	 * Returns a string representation of the point (for debugging purposes).
+	 * @param {number} [precision]
+	 */
+	toString(precision) {
+		return `LatLng(${Util.formatNum(this.lat, precision)}, ${Util.formatNum(this.lng, precision)})`;
+	}
+
+	/**
+	 * Returns the distance (in meters) to the given `LatLng` calculated using the
+	 * [Haversine formula](https://en.wikipedia.org/wiki/Haversine_formula).
+	 * @param {LatLngExpression} other
+	 */
+	distanceTo(other) {
+		return haversineDistance(this, new LatLng(other), 6371000);
+	}
+
+	/** Returns a new `LatLng` object with the longitude wrapped so it's always between -180 and +180 degrees. */
+	wrap() {
+		return new LatLng(this.lat, Util.wrapNum(this.lng, [-180, 180], true), this.alt);
+	}
+
+	/**
+	 * Returns a new `LatLngBounds` object in which each boundary is `sizeInMeters/2` meters apart from the `LatLng`.
+	 * @param {number} sizeInMeters
+	 */
+	toBounds(sizeInMeters) {
+		const latAccuracy = 180 * sizeInMeters / 40075017,
+		lngAccuracy = latAccuracy / Math.cos((Math.PI / 180) * this.lat);
+
+		return new LatLngBounds(
+			[this.lat - latAccuracy, this.lng - lngAccuracy],
+			[this.lat + latAccuracy, this.lng + lngAccuracy]);
+	}
+
+	/** Returns a copy of the current LatLng. */
+	clone() {
+		// to skip the validation in the constructor we need to initialize with 0 and then set the values later
+		const latlng = new LatLng(0, 0);
+		latlng.lat = this.lat;
+		latlng.lng = this.lng;
+		if (this.alt !== undefined) {
+			latlng.alt = this.alt;
+		}
+		return latlng;
+	}
+};
+
+/**
+ * Great-circle distance on a sphere of radius R, shared with `EarthCRS.distance`.
+ * @param {LatLng} latlng1
+ * @param {LatLng} latlng2
+ * @param {number} R
+ */
+export function haversineDistance(latlng1, latlng2, R) {
+	const rad = Math.PI / 180,
+	lat1 = latlng1.lat * rad,
+	lat2 = latlng2.lat * rad,
+	sinDLat = Math.sin((latlng2.lat - latlng1.lat) * rad / 2),
+	sinDLon = Math.sin((latlng2.lng - latlng1.lng) * rad / 2),
+	// clamp, since rounding can push this slightly above 1 for antipodal points and make `sqrt(1 - a)` NaN
+	a = Math.min(sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon, 1),
+	c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	return R * c;
+}

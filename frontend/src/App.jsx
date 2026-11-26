@@ -20,27 +20,26 @@ const buildInfoLabel = formatBuildInfo(__BUILD_TIME__, __GIT_HASH__)
 const SITE_NAME = '부산 관광 나침반'
 // 주 메뉴. lead는 메뉴를 펼쳤을 때 칸 위에 보이는 부제(왼쪽부터 이어 읽힘).
 const menus = [
-  { title: '부산 관광 한눈에', page: 'visitors', lead: '지금 부산 관광을 한눈에 보고', items: ['핵심 지표 요약', '월별 방문 추이', '지역별 현황', '업종별 소비'] },
-  { title: '국가별 관광', page: 'countries', lead: '어느 나라에서 오는지 비교하고', items: ['국가 비교', '국가별 상세', '계절성 비교'] },
-  { title: '관광수요 전망', page: 'outlook', lead: '앞으로 얼마나 올지 내다보고', items: ['부산 방문객 전망', '국가별 방문객 전망', '예측 정확도', 'What-if 시뮬레이터'] },
-  { title: '분석 리포트', page: 'reports', lead: '매달 달라진 점을 정리하고', items: ['자동 리포트'] },
-  { title: '부산 행사 캘린더', page: 'events', lead: '관광객을 부르는 행사를 챙기는', items: ['부산 행사 캘린더'] },
-  { title: '지도로 보기', page: null, soon: true, lead: `가 볼 곳까지 찾아 주는 ${SITE_NAME}`, items: ['편의시설 지도', '추천 코스'] },
+  { title: '부산시 관계자', page: 'visitors', lead: '부산 관광 현황과 정책 자료를 살펴보세요.', items: ['국가별 방문현황', '국가별 소비분석', '분석리포트', 'What-if 시뮬레이터'] },
+  { title: '소상공인', page: 'visitors', lead: '관광객 흐름과 소비 정보를 확인하세요.', items: ['방문 패턴 분석', '소비 패턴 분석', '주간행사일정'] },
+  { title: '외국인 관광객', page: 'visitors', lead: '부산 관광과 이동 정보를 찾아보세요.', items: ['교통이 편한 숙소찾기', '다양한 관광지 찾기', '추천 코스'] },
+  { title: '통합캘린더', page: 'events', lead: '부산에서 열리는 MICE 행사와 축제 일정을 확인하세요.', items: ['통합캘린더'] },
 ]
 // 프로젝트 소개는 주 메뉴에서 숨기고(11/11 결정) 사이트맵과 푸터에서만 연결함.
 const sitemapGroups = [...menus.map(menu => [menu.title, menu.items]), ['프로젝트 소개', projectSections.map(section => section.label)]]
-const itemLabels = { '부산 행사 캘린더': '행사 일정' }
-const pendingMenus = new Set(['What-if 시뮬레이터', '편의시설 지도', '추천 코스'])
-const visitorRoutes = { '핵심 지표 요약': 'kpi', '월별 방문 추이': 'trend', '지역별 현황': 'region', '업종별 소비': 'industry' }
+const itemLabels = { '통합캘린더': '통합캘린더', '주간행사일정': '주간행사일정', '국가별 관광': '국가 비교', '관광수요 전망': '부산 방문객 전망', '분석 리포트': '자동 리포트' }
+const pendingMenus = new Set(['What-if 시뮬레이터', '편의시설 지도'])
+const visitorRoutes = { '핵심 지표 요약': 'kpi', '핵심지표': 'kpi', '월별 방문 추이': 'trend', '방문 패턴 분석': 'trend', '지역별 현황': 'region', '업종별 소비': 'industry', '소비 패턴 분석': 'industry' }
 const visitorFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(visitorRoutes).includes(focus) ? focus : 'kpi' }
-const countryRoutes = { '국가 비교': 'compare', '국가별 상세': 'detail', '계절성 비교': 'season', '언어권별 관심 관광지': 'interest' }
+const countryRoutes = { '국가 비교': 'compare', '국가별 방문현황': 'compare', '국가별 소비분석': 'detail', '국가별 상세': 'detail', '계절성 비교': 'season', '언어권별 관심 관광지': 'interest' }
 const countryFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(countryRoutes).includes(focus) ? focus : 'compare' }
 const countryCode = hash => new URLSearchParams(hash.split('?')[1] || '').get('country')
 const outlookRoutes = { '부산 방문객 전망': 'busan', '국가별 방문객 전망': 'countries', '예측 정확도': 'accuracy' }
 const outlookFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(outlookRoutes).includes(focus) ? focus : 'busan' }
 const projectRoutes = Object.fromEntries(projectSections.map(section => [section.label, section.id]))
 const projectFocus = hash => { const focus = new URLSearchParams(hash.split('?')[1] || '').get('focus'); return Object.values(projectRoutes).includes(focus) ? focus : 'about' }
-const reportRoutes = { '자동 리포트': 'overview', '관광수요 주요 변화': 'overview', '국가별 수요 특징': 'markets', '국가별 분석 결과': 'markets', '정책·마케팅 시사점': 'implications' }
+const reportRoutes = { '자동 리포트': 'overview', '분석리포트': 'overview', '관광수요 주요 변화': 'overview', '국가별 수요 특징': 'markets', '국가별 분석 결과': 'markets', '정책·마케팅 시사점': 'implications' }
+const touristTabs = { '교통이 편한 숙소찾기': 'lodging', '다양한 관광지 찾기': 'attractions', '추천 코스': 'routes' }
 const reportFocus = (hash) => new URLSearchParams(hash.split('?')[1] || '').get('focus') || 'overview'
 const getPage = () => resolvePage(window.location.pathname, window.location.hash)
 const appHashHref = hash => window.location.pathname === '/' || window.location.pathname === '/index.html' ? hash : `/${hash}`
@@ -156,6 +155,7 @@ function App() {
   const [visitorDataStatus, setVisitorDataStatus] = useState(null)
   const [page, setPage] = useState(getPage)
   const [pageHash, setPageHash] = useState(() => window.location.hash)
+  const [touristTab, setTouristTab] = useState(null)
   const visibleDataStatus = page === 'visitors' ? visitorDataStatus : dataStatus
   const menuButtons = useRef([])
   const navigation = useRef(null)
@@ -264,6 +264,13 @@ function App() {
       openCountryHash(title)
       return
     }
+    if (Object.hasOwn(touristTabs, title)) {
+      setDialog(null)
+      setActiveMenu(null)
+      setPage('dashboard')
+      setTouristTab(touristTabs[title])
+      return
+    }
     if (Object.hasOwn(visitorRoutes, title)) {
       setDialog(null)
       if (getPage() !== 'notFound') setPage('visitors')
@@ -293,7 +300,7 @@ function App() {
       } else navigateToAppHash(`#${destination}`)
       return
     }
-    if (title === '부산 행사 캘린더' || title === '행사 일정') {
+    if (title === '부산 행사 캘린더' || title === '행사 일정' || title === '통합캘린더' || title === '주간행사일정') {
       setDialog(null)
       if (getPage() !== 'notFound') setPage('events')
       navigateToAppHash('#/events')
@@ -330,17 +337,17 @@ function App() {
         <nav className="main-navigation" aria-label="주 메뉴" ref={navigation} onMouseLeave={() => setActiveMenu(null)} onBlur={event => { if (!navigation.current?.contains(event.relatedTarget)) setActiveMenu(null) }}>
           <div className="navigation-inner">
             {menus.map((menu, index) => {
-              const current = page === menu.page
-              return <button key={menu.title} ref={element => { menuButtons.current[index] = element }} type="button" className={`navigation-button${current ? ' current' : ''}${activeMenu === index ? ' active' : ''}`} aria-current={current ? 'page' : undefined} aria-expanded={activeMenu !== null} aria-controls="mega-menu" onMouseEnter={() => setActiveMenu(index)} onFocus={() => setActiveMenu(index)} onClick={() => menu.page ? openDialog(menu.items[0]) : setActiveMenu(index)}>{menu.title}{menu.soon && <span className="navigation-soon">예정</span>}</button>
+              const current = page === menu.page && (menu.page !== 'visitors' || menu.title === menus.find(item => item.page === 'visitors')?.title) && (menu.title !== '주간행사일정' || activeMenu === index)
+              return <button key={menu.title} ref={element => { menuButtons.current[index] = element }} type="button" className={`navigation-button${current ? ' current' : ''}${activeMenu === index ? ' active' : ''}`} aria-current={current ? 'page' : undefined} aria-expanded={activeMenu === index} aria-controls="mega-menu" onMouseEnter={() => setActiveMenu(index)} onFocus={() => setActiveMenu(index)} onClick={() => menu.title === '부산시 관계자' ? openDialog('관계자 로그인') : menu.page === 'events' ? openDialog(menu.title) : setActiveMenu(activeMenu === index ? null : index)}>{menu.title}{menu.soon && <span className="navigation-soon">예정</span>}</button>
             })}
           </div>
           <div className="mega-menu" id="mega-menu" hidden={activeMenu === null}>
             <div className="mega-columns">
               {menus.map((menu, index) => <div className={`mega-column${activeMenu === index ? ' active' : ''}`} key={menu.title} onMouseEnter={() => setActiveMenu(index)}>
                 <p className="mega-lead">{menu.lead}</p>
-                {menu.items.map(item => pendingMenus.has(item)
+                {menu.items.map(item => pendingMenus.has(item) && menu.title !== '부산시 관계자'
                   ? <span className="mega-item pending" key={item}>{item}<span className="dropdown-pending">준비 중</span></span>
-                  : <button className="mega-item" type="button" key={item} onClick={() => openDialog(item)}>{itemLabels[item] || item}</button>)}
+                  : <button className={`mega-item${pendingMenus.has(item) ? ' pending' : ''}`} type="button" key={item} onClick={() => openDialog(menu.title === '부산시 관계자' ? '관계자 로그인' : item)}>{itemLabels[item] || item}{pendingMenus.has(item) && <span className="dropdown-pending">준비 중</span>}</button>)}
               </div>)}
             </div>
           </div>
@@ -348,12 +355,11 @@ function App() {
         <div className="header-actions">
           {/* FR-01 로그인 자리. 실제 로그인은 FR-10(11/26~, 황지원)에서 연결 */}
           <button className="login-button" type="button" onClick={() => openDialog('관계자 로그인')}>로그인</button>
-          <button className="all-menu-button" type="button" aria-label="전체메뉴 (사이트맵)" onClick={() => openDialog('사이트맵')}><Icon name="grid" /></button>
         </div>
       </div>
     </header>
     <main className="dashboard-main" id="main-content" tabIndex={-1} aria-label={page === 'notFound' ? '잘못된 주소 안내' : '대시보드'} onClick={() => setActiveMenu(null)}>
-      {page === 'notFound' ? <NotFound key={pageHash} requestedAddress={`${window.location.pathname}${window.location.search}${pageHash}`} onOpenSitemap={() => openDialog('사이트맵')} /> : page === 'events' ? <EventCalendarPage /> : page === 'reports' ? <AnalysisReport key={pageHash} initialFocus={reportFocus(pageHash)} /> : page === 'project' ? <ProjectIntro focus={projectFocus(pageHash)} navigationKey={pageHash} /> : page === 'visitors' ? <VisitorOverview focus={visitorFocus(pageHash)} navigationKey={pageHash} onDataStatus={setVisitorDataStatus} /> : page === 'countries' ? <CountryTourism focus={countryFocus(pageHash)} country={countryCode(pageHash)} navigationKey={pageHash} onOpen={openDialog} /> : page === 'outlook' ? <ForecastOutlook focus={outlookFocus(pageHash)} navigationKey={pageHash} /> : <DashboardHome onOpen={openDialog} />}
+      {page === 'notFound' ? <NotFound key={pageHash} requestedAddress={`${window.location.pathname}${window.location.search}${pageHash}`} onOpenSitemap={() => openDialog('사이트맵')} /> : page === 'events' ? <EventCalendarPage /> : page === 'reports' ? <AnalysisReport key={pageHash} initialFocus={reportFocus(pageHash)} /> : page === 'project' ? <ProjectIntro focus={projectFocus(pageHash)} navigationKey={pageHash} /> : page === 'visitors' ? <VisitorOverview focus={visitorFocus(pageHash)} navigationKey={pageHash} onDataStatus={setVisitorDataStatus} /> : page === 'countries' ? <CountryTourism focus={countryFocus(pageHash)} country={countryCode(pageHash)} navigationKey={pageHash} onOpen={openDialog} /> : page === 'outlook' ? <ForecastOutlook focus={outlookFocus(pageHash)} navigationKey={pageHash} /> : <DashboardHome touristTab={touristTab} onTouristTabChange={setTouristTab} />}
     </main>
     <Footer onOpen={openDialog} dataStatus={visibleDataStatus} />
     <DataChatbot />

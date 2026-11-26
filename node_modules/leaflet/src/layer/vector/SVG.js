@@ -1,0 +1,242 @@
+import {Renderer} from './Renderer.js';
+import * as DomUtil from '../../dom/DomUtil.js';
+import {splitWords, stamp} from '../../core/Util.js';
+
+/** @import {RendererEventMap, RendererOptions} from '../../types.js' */
+/** @import {Point} from '../../geometry/Point.js' */
+/** @import {CircleMarker} from './CircleMarker.js' */
+/** @import {Path} from './Path.js' */
+/** @import {Polyline} from './Polyline.js' */
+
+/**
+ * Allows vector layers to be displayed with [SVG](https://developer.mozilla.org/docs/Web/SVG). Inherits `Renderer`.
+ * @constructorDescription Creates an SVG renderer with the given options.
+ * @example
+ * Use SVG by default for all paths in the map:
+ *
+ * ```js
+ * const map = new LeafletMap('map', {
+ * 	renderer: new SVG()
+ * });
+ * ```
+ *
+ * Use a SVG renderer with extra padding for specific vector geometries:
+ *
+ * ```js
+ * const map = new LeafletMap('map');
+ * const myRenderer = new SVG({ padding: 0.5 });
+ * const line = new Polyline( coordinates, { renderer: myRenderer } );
+ * const circle = new Circle( center, { renderer: myRenderer, radius: 100 } );
+ * ```
+ * @template {RendererOptions} [O=RendererOptions]
+ * @template {RendererEventMap} [E=RendererEventMap]
+ * @extends {Renderer<O, E>}
+ */
+export class SVG extends Renderer {
+
+	_initContainer() {
+		this._container = SVG.create('svg');
+
+		// makes it possible to click through svg root; we'll reset it back in individual paths
+		this._container.setAttribute('pointer-events', 'none');
+
+		/** @type {SVGElement} */
+		this._rootGroup = SVG.create('g');
+		this._container.append(this._rootGroup);
+	}
+
+	_destroyContainer() {
+		super._destroyContainer();
+		delete /** @type {any} */ (this)._rootGroup;
+		delete this._svgSize;
+	}
+
+	_resizeContainer() {
+		const size = super._resizeContainer();
+
+		// set size of svg-container if changed
+		if (!this._svgSize?.equals(size)) {
+			/** @type {Point | undefined} */
+			this._svgSize = size;
+			this._container.setAttribute('width', `${size.x}`);
+			this._container.setAttribute('height', `${size.y}`);
+		}
+
+		// Reset the <SVG>'s viewBox as per _update, but skip redrawing paths.
+		// This keeps paths visually aligned when resizing.
+		const b = this._bounds;
+		if (b) {
+			this._container.setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
+		}
+		return size;
+	}
+
+	_update() {
+		if (this._map._animatingZoom && this._bounds) { return; }
+
+		const b = this._bounds,
+		size = b.getSize();
+
+		// movement: update container viewBox so that we don't have to change coordinates of individual layers
+		this._container.setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
+
+		this.fire('update');
+	}
+
+	// methods below are called by vector layers implementations
+
+	/** @param {Path} layer */
+	_initPath(layer) {
+		const path = layer._path = SVG.create('path');
+
+		if (layer.options.className) {
+			path.classList.add(...splitWords(layer.options.className));
+		}
+
+		if (layer.options.interactive) {
+			path.classList.add('leaflet-interactive');
+		}
+
+		this._updateStyle(layer);
+		this._layers[stamp(layer)] = layer;
+	}
+
+	/** @param {Path} layer */
+	_addPath(layer) {
+		if (!this._rootGroup) { this._initContainer(); }
+		this._rootGroup.append(layer._path);
+		layer.addInteractiveTarget(layer._path);
+	}
+
+	/** @param {Path} layer */
+	_removePath(layer) {
+		layer._path.remove();
+		layer.removeInteractiveTarget(layer._path);
+		delete this._layers[stamp(layer)];
+	}
+
+	/** @param {Path} layer */
+	_updatePath(layer) {
+		layer._project();
+		layer._update();
+	}
+
+	/** @param {Path} layer */
+	_updateStyle(layer) {
+		const path = layer._path,
+		options = layer.options;
+
+		if (!path) { return; }
+
+		if (options.stroke) {
+			path.setAttribute('stroke', options.color);
+			path.setAttribute('stroke-opacity', `${options.opacity}`);
+			path.setAttribute('stroke-width', `${options.weight}`);
+			path.setAttribute('stroke-linecap', options.lineCap);
+			path.setAttribute('stroke-linejoin', options.lineJoin);
+
+			if (options.dashArray) {
+				path.setAttribute('stroke-dasharray', `${options.dashArray}`);
+			} else {
+				path.removeAttribute('stroke-dasharray');
+			}
+
+			if (options.dashOffset) {
+				path.setAttribute('stroke-dashoffset', options.dashOffset);
+			} else {
+				path.removeAttribute('stroke-dashoffset');
+			}
+		} else {
+			path.setAttribute('stroke', 'none');
+		}
+
+		if (options.fill) {
+			path.setAttribute('fill', options.fillColor || options.color);
+			path.setAttribute('fill-opacity', `${options.fillOpacity}`);
+			path.setAttribute('fill-rule', options.fillRule || 'evenodd');
+		} else {
+			path.setAttribute('fill', 'none');
+		}
+	}
+
+	/**
+	 * @param {Polyline} layer
+	 * @param {boolean} [closed]
+	 */
+	_updatePoly(layer, closed) {
+		this._setPath(layer, SVG.pointsToPath(layer._parts, closed));
+	}
+
+	/** @param {CircleMarker} layer */
+	_updateCircle(layer) {
+		const p = layer._point,
+		r = Math.max(Math.round(layer._pxRadius), 1),
+		r2 = Math.max(Math.round(layer._pxRadiusY ?? r), 1),
+		arc = `a${r},${r2} 0 1,0 `;
+
+		// drawing a circle with two half-arcs
+		const d = layer._empty() ? 'M0 0' :
+			`M${num(p.x - r)},${num(p.y)
+			}${arc}${r * 2},0 ${
+				arc}${-r * 2},0 `;
+
+		this._setPath(layer, d);
+	}
+
+	/**
+	 * @param {Path} layer
+	 * @param {string} path
+	 */
+	_setPath(layer, path) {
+		layer._path.setAttribute('d', path);
+	}
+
+	// SVG does not have the concept of zIndex so we resort to changing the DOM order of elements
+	/** @param {Path} layer */
+	_bringToFront(layer) {
+		DomUtil.toFront(layer._path);
+	}
+
+	/** @param {Path} layer */
+	_bringToBack(layer) {
+		DomUtil.toBack(layer._path);
+	}
+
+	/**
+	 * Returns a instance of [SVGElement](https://developer.mozilla.org/docs/Web/API/SVGElement),
+	 * corresponding to the class name passed. For example, using 'line' will return an instance
+	 * of [SVGLineElement](https://developer.mozilla.org/docs/Web/API/SVGLineElement).
+	 * @param {string} name
+	 */
+	static create(name) {
+		return document.createElementNS('http://www.w3.org/2000/svg', name);
+	}
+
+	/**
+	 * Generates a SVG path string for multiple rings, with each ring turning into "M..L..L.." instructions
+	 * @param {Point[][]} rings
+	 * @param {boolean} [closed]
+	 */
+	static pointsToPath(rings, closed) {
+		const str = rings.flatMap(points => [
+			...points.map((p, j) => `${(j ? 'L' : 'M') + num(p.x)} ${num(p.y)}`),
+			// closes the ring for polygons
+			closed ? 'z' : ''
+		]).join('');
+
+		// SVG complains about empty path strings
+		return str || 'M0 0';
+	}
+
+}
+
+// Formats a pixel coordinate with 0.1px precision. Built from integer parts because V8 stringifies small integers
+// much faster than fractional numbers, and path strings with many vertices are rebuilt on every redraw.
+/** @param {number} v */
+function num(v) {
+	const n = Math.round(v * 10),
+	a = n < 0 ? -n : n,
+	i = Math.floor(a / 10),
+	d = a - i * 10;
+	return (n < 0 ? '-' : '') + (d ? `${i}.${d}` : i);
+}

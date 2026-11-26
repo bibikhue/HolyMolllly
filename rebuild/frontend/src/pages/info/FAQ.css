@@ -1,0 +1,85 @@
+.faq-page {
+  width: min(100% - 32px, 1480px);
+  margin: 0 auto;
+  padding: 30px 0 72px;
+  text-align: left;
+  color: var(--text-strong);
+}
+
+.faq-page__eyebrow { color: var(--text-hover); font-weight: 700; }
+.faq-page__header h1 { margin: 12px 0 16px; font-size: clamp(30px, 4vw, 36px); }
+
+.faq-page__categories {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 36px 0 46px;
+}
+
+.faq-page__category {
+  padding: 12px 18px;
+  border: 1px solid #d5e2ed;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--text-strong);
+}
+
+.faq-page__category.is-active {
+  border-color: var(--text-hover);
+  background: var(--text-hover);
+  color: var(--white);
+}
+
+.faq-page__category:focus-visible,
+.faq-page__question:focus-visible {
+  outline: 3px solid var(--text-hover);
+  outline-offset: 3px;
+}
+
+.faq-page__section h2 { margin: 0 0 20px; font-size: clamp(22px, 3vw, 26px); }
+.faq-page__section + .faq-page__section { margin-top: 44px; }
+
+.faq-page__list {
+  display: block;
+  overflow: hidden;
+  border: 1px solid #d5e2ed;
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.faq-page__item { display: block; border-bottom: 1px solid #e1e9f0; }
+.faq-page__item:last-child { border-bottom: 0; }
+
+.faq-page__question {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  min-height: 82px;
+  padding: 22px clamp(18px, 2vw, 30px);
+  border: 0;
+  background: transparent;
+  color: var(--text-strong);
+  text-align: left;
+  font-size: clamp(16px, 2vw, 18px);
+  font-weight: 700;
+}
+
+.faq-page__q { color: var(--text-hover); font-size: 20px; }
+.faq-page__toggle { margin-left: auto; color: var(--text-hover); font-size: 26px; font-weight: 400; }
+
+.faq-page__list p {
+  margin: 0;
+  padding: 0 clamp(18px, 2vw, 30px) 28px clamp(52px, 4vw, 66px);
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+.faq-page__empty {
+  padding: 32px;
+  border: 1px solid #d5e2ed;
+  border-radius: 12px;
+  background: var(--white);
+}
+
