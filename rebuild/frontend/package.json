@@ -12,10 +12,7 @@
   "dependencies": {
     "axios": "^1.21.1",
     "leaflet": "^1.9.4",
-<<<<<<< HEAD
-=======
     "plotly.js": "^4.3.0",
->>>>>>> b7ddd2cd7e1329cdaa3148a0c36f4dca236ccba3
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-leaflet": "^5.0.0",

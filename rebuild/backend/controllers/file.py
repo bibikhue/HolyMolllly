@@ -6,7 +6,7 @@ from services import file as file_services
 
 # 여러 파일 업로드
 async def upload(
-    files: List[UploadFile] = File(...)
+    files: List[UploadFile] = File(..., description="업로드할 파일 목록")
 ):
     try:
         for file in files:
