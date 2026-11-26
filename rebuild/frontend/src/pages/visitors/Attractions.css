@@ -1,0 +1,56 @@
+.attractions-page {
+  width: min(100% - 40px, 1200px);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px) 0 64px;
+  text-align: left;
+}
+
+.attractions-page__intro {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.attractions-page__eyebrow {
+  margin: 0 0 8px;
+  color: #2878b5;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.attractions-page__intro h1 {
+  margin: 0;
+  color: #18324b;
+  font-size: clamp(25px, 3vw, 36px);
+  line-height: 1.3;
+}
+
+.attractions-page__description {
+  margin: 10px 0 0;
+  color: #617487;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.attractions-page__map-card {
+  display: block;
+  overflow: hidden;
+  padding: 12px;
+  border: 1px solid #e1e9f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(35 63 88 / 8%);
+}
+
+@media (max-width: 700px) {
+  .attractions-page {
+    width: min(100% - 24px, 1200px);
+    padding: 28px 0 40px;
+  }
+
+  .attractions-page__map-card {
+    padding: 7px;
+    border-radius: 13px;
+  }
+
+}
