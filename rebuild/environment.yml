@@ -8,6 +8,8 @@ dependencies:
   - python=3.12
   - pandas
   - numpy
+  - lightgbm
+  - scikit-learn
   - matplotlib
   - sqlalchemy
   - pymysql
@@ -37,3 +39,4 @@ dependencies:
       - faiss-cpu==1.14.3
       - transformers>=4.41,<5
       - torch
+      - holidays
