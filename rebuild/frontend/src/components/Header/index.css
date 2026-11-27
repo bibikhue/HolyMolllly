@@ -1,7 +1,10 @@
 .header {
+  --header-height: 80px;
+  --header-menu-gap: 56px;
+  --header-submenu-overhang: 16px;
   position: relative;
   z-index: 10;
-  padding: 0 16px;
+  padding: 0 clamp(20px, 3vw, 56px);
 }
 
 .header,
@@ -23,7 +26,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  height: 80px;
+  height: var(--header-height);
 }
 
 .header-bar > .logo {
@@ -40,30 +43,18 @@
 .header-logout {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border: 1px solid #dce8f0;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #c8d9e8;
   border-radius: 8px;
-  background: #f2f7fb;
+  background: var(--white);
   color: var(--text-strong);
-  font: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
-  cursor: pointer;
 }
 
-.header-logout svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.header-logout:hover:not(:disabled) { background: #e7f1f8; color: var(--text-hover); }
+.header-logout:hover:not(:disabled) { background: #f7fafc; }
 .header-logout:focus-visible { outline: 2px solid var(--text-hover); outline-offset: 3px; }
 .header-logout:disabled { opacity: .6; cursor: wait; }
 .header-logout-error {
@@ -89,8 +80,9 @@
 
 .header-columns {
   display: grid;
-  grid-template-columns: 140px 100px 160px 80px;
-  gap: 8px;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: var(--header-menu-gap);
   width: max-content;
   margin: 0 auto;
 }
@@ -99,6 +91,14 @@
   font-size: 16px;
   font-weight: 900;
 }
+
+.header-bar .header-columns > li { white-space: nowrap; }
+
+.header-dropdown .header-columns {
+  grid-template-columns: var(--header-menu-columns);
+}
+
+.header-dropdown .header-columns > li { min-width: 0; }
 
 .header-dropdown {
   font-size: 14px;
@@ -114,14 +114,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80px;
+  height: var(--header-height);
 }
 
 .header-bar nav a::after {
   content: "";
   position: absolute;
   bottom: 0;
-  inset-inline: 10px;
+  inset-inline: 0;
   height: 3px;
   background: var(--text-hover);
   opacity: 0;
@@ -136,8 +136,23 @@
 .header-submenu {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  margin-inline: calc(-1 * var(--header-submenu-overhang));
+  width: calc(100% + 2 * var(--header-submenu-overhang));
+  align-items: center;
+  text-align: center;
+}
+
+.header-submenu > li {
+  flex: none;
+  width: 100%;
+}
+
+.header-submenu a {
+  display: block;
   white-space: pre-line;
+  word-break: keep-all;
+  line-height: 1.2;
 }
 
 .header-columns a.active,
