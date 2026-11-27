@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DonutChart from "../../components/DonutChart";
 import LineChart from "../../components/LineChart";
@@ -32,8 +32,27 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
   const overviewHeight = Math.max(240, Math.min(300, Math.floor((viewportHeight - 240) * 0.56)));
-  const monthlyHeight = Math.max(220, Math.min(260, viewportHeight - 272 - overviewHeight));
+  const monthlyRef = useRef(null);
+  const [monthlyHeight, setMonthlyHeight] = useState(220);
   const detailHeight = Math.max(380, Math.min(560, viewportHeight - 250));
+
+  useLayoutEffect(() => {
+    if (!active || view !== "basic" || !result) return;
+    const monthly = monthlyRef.current;
+    const main = monthly.closest("main");
+    const overview = monthly.previousElementSibling;
+    const updateHeight = () => {
+      const offset = monthly.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop;
+      const style = getComputedStyle(monthly);
+      const available = main.clientHeight - offset - parseFloat(style.paddingTop) - parseFloat(style.borderTopWidth);
+      setMonthlyHeight(Math.max(220, Math.min(360, Math.floor(available))));
+    };
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(main);
+    observer.observe(overview);
+    updateHeight();
+    return () => observer.disconnect();
+  }, [active, view, result]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -127,14 +146,14 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
       )}
       </div>
       {result && (
-        <div className="admin-visits__card admin-visits__monthly admin-visits__overview-monthly">
-          <LineChart title={`${config.trend} (상위 10개 국가)`} showTitle={false} series={monthlySeries} scale={config.scale} yTitle={config.yTitle} unit={config.unit} formatValue={config.formatValue} responsive height={monthlyHeight} xAxis={{ tickangle: 0, title: { text: metric === "sales" ? "월별 소비금액(상위 10개 국가)" : "월별 방문객 수(상위 10개 국가)" } }} />
+        <div ref={monthlyRef} className="admin-visits__card admin-visits__monthly admin-visits__overview-monthly">
+          <LineChart title={`${config.trend} (상위 10개 국가)`} showTitle={false} series={monthlySeries} scale={config.scale} yTitle={config.yTitle} unit={config.unit} formatValue={config.formatValue} responsive height={monthlyHeight} xAxis={{ tickangle: 0, title: { text: metric === "sales" ? "월별 소비금액(상위 10개 국가)" : "월별 방문객 수(상위 10개 국가)" } }} yAxis={{ range: [0, metric === "sales" ? 500 : 200], dtick: metric === "sales" ? 100 : 50, fixedrange: true }} />
         </div>
       )}
       </div>
       <div className={`country-statistics-details country-statistics-details--${metric}`} hidden={view !== "detail"}>
       {result && metric === "sales" && (
-        <CountryMonthlySpend countries={result.data} country={selectedCountry} onCountryChange={setCountryCode} start={result.start_ym} end={result.end_ym} height={detailHeight} />
+        <CountryMonthlySpend countries={result.data} country={selectedCountry} onCountryChange={setCountryCode} start={result.start_ym} end={result.end_ym} height={Math.max(220, Math.min(280, viewportHeight - 620))} />
       )}
       {result && metric === "visits" && (
         <CountryDistrictVisits countries={result.data} start={result.start_ym} end={result.end_ym} height={detailHeight} />

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCountryDistrictVisits } from "../../apis/admin";
 import GroupedBarChart from "../../components/GroupedBarChart";
-
-const AREA_COLORS = { 원도심: "#f4a261", 중부산: "#76c893", 서부산: "#4ea8de", 동부산: "#9b8afb" };
+import { AREA_COLORS } from "../../constants/charts";
 
 function DistrictChart({ country, start, end, height }) {
   const [result, setResult] = useState(null);

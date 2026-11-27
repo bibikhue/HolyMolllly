@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAgeDistrictVisits } from "../../apis/admin";
 import StackedBarChart from "../../components/StackedBarChart";
-
-const COLORS = [
-  "#d95f0e", "#f16913", "#fd8d3c", "#fdae6b", "#238b45", "#41ab5d", "#74c476", "#a1d99b",
-  "#2171b5", "#4292c6", "#6baed6", "#9ecae1", "#6a51a3", "#807dba", "#9e9ac8", "#bcbddc",
-];
+import { AREA_COLORS, AREA_SHADES } from "../../constants/charts";
 
 export default function AgeDistrictVisits({ start, end, height }) {
   const [result, setResult] = useState(null);
@@ -28,16 +24,19 @@ export default function AgeDistrictVisits({ start, end, height }) {
   const districts = new Map();
   for (const age of ages) {
     for (const group of age.groups) {
-      for (const district of group.districts) {
-        const item = districts.get(district.sgg_cd) ?? { code: district.sgg_cd, name: district.sgg_nm, total: 0, ages: new Map() };
-        item.total += Number(district.visitor_cnt);
+      for (const [index, district] of group.districts.entries()) {
+        const item = districts.get(district.sgg_cd) ?? {
+          code: district.sgg_cd, name: district.sgg_nm, area: group.name, order: index,
+          color: AREA_SHADES[group.name]?.[index] ?? AREA_COLORS[group.name], ages: new Map(),
+        };
         item.ages.set(age.age_group, district);
         districts.set(item.code, item);
       }
     }
   }
-  const series = [...districts.values()].sort((a, b) => b.total - a.total || a.code.localeCompare(b.code)).map((item, index) => ({
-    name: item.name, color: COLORS[index % COLORS.length],
+  const areaOrder = Object.keys(AREA_COLORS);
+  const series = [...districts.values()].sort((a, b) => areaOrder.indexOf(a.area) - areaOrder.indexOf(b.area) || a.order - b.order).map((item) => ({
+    name: item.name, color: item.color,
     values: ages.map((age) => Number(item.ages.get(age.age_group)?.share_pct ?? 0)),
     counts: ages.map((age) => Number(item.ages.get(age.age_group)?.visitor_cnt ?? 0)),
   }));

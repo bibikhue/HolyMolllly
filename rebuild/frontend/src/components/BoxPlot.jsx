@@ -71,7 +71,7 @@ export default function BoxPlot({ data = [], title, showTitle = true, width = 88
             font: { family: "Pretendard, sans-serif", color: "#222", size: 13 },
             hovermode: "closest",
             hoverlabel: { bgcolor: "#fff", bordercolor: "#c8d9e8", font: { color: "#12324a", size: 12 }, align: "left" },
-            xaxis: { title: { text: "월별 1인당 관광소비액 (원) (상위 12개국)" }, nticks: 4, tickformat: ",.0f", ticksuffix: "원", gridcolor: "#e5e7eb", zeroline: false, rangemode: "tozero", automargin: true },
+            xaxis: { title: { text: "<b>월별 1인당 관광소비액 (원) (상위 12개국)</b>" }, nticks: 4, tickformat: ",.0f", ticksuffix: "원", gridcolor: "#e5e7eb", zeroline: false, rangemode: "tozero", automargin: true },
             yaxis: { type: "category", dtick: 1, tickfont: { size: 11 }, categoryorder: "array", categoryarray: items.map((item) => item.country_nm), autorange: "reversed", automargin: true },
             annotations: items.map((item) => ({
               x: item.median, y: item.country_nm, xref: "x", yref: "y",

@@ -38,12 +38,11 @@ function IndustryChart({ country, district, start, end }) {
   return (
     <>
       <DonutChart
-        title={`${country.country_nm} ${district.sgg_nm} 업종별 소비 비중`}
+        title={`${country.country_nm} ${district.sgg_nm} 업종별 간편결제 관광소비 비중`}
         data={data} centerValue={district.sgg_nm} chartSize={280} legendWidth={180} hole={0.42}
         showLabels minLabelPercent={3} percentDigits={1}
         unit="억원" formatValue={formatEok} legendTitle="업종별 소비금액" showDataTable={false}
       />
-      <p className="admin-visits__chart-note">간편결제 관광소비 기준 · 금액 단위: 억원</p>
     </>
   );
 }
@@ -51,7 +50,7 @@ function IndustryChart({ country, district, start, end }) {
 export default function CountryIndustrySpend({ country, start, end }) {
   const [districts, setDistricts] = useState(null);
   const [error, setError] = useState("");
-  const [districtCode, setDistrictCode] = useState("26110");
+  const [districtCodes, setDistrictCodes] = useState(["26110", "26350"]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,22 +65,30 @@ export default function CountryIndustrySpend({ country, start, end }) {
     return () => controller.abort();
   }, []);
 
-  const district = districts?.find((item) => String(item.sgg_cd) === districtCode) ?? districts?.[0];
+  const firstDistrict = districts?.find((item) => String(item.sgg_cd) === districtCodes[0]) ?? districts?.[0];
+  const secondDistrict = districts?.find((item) => String(item.sgg_cd) === districtCodes[1] && item !== firstDistrict)
+    ?? districts?.find((item) => item !== firstDistrict);
+  const selectedDistricts = [firstDistrict, secondDistrict];
 
   return (
-    <div className="admin-visits__card admin-visits__monthly">
-      {error ? <p role="alert">{error}</p> : !districts ? <p role="status">구군 목록을 불러오는 중입니다.</p> : country && district ? (
-        <>
+    <div className="country-industry-comparison">
+      {error ? <p role="alert">{error}</p> : !districts ? <p role="status">구군 목록을 불러오는 중입니다.</p> : country && firstDistrict && secondDistrict ? selectedDistricts.map((district, index) => (
+        <div className="admin-visits__card" key={index}>
           <div className="admin-visits__chart-controls">
             <label className="admin-visits__country-select">구·군
-              <select value={String(district.sgg_cd)} onChange={(event) => setDistrictCode(event.target.value)}>
-                {districts.map((item) => <option key={item.sgg_cd} value={String(item.sgg_cd)}>{item.sgg_nm}</option>)}
+              <select aria-label={`${index + 1}번째 비교 구·군`} value={String(district.sgg_cd)} onChange={(event) => {
+                const code = event.target.value;
+                if (code === String(selectedDistricts[1 - index].sgg_cd)) return;
+                setDistrictCodes(selectedDistricts.map((item, position) => position === index ? code : String(item.sgg_cd)));
+              }}>
+                {districts.filter((item) => String(item.sgg_cd) !== String(selectedDistricts[1 - index].sgg_cd))
+                  .map((item) => <option key={item.sgg_cd} value={String(item.sgg_cd)}>{item.sgg_nm}</option>)}
               </select>
             </label>
           </div>
           <IndustryChart key={`${country.country_cd}:${district.sgg_cd}:${start}:${end}`} country={country} district={district} start={start} end={end} />
-        </>
-      ) : <p>조회할 국가 또는 구군이 없습니다.</p>}
+        </div>
+      )) : <p>비교할 국가 또는 구군이 없습니다.</p>}
     </div>
   );
 }

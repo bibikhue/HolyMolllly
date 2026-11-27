@@ -32,6 +32,7 @@ function CountryYearChart({ country, start, end, height }) {
     y: item.sales_per_visitor.map((value) => value === null ? null : Number(value)),
     color: YEAR_COLORS[index % YEAR_COLORS.length],
   }));
+  const maximum = Math.max(0, ...series.flatMap((item) => item.y.filter((value) => Number.isFinite(value))));
 
   return (
     <LineChart
@@ -39,7 +40,7 @@ function CountryYearChart({ country, start, end, height }) {
       series={series} responsive height={height} yTitle="1인당 관광소비액 (원)" unit="원"
       formatValue={formatWon} legendTitle="연도"
       xAxis={{ type: "linear", title: { text: "월" }, tickangle: 0, tickformat: undefined, tickvals: MONTHS, ticktext: MONTHS.map((month) => `${month}월`), range: [0.7, 12.3] }}
-      yAxis={{ rangemode: "normal", tickformat: ",.0f", ticksuffix: "원" }}
+      yAxis={{ range: [0, maximum > 0 ? maximum * 1.08 : 1], autorange: false, tickformat: ",.0f", ticksuffix: "원" }}
     />
   );
 }
