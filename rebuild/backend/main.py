@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import ages, countries, file, genders, industries, sidos, sigungu
+from routes import ages, auth, countries, file, genders, industries, sidos, sigungu
 from services.health import check_db
 
 
@@ -14,13 +14,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 api_router = APIRouter(prefix="/api")
+api_router.include_router(auth.router)
 api_router.include_router(sidos.router)
 api_router.include_router(sigungu.router)
 api_router.include_router(industries.router)
