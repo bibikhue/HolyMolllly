@@ -28,7 +28,14 @@ function Login({ onClose, onLogin }) {
       }
       if (dialogRef.current?.open) onLogin();
     } catch (error) {
-      setError(error.message);
+      const message = error.response?.data?.message;
+      setError(
+        error.response?.status === 401
+          ? "아이디 혹은 비밀번호가 틀렸습니다."
+          : typeof message === "string" && message
+            ? message
+            : "로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      );
     } finally {
       form.elements.password.value = "";
       setIsSubmitting(false);

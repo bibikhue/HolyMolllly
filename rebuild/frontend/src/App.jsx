@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
 import "./App.css";
 
@@ -26,10 +26,11 @@ import VisitorsStays from "./pages/visitors/Stays";
 import VisitorsAttractions from "./pages/visitors/Attractions";
 import VisitorsRecommendedCourses from "./pages/visitors/RecommendedCourses";
 import { PATHS } from "./constants/paths";
-import { getCurrentUser } from "./apis/auth";
+import { getCurrentUser, logout } from "./apis/auth";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isCheckingLogin, setIsCheckingLogin] = useState(!isLoggedIn);
 
@@ -58,9 +59,16 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    navigate(PATHS.HOME, { replace: true });
+    setIsLoggedIn(false);
+    setIsLoginOpen(false);
+  };
+
   return (
     <>
-      <Header onNavigate={handleNavigate} />
+      <Header onNavigate={handleNavigate} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       <main>
         <Routes>
           <Route path={PATHS.HOME} element={<Home />} />

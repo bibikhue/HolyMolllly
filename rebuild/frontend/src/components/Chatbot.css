@@ -1,17 +1,18 @@
 .chatbot-button,
 .chatbot-panel {
+  --chatbot-button-size: min(10vw, 6dvh);
   position: fixed;
-  right: 24px;
+  right: 2vw;
   background: var(--white);
 }
 
 .chatbot-button {
-  bottom: 24px;
+  bottom: 2dvh;
   z-index: 20;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: var(--chatbot-button-size);
+  height: var(--chatbot-button-size);
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -19,18 +20,19 @@
 }
 
 .chatbot-button img {
-  width: 48px;
-  height: 48px;
+  width: 86%;
+  height: 86%;
   object-fit: contain;
 }
 
 .chatbot-panel {
-  bottom: 96px;
+  bottom: calc(4dvh + var(--chatbot-button-size));
   z-index: 21;
   display: flex;
   flex-direction: column;
-  width: 380px;
-  height: 560px;
+  width: min(96vw, 48dvh);
+  height: 70dvh;
+  max-height: calc(94dvh - var(--chatbot-button-size));
   overflow: hidden;
   border: 1px solid #dceaf2;
   border-radius: 12px;
@@ -102,8 +104,6 @@
 }
 
 .chatbot-close {
-  width: 43px;
-  height: 43px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -114,7 +114,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 16px;
+  width: 38%;
   height: 1px;
   background: var(--bg-primary);
   transform: translate(-50%, -50%) rotate(45deg);
@@ -172,4 +172,3 @@
   font-size: 22px;
   cursor: default;
 }
-

@@ -21,7 +21,6 @@ function About() {
     const main = pageRef.current.closest("main");
     const listeners = new AbortController();
     let currentIndex = 0;
-    let touchStartY = 0;
     let lockedUntil = 0;
 
     const viewport = () => {
@@ -66,21 +65,10 @@ function About() {
     window.addEventListener("scroll", syncIndex, { signal: listeners.signal });
     main.addEventListener("scroll", syncIndex, { signal: listeners.signal });
     window.addEventListener("wheel", (event) => {
+      if (window.matchMedia("(max-width: 1000px), (max-height: 600px)").matches) return;
       if (event.ctrlKey || Math.abs(event.deltaY) < 8) return;
       if (move(Math.sign(event.deltaY), Math.max(80, Math.abs(event.deltaY)))) event.preventDefault();
     }, { passive: false, signal: listeners.signal });
-    window.addEventListener("touchstart", (event) => {
-      touchStartY = event.touches[0].clientY;
-    }, { passive: true, signal: listeners.signal });
-    window.addEventListener("touchmove", (event) => {
-      const direction = Math.sign(touchStartY - event.touches[0].clientY);
-      if ((direction > 0 && currentIndex < sections.length - 1) ||
-          (direction < 0 && currentIndex > 0)) event.preventDefault();
-    }, { passive: false, signal: listeners.signal });
-    window.addEventListener("touchend", (event) => {
-      const distance = touchStartY - event.changedTouches[0].clientY;
-      if (Math.abs(distance) > 50) move(Math.sign(distance), Math.abs(distance));
-    }, { signal: listeners.signal });
 
     return () => {
       listeners.abort();

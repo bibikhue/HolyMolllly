@@ -26,6 +26,67 @@
   height: 80px;
 }
 
+.header-bar > .logo {
+  container-name: header-brand;
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+.header-actions {
+  position: relative;
+  justify-self: end;
+}
+
+.header-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid #dce8f0;
+  border-radius: 8px;
+  background: #f2f7fb;
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.header-logout svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header-logout:hover:not(:disabled) { background: #e7f1f8; color: var(--text-hover); }
+.header-logout:focus-visible { outline: 2px solid var(--text-hover); outline-offset: 3px; }
+.header-logout:disabled { opacity: .6; cursor: wait; }
+.header-logout-error {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  margin: 8px 0 0;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+@container header-brand (max-width: 16rem) {
+  .header-bar .logo-text {
+    display: none;
+  }
+}
+
 .header-columns {
   display: grid;
   grid-template-columns: 140px 100px 160px 80px;
