@@ -1,5 +1,8 @@
-import Subway from "../../components/public_TransPort/Subway";
+import { lazy, Suspense } from "react";
+import MapLoading from "../../components/Map/MapLoading.jsx";
 import "./Attractions.css";
+
+const Subway = lazy(() => import("../../components/public_TransPort/Subway.jsx"));
 
 function VisitorsAttractions() {
   return (
@@ -12,7 +15,9 @@ function VisitorsAttractions() {
         </p>
       </header>
       <div className="attractions-page__map-card">
-        <Subway />
+        <Suspense fallback={<MapLoading />}>
+          <Subway />
+        </Suspense>
       </div>
     </section>
   );

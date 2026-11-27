@@ -1,0 +1,13 @@
+.map-loading {
+  display: grid;
+  min-height: clamp(360px, 43vw, 560px);
+  place-items: center;
+  color: #617487;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .map-loading {
+    min-height: clamp(350px, 75vw, 500px);
+  }
+}

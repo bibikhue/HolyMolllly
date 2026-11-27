@@ -6,6 +6,7 @@
 }
 
 .subway-map {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
