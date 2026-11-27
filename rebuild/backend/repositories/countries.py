@@ -40,7 +40,7 @@ def get_period_bounds(country_cd=None, sgg_cd=None):
 
 def get_country_summary(start_ym=None, end_ym=None, country_cd=None, sgg_cd=None):
     query = """
-        SELECT c.country_nm, SUM(tc.tourist_cnt) AS tourist_cnt
+        SELECT c.country_cd, c.country_nm, SUM(tc.tourist_cnt) AS tourist_cnt
         FROM tourist_counts AS tc
         JOIN countries AS c ON c.country_id = tc.country_id
         WHERE 1 = 1
@@ -58,7 +58,7 @@ def get_country_summary(start_ym=None, end_ym=None, country_cd=None, sgg_cd=None
     if sgg_cd is not None:
         query += " AND tc.sgg_cd = :sgg_cd"
         params["sgg_cd"] = sgg_cd
-    query += " GROUP BY c.country_id, c.country_nm ORDER BY tourist_cnt DESC, c.country_nm"
+    query += " GROUP BY c.country_id, c.country_cd, c.country_nm ORDER BY tourist_cnt DESC, c.country_nm"
 
     with get_connection() as connection:
         rows = connection.execute(text(query), params).mappings().all()
@@ -86,7 +86,7 @@ def get_sales_period_bounds(country_cd=None, sgg_cd=None):
 
 def get_country_sales(start_ym=None, end_ym=None, country_cd=None, sgg_cd=None):
     query = """
-        SELECT c.country_nm, SUM(cs.spend_amt) AS sales_amt
+        SELECT c.country_cd, c.country_nm, SUM(cs.spend_amt) AS sales_amt
         FROM country_tourism_spending AS cs
         JOIN countries AS c ON c.country_id = cs.country_id
         WHERE 1 = 1
@@ -104,7 +104,7 @@ def get_country_sales(start_ym=None, end_ym=None, country_cd=None, sgg_cd=None):
     if sgg_cd is not None:
         query += " AND cs.sgg_cd = :sgg_cd"
         params["sgg_cd"] = sgg_cd
-    query += " GROUP BY c.country_id, c.country_nm ORDER BY sales_amt DESC, c.country_nm"
+    query += " GROUP BY c.country_id, c.country_cd, c.country_nm ORDER BY sales_amt DESC, c.country_nm"
 
     with get_connection() as connection:
         rows = connection.execute(text(query), params).mappings().all()
@@ -216,29 +216,35 @@ def get_sales_per_visitor(start_ym=None, end_ym=None, country_cd=None, sgg_cd=No
 
 
 def get_monthly_sales_per_visitor(start_ym=None, end_ym=None, country_cd=None, sgg_cd=None):
-    query = """
-        SELECT tc.base_ym, c.country_nm,
-               SUM(tc.tourist_cnt) AS tourist_cnt, SUM(cs.spend_amt) AS sales_amt
-        FROM tourist_counts AS tc
-        JOIN country_tourism_spending AS cs
-          ON cs.base_ym = tc.base_ym AND cs.sgg_cd = tc.sgg_cd AND cs.country_id = tc.country_id
-        JOIN countries AS c ON c.country_id = tc.country_id
-        WHERE c.country_cd = :country_cd
-    """
-    params = {"country_cd": country_cd}
-    if start_ym is not None:
-        query += " AND tc.base_ym >= :start_ym"
-        params["start_ym"] = start_ym
-    if end_ym is not None:
-        query += " AND tc.base_ym <= :end_ym"
-        params["end_ym"] = end_ym
-    if sgg_cd is not None:
-        query += " AND tc.sgg_cd = :sgg_cd"
-        params["sgg_cd"] = sgg_cd
-    query += " GROUP BY tc.base_ym, c.country_id, c.country_nm HAVING SUM(tc.tourist_cnt) > 0 ORDER BY tc.base_ym"
+    return get_sales_per_visitor_distribution(start_ym, end_ym, country_cd, sgg_cd)
 
+
+def get_sales_per_visitor_distribution(start_ym, end_ym, country_cd=None, sgg_cd=None):
+    # Aggregate each source first so missing districts do not change either total.
+    query = """
+        WITH monthly_visitors AS (
+            SELECT base_ym, country_id, SUM(tourist_cnt) AS tourist_cnt
+            FROM tourist_counts
+            WHERE base_ym BETWEEN :start_ym AND :end_ym
+              AND (:sgg_cd IS NULL OR sgg_cd = :sgg_cd)
+            GROUP BY base_ym, country_id
+        ), monthly_sales AS (
+            SELECT base_ym, country_id, SUM(spend_amt) AS sales_amt
+            FROM country_tourism_spending
+            WHERE base_ym BETWEEN :start_ym AND :end_ym
+              AND (:sgg_cd IS NULL OR sgg_cd = :sgg_cd)
+            GROUP BY base_ym, country_id
+        )
+        SELECT v.base_ym, c.country_nm, v.tourist_cnt, s.sales_amt
+        FROM monthly_visitors AS v
+        JOIN monthly_sales AS s ON s.base_ym = v.base_ym AND s.country_id = v.country_id
+        JOIN countries AS c ON c.country_id = v.country_id
+        WHERE v.tourist_cnt > 0 AND s.sales_amt > 0
+          AND (:country_cd IS NULL OR c.country_cd = :country_cd)
+        ORDER BY v.base_ym, c.country_nm
+    """
     with get_connection() as connection:
-        rows = connection.execute(text(query), params).mappings().all()
+        rows = connection.execute(text(query), {"start_ym": start_ym, "end_ym": end_ym, "country_cd": country_cd, "sgg_cd": sgg_cd}).mappings().all()
     return [dict(row) for row in rows]
 
 

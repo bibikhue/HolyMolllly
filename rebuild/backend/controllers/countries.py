@@ -58,6 +58,13 @@ def get_monthly_sales_per_visitor(
     return handle_service_error(countries.get_monthly_sales_per_visitor, country_cd, start_ym, end_ym, sgg_cd)
 
 
+def get_sales_per_visitor_distribution(
+    start_ym: str | None = Query(default=None, description="시작 연월(YYYY-MM)"),
+    end_ym: str | None = Query(default=None, description="끝 연월(YYYY-MM)"),
+):
+    return handle_service_error(countries.get_sales_per_visitor_distribution, start_ym, end_ym)
+
+
 def get_country_visitors_by_sigungu(
     country_cd: str = Query(description="조회할 국가 코드(3자리). 예: 392(일본), 158(대만), 156(중국), 840(미국)"),
     start_ym: str | None = Query(default=None, description="시작 연월(YYYY-MM). 생략하면 해당 국가의 가장 이른 데이터부터 조회"),

@@ -5,6 +5,11 @@ from controllers import countries
 
 router = APIRouter(tags=["국가"])
 router.add_api_route(
+    "/countries/sales-per-visitor/distribution", countries.get_sales_per_visitor_distribution, methods=["GET"],
+    summary="국가별 월별 1인당 관광소비액 분포 조회",
+    description="방문객 수가 양수인 국가별 월간 소비액을 방문객 수로 나눕니다. 기타와 양수가 아닌 소비액은 제외하며 중앙값 내림차순으로 반환합니다.",
+)
+router.add_api_route(
     "/countries/visitors", countries.get_country_summary, methods=["GET"],
     summary="국가별 방문객 합계 조회",
     description="선택한 기간과 시군구의 외국인 방문객 수를 국가별로 합산하고, 전체 대비 비율(%)과 적용된 시작·끝 연월을 함께 반환합니다.",

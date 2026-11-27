@@ -22,8 +22,7 @@ export const HEADER_LIST = [
     name: "관광 정책 지원",
     link: PATHS.ADMIN,
     children: [
-      { name: "국가별 방문", link: PATHS.ADMIN_VISITS },
-      { name: "국가별 소비", link: PATHS.ADMIN_SALES },
+      { name: "국가별 방문 및 소비", link: PATHS.ADMIN_COUNTRIES },
       { name: "분석 리포트", link: PATHS.ADMIN_REPORT },
       {
         name: "국가별 예상 관광객 수\n(시뮬레이션)",

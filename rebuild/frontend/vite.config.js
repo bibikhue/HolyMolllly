@@ -4,6 +4,10 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Plotly dependencies reference Node's global in browser builds.
+  define: {
+    global: 'globalThis',
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:8000',

@@ -1,4 +1,5 @@
 import re
+from statistics import median
 
 from repositories import countries, sigungu
 
@@ -123,6 +124,23 @@ def get_monthly_sales_per_visitor(country_cd, start_ym=None, end_ym=None, sgg_cd
         "end_ym": end_ym,
         "series": list(series_by_year.values()),
     }
+
+
+def get_sales_per_visitor_distribution(start_ym=None, end_ym=None):
+    validate_filters(start_ym, end_ym, None, None)
+    if start_ym is None or end_ym is None:
+        bounds = countries.get_sales_per_visitor_period_bounds()
+        start_ym = start_ym if start_ym is not None else bounds["start_ym"]
+        end_ym = end_ym if end_ym is not None else bounds["end_ym"]
+    grouped = {}
+    for row in countries.get_sales_per_visitor_distribution(start_ym, end_ym):
+        if row["country_nm"] == "기타" or row["tourist_cnt"] <= 0 or row["sales_amt"] <= 0:
+            continue
+        grouped.setdefault(row["country_nm"], []).append(float(row["sales_amt"] / row["tourist_cnt"]))
+    data = [{"country_nm": name, "values": values, "median": median(values), "month_count": len(values)}
+            for name, values in grouped.items()]
+    data.sort(key=lambda item: (-item["median"], item["country_nm"]))
+    return {"start_ym": start_ym, "end_ym": end_ym, "data": data}
 
 
 def get_country_visitors_by_sigungu(country_cd, start_ym=None, end_ym=None):

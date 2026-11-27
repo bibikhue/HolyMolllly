@@ -14,8 +14,7 @@ import Chatbot from "./components/Chatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Admin from "./pages/admin";
-import AdminVisits from "./pages/admin/Visits";
-import AdminSales from "./pages/admin/Sales";
+import CountryStatistics from "./pages/admin/CountryStatistics";
 import AdminReport from "./pages/admin/Report";
 import AdminForecast from "./pages/admin/Forecast";
 import Owners from "./pages/owners";
@@ -86,8 +85,7 @@ function App() {
             }
           >
             <Route path={PATHS.ADMIN} element={<Admin />} />
-            <Route path={PATHS.ADMIN_VISITS} element={<AdminVisits />} />
-            <Route path={PATHS.ADMIN_SALES} element={<AdminSales />} />
+            <Route path={PATHS.ADMIN_COUNTRIES} element={<CountryStatistics />} />
             <Route path={PATHS.ADMIN_REPORT} element={<AdminReport />} />
             <Route path={PATHS.ADMIN_FORECAST} element={<AdminForecast />} />
           </Route>

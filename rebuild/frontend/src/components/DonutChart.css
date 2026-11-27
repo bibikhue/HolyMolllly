@@ -1,0 +1,51 @@
+.donut-chart {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+  text-align: left;
+}
+
+.donut-chart--right { grid-template-columns: minmax(0, 1fr) minmax(160px, .6fr); align-items: center; }
+.donut-chart-wrapper { min-width: 0; }
+.donut-chart__title { margin: 0 0 20px; font-size: 20px; text-align: left; }
+.donut-chart__plot { position: relative; width: 100%; min-width: 0; aspect-ratio: 1; container-type: inline-size; }
+.donut-chart__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.donut-chart__center span { text-align: center; font-size: 13px; color: var(--text-primary); }
+.donut-chart__center strong { text-align: center; font-size: clamp(12px, 4cqi, 24px); overflow-wrap: anywhere; }
+.donut-chart__legend-container { min-width: 0; }
+.donut-chart__legend-container h4, .donut-chart-group > h4 { margin: 0 0 12px; text-align: center; }
+.donut-chart__legend { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; font-size: 13px; }
+.donut-chart__legend li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.donut-chart__swatch { flex: 0 0 18px; height: 8px; }
+.donut-chart__legend-label { flex: 1; }
+.donut-chart__legend-value { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.donut-chart--bottom .donut-chart__legend,
+.donut-chart-group > .donut-chart__legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; }
+.donut-chart__table { grid-column: 1 / -1; font-size: 12px; }
+.donut-chart__table summary { cursor: pointer; color: var(--text-primary); }
+.donut-chart__table table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.donut-chart__table th, .donut-chart__table td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+.donut-chart__empty { grid-column: 1 / -1; padding: 40px 16px; text-align: center; }
+.donut-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.donut-chart-group { min-width: 0; }
+.donut-chart-group > .donut-chart__legend, .donut-chart-group > h4 { margin-top: 16px; }
+
+@media (max-width: 640px) {
+  .donut-chart--right, .donut-chart-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.donut-chart-container { container: donut-chart / inline-size; min-width: 0; width: 100%; }
+
+@container donut-chart (max-width: 560px) {
+  .donut-chart--right { grid-template-columns: minmax(0, 1fr); }
+}
+.donut-chart-container--fixed { width: max-content; container-type: normal; }
