@@ -32,3 +32,22 @@ def get_country_sigungu_sales(country_cd, sgg_cd, start_ym=None, end_ym=None):
         "unit": "천원",
         "data": data,
     }
+
+
+def get_sales_overview(start_ym, end_ym):
+    validate_filters(start_ym, end_ym, None, None)
+    return {"start_ym": start_ym, "end_ym": end_ym, "unit": "천원", "data": industries.get_sales_overview(start_ym, end_ym)}
+
+
+def get_sales_patterns(sgg_cd, start_ym, end_ym, industry_nm=None):
+    validate_filters(start_ym, end_ym, None, sgg_cd)
+    sgg_nm = industries.get_busan_sigungu_name(sgg_cd)
+    if sgg_nm is None:
+        raise ValueError(400, "부산 구·군을 선택해 주세요.")
+    rows = industries.get_sales_patterns(sgg_cd, start_ym, end_ym, industry_nm)
+    totals = {}
+    for row in rows:
+        item = totals.setdefault(row["country_nm"], {"country_cd": row["country_cd"], "country_nm": row["country_nm"], "sales_amt": 0})
+        item["sales_amt"] += int(row["sales_amt"])
+    return {"sgg_cd": sgg_cd, "sgg_nm": sgg_nm, "start_ym": start_ym, "end_ym": end_ym, "unit": "천원",
+            "countries": sorted(totals.values(), key=lambda item: (-item["sales_amt"], item["country_nm"])), "monthly": rows}

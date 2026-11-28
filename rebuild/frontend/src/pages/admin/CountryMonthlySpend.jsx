@@ -1,6 +1,8 @@
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { getMonthlySalesPerVisitor } from "../../apis/admin";
 import LineChart from "../../components/LineChart";
+import { useChatDataset } from "../../components/chatDatasets";
 
 const MONTHS = Array.from({ length: 12 }, (_, index) => index + 1);
 const YEAR_COLORS = ["#1d4f7a", "#59a14f", "#f46d43", "#9467bd", "#e6a329", "#28a6a1", "#b85978", "#667085"];
@@ -10,22 +12,24 @@ function CountryYearChart({ country, start, end, height }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const code = country.country_cd;
+  const requestKey = `${code}:${start}:${end}`;
+  useChatDataset("policy-per-visitor", { period: { start_ym: start, end_ym: end }, country: code, unit: "원/방문객", status: error ? "error" : result?.requestKey === requestKey ? "ready" : "loading", data: result?.requestKey === requestKey ? result : null });
 
   useEffect(() => {
     const controller = new AbortController();
     getMonthlySalesPerVisitor({ country_cd: code, start_ym: start, end_ym: end }, controller.signal)
       .then(({ data }) => {
         if (!Array.isArray(data.series)) throw new Error("월별 소비 통계 응답을 확인할 수 없습니다.");
-        if (!controller.signal.aborted) setResult(data);
+        if (!controller.signal.aborted) setResult({ ...data, requestKey });
       })
       .catch((error) => {
         if (!controller.signal.aborted) setError(error.response?.data?.message || "월별 1인당 소비 통계를 불러오지 못했습니다.");
       });
     return () => controller.abort();
-  }, [code, start, end]);
+  }, [code, start, end, requestKey]);
 
   if (error) return <p role="alert">{error}</p>;
-  if (!result) return <p role="status">월별 1인당 소비 통계를 불러오는 중입니다.</p>;
+  if (!result) return <LoadingSpinner label="월별 1인당 소비 통계를 불러오는 중입니다." />;
 
   const series = [...result.series].sort((a, b) => a.year - b.year).map((item, index) => ({
     name: `${item.year}년`, x: MONTHS,
@@ -45,22 +49,19 @@ function CountryYearChart({ country, start, end, height }) {
   );
 }
 
-export default function CountryMonthlySpend({ countries, country: selected, onCountryChange, start, end, height = 420 }) {
+export default function CountryMonthlySpend({ countries, country: selected, countryCode, onCountryChange, start, end, height = 420 }) {
   const options = countries.filter((item) => item.country_cd != null && item.country_nm !== "기타");
 
   return (
     <div className="admin-visits__card admin-visits__monthly">
-      {selected ? (
-        <>
           <label className="admin-visits__country-select">
             국가
-            <select value={String(selected.country_cd)} onChange={(event) => onCountryChange(event.target.value)}>
+            <select value={countryCode} onChange={(event) => onCountryChange(event.target.value)}>
+              {!selected && <option value={countryCode} disabled>선택 국가 데이터 없음</option>}
               {options.map((item) => <option key={item.country_cd} value={String(item.country_cd)}>{item.country_nm}</option>)}
             </select>
           </label>
-          <CountryYearChart key={`${selected.country_cd}:${start}:${end}`} country={selected} start={start} end={end} height={height} />
-        </>
-      ) : <p>조회할 국가가 없습니다.</p>}
+      {selected ? <CountryYearChart key={`${selected.country_cd}:${start}:${end}`} country={selected} start={start} end={end} height={height} /> : <p>선택 국가의 데이터가 없습니다.</p>}
     </div>
   );
 }

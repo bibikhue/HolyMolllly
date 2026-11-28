@@ -1,0 +1,40 @@
+.owners-sales { min-width: 0; }
+.owners-sales__filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.owners-sales__filters label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4f6577; }
+.owners-sales__filters select { height: 36px; min-width: 130px; padding: 0 10px; border: 1px solid #cadbea; border-radius: 7px; background: #fff; color: #12324a; font: inherit; }
+.owners-sales__chart { min-width: 0; }
+.owners-sales__chart h2, .owners-sales__chart h3 { margin: 0 0 16px; font-size: 18px; text-align: center; }
+.owners-sales__scope { margin: 8px 0 18px; color: #7a8e9f; font-size: 12px; text-align: center; }
+.owners-sales__divider { margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5edf3; }
+.owners-sales__source { margin: 8px 0 0; font-size: 11px; color: #7a8e9f; text-align: center; }
+.owners-sales__source a { color: inherit; }
+.owners-sales__map-frame { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 16px; align-items: center; }
+.owners-sales__map-frame svg { display: block; width: 100%; height: 530px; }
+.owners-sales__map-frame path { cursor: pointer; transition: fill .15s; }
+.owners-sales__map-frame path:hover { filter: brightness(.96); stroke: #16466b; stroke-width: 2; }
+.owners-sales__map-frame text { font: 600 11px Pretendard, sans-serif; }
+.owners-sales__map-callout { paint-order: stroke fill; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; }
+.owners-sales__map-legend { display: grid; gap: 10px; font-size: 11px; }
+.owners-sales__map-legend strong { font-size: 13px; margin-bottom: 4px; }
+.owners-sales__map-legend span { display: flex; align-items: center; gap: 8px; }
+.owners-sales__map-legend i { width: 24px; height: 15px; border-radius: 3px; }
+.owners-sales__composition { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 32px; align-items: center; max-width: 840px; margin: 0 auto; }
+.owners-sales__composition .donut-chart-container { margin: auto; }
+.owners-sales__composition .donut-chart__center span { text-align: center; font-size: 13px; }
+.owners-sales__composition .donut-chart__center strong { text-align: center; font-size: 22px; white-space: nowrap; }
+.owners-sales__composition .donut-chart__center small { display: block; font-size: 12px; }
+.owners-sales__composition table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.owners-sales__composition th, .owners-sales__composition td { padding: 12px 8px; border-bottom: 1px solid #e5edf3; }
+.owners-sales__composition thead { background: #f2f6fa; }
+.owners-sales__composition th { text-align: left; font-weight: 600; }
+.owners-sales__composition td { text-align: right; font-variant-numeric: tabular-nums; }
+.owners-sales__composition th i { display: inline-block; width: 11px; height: 11px; margin-right: 8px; border-radius: 2px; }
+.owners-sales__sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 1100px) { .owners-sales__composition { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+@media (max-width: 600px) {
+  .owners-sales__map-frame { grid-template-columns: minmax(0, 1fr); }
+  .owners-sales__map-frame svg { height: auto; }
+  .owners-sales__map-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owners-sales__map-legend strong { grid-column: 1 / -1; }
+  .owners-sales__chart h2, .owners-sales__chart h3 { font-size: 16px; }
+}

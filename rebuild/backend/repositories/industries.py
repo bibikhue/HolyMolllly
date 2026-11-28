@@ -46,3 +46,34 @@ def get_country_sigungu_sales(country_cd, sgg_cd, start_ym=None, end_ym=None):
     with get_connection() as connection:
         rows = connection.execute(text(query), params).mappings().all()
     return [dict(row) for row in rows]
+
+
+def get_sales_overview(start_ym, end_ym):
+    with get_connection() as connection:
+        rows = connection.execute(text("""
+            SELECT f.base_ym, f.sgg_cd, s.sgg_nm, i.industry_nm, SUM(f.spend_amt) AS sales_amt
+            FROM foreign_epay_spending AS f
+            JOIN sigungu AS s ON s.sgg_cd = f.sgg_cd AND s.sido_cd = '26'
+            JOIN tourism_detail_industries AS d ON d.detail_industry_id = f.detail_industry_id
+            JOIN tourism_industries AS i ON i.industry_id = d.industry_id
+            WHERE f.base_ym BETWEEN :start_ym AND :end_ym
+            GROUP BY f.base_ym, f.sgg_cd, s.sgg_nm, i.industry_id, i.industry_nm
+            ORDER BY f.base_ym, f.sgg_cd, i.industry_id
+        """), {"start_ym": start_ym, "end_ym": end_ym}).mappings().all()
+    return [dict(row) for row in rows]
+
+
+def get_sales_patterns(sgg_cd, start_ym, end_ym, industry_nm=None):
+    with get_connection() as connection:
+        rows = connection.execute(text("""
+            SELECT f.base_ym, c.country_cd, c.country_nm, SUM(f.spend_amt) AS sales_amt
+            FROM foreign_epay_spending AS f
+            JOIN countries AS c ON c.country_id = f.country_id
+            JOIN tourism_detail_industries AS d ON d.detail_industry_id = f.detail_industry_id
+            JOIN tourism_industries AS i ON i.industry_id = d.industry_id
+            WHERE f.sgg_cd = :sgg_cd AND f.base_ym BETWEEN :start_ym AND :end_ym
+              AND (:industry_nm IS NULL OR i.industry_nm = :industry_nm)
+            GROUP BY f.base_ym, c.country_id, c.country_cd, c.country_nm
+            ORDER BY f.base_ym, c.country_nm
+        """), {"sgg_cd": sgg_cd, "start_ym": start_ym, "end_ym": end_ym, "industry_nm": industry_nm}).mappings().all()
+    return [dict(row) for row in rows]

@@ -15,3 +15,16 @@ def get_country_sigungu_sales(
     end_ym: str | None = Query(default=None, description="끝 연월(YYYY-MM). 생략하면 가장 최근 데이터까지 조회"),
 ):
     return handle_service_error(industries.get_country_sigungu_sales, country_cd, sgg_cd, start_ym, end_ym)
+
+
+def get_sales_overview(start_ym: str = Query(description="시작월(YYYY-MM)"), end_ym: str = Query(description="종료월(YYYY-MM)")):
+    return handle_service_error(industries.get_sales_overview, start_ym, end_ym)
+
+
+def get_sales_patterns(
+    sgg_cd: str = Query(description="부산 구·군 코드"),
+    start_ym: str = Query(description="시작월(YYYY-MM)"),
+    end_ym: str = Query(description="종료월(YYYY-MM)"),
+    industry_nm: str | None = Query(default=None, description="업종명. 생략하면 전체 업종"),
+):
+    return handle_service_error(industries.get_sales_patterns, sgg_cd, start_ym, end_ym, industry_nm)

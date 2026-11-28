@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { login } from "../apis/auth";
 import "./Login.css";
 
-function Login({ onClose, onLogin }) {
+function Login({ onClose, onLogin, requireAdmin = true }) {
   const dialogRef = useRef(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,11 +22,11 @@ function Login({ onClose, onLogin }) {
     setIsSubmitting(true);
     try {
       const { data } = await login(values.get("username").trim(), values.get("password"));
-      if (data?.user?.role !== "admin") {
+      if (requireAdmin && data?.user?.role !== "admin") {
         setError("관리자 계정으로만 이용할 수 있습니다.");
         return;
       }
-      if (dialogRef.current?.open) onLogin();
+      if (dialogRef.current?.open) onLogin(data.user);
     } catch (error) {
       const message = error.response?.data?.message;
       setError(
@@ -54,8 +54,8 @@ function Login({ onClose, onLogin }) {
     >
       <section className="login-content">
         <button type="button" className="login-close" aria-label="로그인 닫기" onClick={onClose}>×</button>
-        <h2 id="login-title">관리자 로그인</h2>
-        <p>해당 페이지는 사이트 관리자만 이용할 수 있습니다.</p>
+        <h2 id="login-title">{requireAdmin ? "관리자 로그인" : "로그인"}</h2>
+        <p>{requireAdmin ? "해당 페이지는 사이트 관리자만 이용할 수 있습니다." : "행사 기획 상담은 로그인 후 이용할 수 있습니다."}</p>
         <p>계정 발급이 필요하시면 이메일로 문의해 주세요.</p>
         <a href="mailto:admin@example.com">admin@example.com</a>
         <form onSubmit={submitLogin}>

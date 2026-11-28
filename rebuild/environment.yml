@@ -33,6 +33,7 @@ dependencies:
       - langchain-openai==0.3.35
       - langchain-text-splitters==0.3.11
       - openai==2.3.0
+      - sqlglot==30.35.0
       - sentence-transformers==5.1.1
       - langchain-core
       - langchain-huggingface==0.3.0

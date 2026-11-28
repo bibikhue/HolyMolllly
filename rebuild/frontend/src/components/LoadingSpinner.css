@@ -1,0 +1,5 @@
+.loading-spinner { display: grid; place-items: center; width: 100%; min-height: 120px; padding: 24px; }
+.loading-spinner__ring { display: block; width: 30px; height: 30px; border: 3px solid #e1eef8; border-top-color: #0068a9; border-right-color: #0068a9; border-radius: 50%; animation: loading-spinner-turn .8s linear infinite; }
+.loading-spinner__label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@keyframes loading-spinner-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading-spinner__ring { animation: none; } }

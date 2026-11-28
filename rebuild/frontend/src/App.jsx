@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import "./App.css";
 
@@ -18,30 +18,38 @@ import CountryStatistics from "./pages/admin/CountryStatistics";
 import AdminReport from "./pages/admin/Report";
 import AdminForecast from "./pages/admin/Forecast";
 import Owners from "./pages/owners";
-import OwnersVisit from "./pages/owners/Visit";
-import OwnersSales from "./pages/owners/Sales";
+import OwnersStatistics from "./pages/owners/Statistics";
+import WeeklyEvents from "./pages/owners/WeeklyEvents";
 import Visitors from "./pages/visitors";
 import VisitorsStays from "./pages/visitors/Stays";
 import VisitorsAttractions from "./pages/visitors/Attractions";
 import VisitorsRecommendedCourses from "./pages/visitors/RecommendedCourses";
 import { PATHS } from "./constants/paths";
 import { getCurrentUser, logout } from "./apis/auth";
+import useGraphContext from "./components/useGraphContext";
+import { AnalysisFiltersContext, initialAnalysisFilters } from "./components/analysisFilters";
 
 function App() {
+  const [filters, setFilters] = useState(initialAnalysisFilters);
+  const filterContext = useMemo(() => ({ filters, setFilters }), [filters]);
+  const [graphContext, refreshGraphContext] = useGraphContext();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authenticatedUser, setAuthenticatedUser] = useState(null);
+  const [loginPurpose, setLoginPurpose] = useState("admin");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isCheckingLogin, setIsCheckingLogin] = useState(!isLoggedIn);
+  const openAdminLogin = useCallback((open) => { setLoginPurpose("admin"); setIsLoginOpen(open); }, []);
 
   useEffect(() => {
     if (isLoggedIn) return;
     let active = true;
     getCurrentUser()
       .then(({ data }) => {
-        if (active) setIsLoggedIn(data?.user?.role === "admin");
+        if (active) { setIsLoggedIn(data?.user?.role === "admin"); setAuthenticatedUser(data?.user ?? null); }
       })
       .catch(() => {
-        if (active) setIsLoggedIn(false);
+        if (active) { setIsLoggedIn(false); setAuthenticatedUser(null); }
       })
       .finally(() => {
         if (active) setIsCheckingLogin(false);
@@ -54,7 +62,7 @@ function App() {
   const handleNavigate = (event, path) => {
     if (!isLoggedIn && path.startsWith(PATHS.ADMIN)) {
       event.preventDefault();
-      if (!isCheckingLogin) setIsLoginOpen(true);
+      if (!isCheckingLogin) openAdminLogin(true);
     }
   };
 
@@ -62,12 +70,13 @@ function App() {
     await logout();
     navigate(PATHS.HOME, { replace: true });
     setIsLoggedIn(false);
+    setAuthenticatedUser(null);
     setIsLoginOpen(false);
   };
 
   return (
-    <>
-      <Header onNavigate={handleNavigate} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+    <AnalysisFiltersContext value={filterContext}>
+      <Header onNavigate={handleNavigate} isLoggedIn={Boolean(authenticatedUser)} onLogout={handleLogout} />
       <main>
         <Routes>
           <Route path={PATHS.HOME} element={<Home />} />
@@ -80,7 +89,7 @@ function App() {
               <ProtectedRoute
                 isLoggedIn={isLoggedIn}
                 isCheckingLogin={isCheckingLogin}
-                onRequireLogin={setIsLoginOpen}
+                onRequireLogin={openAdminLogin}
               />
             }
           >
@@ -90,8 +99,10 @@ function App() {
             <Route path={PATHS.ADMIN_FORECAST} element={<AdminForecast />} />
           </Route>
           <Route path={PATHS.OWNERS} element={<Owners />} />
-          <Route path={PATHS.OWNERS_VISIT} element={<OwnersVisit />} />
-          <Route path={PATHS.OWNERS_SALES} element={<OwnersSales />} />
+          <Route path={PATHS.OWNERS_PATTERNS} element={<OwnersStatistics />} />
+          <Route path={PATHS.OWNERS_VISIT} element={<Navigate to={PATHS.OWNERS_PATTERNS} replace />} />
+          <Route path={PATHS.OWNERS_SALES} element={<Navigate to={`${PATHS.OWNERS_PATTERNS}?metric=sales`} replace />} />
+          <Route path={PATHS.OWNERS_WEEKLY_EVENTS} element={<WeeklyEvents />} />
           <Route path={PATHS.VISITORS} element={<Visitors />} />
           <Route path={PATHS.VISITORS_STAYS} element={<VisitorsStays />} />
           <Route
@@ -105,17 +116,19 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      <Chatbot />
+      <Chatbot graphContext={graphContext} refreshGraphContext={refreshGraphContext} isAuthenticated={Boolean(authenticatedUser)} onRequireLogin={() => { setLoginPurpose("planning"); setIsLoginOpen(true); }} />
       {isLoginOpen && (
         <Login
+          requireAdmin={loginPurpose === "admin"}
           onClose={() => setIsLoginOpen(false)}
-          onLogin={() => {
-            setIsLoggedIn(true);
+          onLogin={(user) => {
+            setIsLoggedIn(user?.role === "admin");
+            setAuthenticatedUser(user);
             setIsLoginOpen(false);
           }}
         />
       )}
-    </>
+    </AnalysisFiltersContext>
   );
 }
 

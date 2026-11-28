@@ -2,6 +2,7 @@ from fastapi import Query
 
 from controllers.errors import handle_service_error
 from services import countries
+from services import country_clusters
 
 
 def get_country_summary(
@@ -11,6 +12,14 @@ def get_country_summary(
     sgg_cd: str | None = Query(default=None, description="시군구 코드(5자리). 생략하면 부산 전체 구·군"),
 ):
     return handle_service_error(countries.get_country_summary, start_ym, end_ym, country_cd, sgg_cd)
+
+
+def get_country_clusters(
+    start_ym: str = Query(description="분석 시작월(YYYY-MM). 2024년·2025년을 포함해야 합니다."),
+    end_ym: str = Query(description="분석 종료월(YYYY-MM)"),
+    sgg_cd: str | None = Query(default=None, description="부산 구·군 코드. 생략하면 부산 전체"),
+):
+    return handle_service_error(country_clusters.get_country_clusters, start_ym, end_ym, sgg_cd)
 
 
 def get_country_sales(

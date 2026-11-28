@@ -4,6 +4,8 @@ export const CHART_COLORS = [
 ];
 
 export const AREA_COLORS = { 원도심: "#f4a261", 중부산: "#76c893", 서부산: "#4ea8de", 동부산: "#9b8afb" };
+export const SALES_COUNTRIES = [{ name: "대만", color: "#f4a261" }, { name: "중국", color: "#76c893" }, { name: "일본", color: "#9b8afb" }, { name: "미국", color: "#eac44b" }, { name: "기타", color: "#b8c3ce" }];
+export const formatEpayEok = (value) => (value / 100000).toLocaleString("ko-KR", { maximumFractionDigits: 1 });
 export const AREA_SHADES = {
   원도심: ["#e88b42", "#f4a261", "#f7b681", "#facba5"],
   중부산: ["#50ad73", "#76c893", "#94d4aa", "#b2e1c2"],

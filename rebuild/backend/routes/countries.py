@@ -5,6 +5,11 @@ from controllers import countries
 
 router = APIRouter(tags=["국가"])
 router.add_api_route(
+    "/countries/clusters", countries.get_country_clusters, methods=["GET"],
+    summary="DB 기반 국가별 방문·소비 유형 분석",
+    description="DB의 11개 지표를 표준화해 K-means 4개 군집(n_init=50, random_state=42)으로 분류하고 PCA 2차원 좌표를 반환합니다. 실루엣 점수는 계산하지 않습니다.",
+)
+router.add_api_route(
     "/countries/sales-per-visitor/distribution", countries.get_sales_per_visitor_distribution, methods=["GET"],
     summary="국가별 월별 1인당 관광소비액 분포 조회",
     description="방문객 수가 양수인 국가별 월간 소비액을 방문객 수로 나눕니다. 기타와 양수가 아닌 소비액은 제외하며 중앙값 내림차순으로 반환합니다.",

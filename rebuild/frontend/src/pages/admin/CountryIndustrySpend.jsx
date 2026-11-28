@@ -1,6 +1,9 @@
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { getBusanDistricts, getCountryDistrictIndustrySales } from "../../apis/admin";
 import DonutChart from "../../components/DonutChart";
+import { useAnalysisFilter } from "../../components/analysisFilters";
+import { useChatDataset } from "../../components/chatDatasets";
 
 const INDUSTRY_COLORS = {
   쇼핑업: "#1f4e79", 여가서비스업: "#2f75b5", 식음료업: "#5b9bd5",
@@ -14,22 +17,24 @@ function IndustryChart({ country, district, start, end }) {
   const [error, setError] = useState("");
   const countryCode = country.country_cd;
   const districtCode = district.sgg_cd;
+  const requestKey = `${countryCode}:${districtCode}:${start}:${end}`;
+  useChatDataset(`policy-industry-${districtCode}`, { period: { start_ym: start, end_ym: end }, country: countryCode, district: districtCode, unit: "천원", status: error ? "error" : result?.requestKey === requestKey ? "ready" : "loading", data: result?.requestKey === requestKey ? result : null });
 
   useEffect(() => {
     const controller = new AbortController();
     getCountryDistrictIndustrySales({ country_cd: countryCode, sgg_cd: districtCode, start_ym: start, end_ym: end }, controller.signal)
       .then(({ data }) => {
         if (!Array.isArray(data.data)) throw new Error("업종별 소비 통계 응답을 확인할 수 없습니다.");
-        if (!controller.signal.aborted) setResult(data);
+        if (!controller.signal.aborted) setResult({ ...data, requestKey });
       })
       .catch((error) => {
         if (!controller.signal.aborted) setError(error.response?.data?.message || "업종별 소비 통계를 불러오지 못했습니다.");
       });
     return () => controller.abort();
-  }, [countryCode, districtCode, start, end]);
+  }, [countryCode, districtCode, start, end, requestKey]);
 
   if (error) return <p role="alert">{error}</p>;
-  if (!result) return <p role="status">업종별 소비 통계를 불러오는 중입니다.</p>;
+  if (!result) return <LoadingSpinner label="업종별 소비 통계를 불러오는 중입니다." />;
 
   const data = result.data.map((row) => ({
     label: row.industry_nm, value: Number(row.sales_amt), color: INDUSTRY_COLORS[row.industry_nm],
@@ -50,7 +55,8 @@ function IndustryChart({ country, district, start, end }) {
 export default function CountryIndustrySpend({ country, start, end }) {
   const [districts, setDistricts] = useState(null);
   const [error, setError] = useState("");
-  const [districtCodes, setDistrictCodes] = useState(["26110", "26350"]);
+  const [sharedDistrict, setSharedDistrict] = useAnalysisFilter("district");
+  const [districtCodes, setDistrictCodes] = useState(() => [sharedDistrict, sharedDistrict === "26110" ? "26350" : "26110"]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -65,14 +71,15 @@ export default function CountryIndustrySpend({ country, start, end }) {
     return () => controller.abort();
   }, []);
 
-  const firstDistrict = districts?.find((item) => String(item.sgg_cd) === districtCodes[0]) ?? districts?.[0];
+  const firstCode = districtCodes.includes(sharedDistrict) ? districtCodes[0] : sharedDistrict;
+  const firstDistrict = districts?.find((item) => String(item.sgg_cd) === firstCode) ?? districts?.[0];
   const secondDistrict = districts?.find((item) => String(item.sgg_cd) === districtCodes[1] && item !== firstDistrict)
     ?? districts?.find((item) => item !== firstDistrict);
   const selectedDistricts = [firstDistrict, secondDistrict];
 
   return (
     <div className="country-industry-comparison">
-      {error ? <p role="alert">{error}</p> : !districts ? <p role="status">구군 목록을 불러오는 중입니다.</p> : country && firstDistrict && secondDistrict ? selectedDistricts.map((district, index) => (
+      {error ? <p role="alert">{error}</p> : !districts ? <LoadingSpinner label="구군 목록을 불러오는 중입니다." /> : country && firstDistrict && secondDistrict ? selectedDistricts.map((district, index) => (
         <div className="admin-visits__card" key={index}>
           <div className="admin-visits__chart-controls">
             <label className="admin-visits__country-select">구·군
@@ -80,6 +87,7 @@ export default function CountryIndustrySpend({ country, start, end }) {
                 const code = event.target.value;
                 if (code === String(selectedDistricts[1 - index].sgg_cd)) return;
                 setDistrictCodes(selectedDistricts.map((item, position) => position === index ? code : String(item.sgg_cd)));
+                setSharedDistrict(code);
               }}>
                 {districts.filter((item) => String(item.sgg_cd) !== String(selectedDistricts[1 - index].sgg_cd))
                   .map((item) => <option key={item.sgg_cd} value={String(item.sgg_cd)}>{item.sgg_nm}</option>)}

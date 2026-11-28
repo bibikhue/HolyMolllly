@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import ages, auth, countries, file, genders, industries, sidos, sigungu
+from routes import ages, auth, chatbot, countries, file, genders, industries, sidos, sigungu
 from services.health import check_db
 
 
@@ -22,6 +22,7 @@ app.add_middleware(
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(auth.router)
+api_router.include_router(chatbot.router)
 api_router.include_router(sidos.router)
 api_router.include_router(sigungu.router)
 api_router.include_router(industries.router)

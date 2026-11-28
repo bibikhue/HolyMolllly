@@ -1,0 +1,21 @@
+.country-type-chart { min-width: 0; }
+.country-types [hidden] { display: none !important; }
+.country-types__filters { margin-bottom: 18px; }
+.country-types__filters label { display: flex; align-items: center; gap: 10px; color: #4f6577; font-size: 13px; }
+.country-types__filters select { height: 36px; min-width: 130px; padding: 0 10px; border: 1px solid #cadbea; border-radius: 7px; background: #fff; color: #12324a; font: inherit; }
+.country-type-chart h2 { margin: 0 0 16px; text-align: center; font-size: 18px; }
+.country-type-chart__legend { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 18px; }
+.country-type-chart__legend button { display: flex; align-items: center; gap: 7px; border: 0; padding: 4px 0; color: #4f6577; background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.country-type-chart__legend button[aria-pressed="false"] { opacity: .35; text-decoration: line-through; }
+.country-type-chart__legend i { width: 11px; height: 11px; border-radius: 50%; }
+.country-type-chart__empty { padding: 30px 16px; text-align: center; color: #7a8e9f; font-size: 13px; }
+.country-type-chart__profiles { min-width: 0; margin-top: 20px; padding-top: 24px; border-top: 1px solid #e5edf3; }
+.country-type-chart__feature-legend { max-width: 900px; margin: 0 auto 12px; gap: 6px 16px; }
+.country-type-chart__feature-legend button { font-size: 11px; }
+.country-type-chart__feature-legend i { border-radius: 2px; }
+.country-type-chart__method { color: #6d8192; font-size: 12px; line-height: 1.7; }
+.country-type-chart__method summary { width: fit-content; margin: 0 auto; cursor: pointer; }
+.country-type-chart__method p { margin: 8px 0; }
+.country-type-chart__method table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.country-type-chart__method th, .country-type-chart__method td { padding: 8px 12px; border-bottom: 1px solid #e5edf3; text-align: left; }
+.country-type-chart__method th { white-space: nowrap; }

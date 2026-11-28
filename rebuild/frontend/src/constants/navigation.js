@@ -34,8 +34,8 @@ export const HEADER_LIST = [
     name: "상권 분석 지원",
     link: PATHS.OWNERS,
     children: [
-      { name: "방문 패턴 분석", link: PATHS.OWNERS_VISIT },
-      { name: "소비 패턴 분석", link: PATHS.OWNERS_SALES },
+      { name: "방문 및 소비 패턴 분석", link: PATHS.OWNERS_PATTERNS },
+      { name: "주간 행사 알림", link: PATHS.OWNERS_WEEKLY_EVENTS },
     ],
   },
   {

@@ -1,3 +1,4 @@
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DonutChart from "../../components/DonutChart";
@@ -8,9 +9,12 @@ import CountryDistrictVisits from "./CountryDistrictVisits";
 import CountryIndustrySpend from "./CountryIndustrySpend";
 import AgeDistrictVisits from "./AgeDistrictVisits";
 import MonthPicker from "../../components/MonthPicker";
+import CountryTypes from "./CountryTypes";
 import { CHART_COLORS } from "../../constants/charts";
 import { getMonthlyVisitsByCountry, getVisitsByCountry, getSalesByCountry, getMonthlySalesByCountry, getSalesPerVisitorDistribution } from "../../apis/admin";
 import "./Visits.css";
+import { useAnalysisFilter } from "../../components/analysisFilters";
+import { distributionSummary, monthlyCountryData, useChatDataset } from "../../components/chatDatasets";
 
 // Match src/visualization/02_국가별_누적_관광소비.py: 원 → 억원.
 const formatEok = (value) => (value / 100000000).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
@@ -24,7 +28,9 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [countryCode, setCountryCode] = useState("");
+  const [countryCode, setCountryCode] = useAnalysisFilter("country");
+  const periodKey = JSON.stringify(period);
+  useChatDataset(`policy-${metric}`, { period, unit: metric === "sales" ? "원" : "명", status: result?.periodKey === periodKey ? "ready" : "loading", data: result?.periodKey === periodKey ? { countries: result.data, monthly: monthlyCountryData(result.monthly, config.key), per_visitor_distribution: distributionSummary(result.distribution) } : null });
   const [viewportHeight, setViewportHeight] = useState(() => window.innerHeight);
   useEffect(() => {
     const updateHeight = () => setViewportHeight(window.innerHeight);
@@ -68,7 +74,7 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
           throw new Error("방문 통계 응답을 확인할 수 없습니다.");
         }
         if (!controller.signal.aborted) {
-          setResult({ ...summary.data, monthly: monthly.data.data, distribution: distribution?.data.data ?? [] });
+          setResult({ ...summary.data, periodKey, monthly: monthly.data.data, distribution: distribution?.data.data ?? [] });
           onBoundsChange((previous) => ({ ...previous, [metric]: { start: fullPeriod.data.start_ym, end: fullPeriod.data.end_ym } }));
         }
       })
@@ -81,15 +87,14 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
         if (!controller.signal.aborted) setIsLoading(false);
       });
     return () => controller.abort();
-  }, [period, config, metric, onBoundsChange]);
+  }, [period, periodKey, config, metric, onBoundsChange]);
 
   const countries = (result?.data ?? [])
     .map((row) => ({ label: row.country_nm, value: Number(row[config.key]) }))
     .filter((item) => Number.isFinite(item.value) && item.value > 0)
     .sort((a, b) => b.value - a.value);
   const countryOptions = (result?.data ?? []).filter((item) => item.country_cd != null && item.country_nm !== "기타");
-  const selectedCountry = countryOptions.find((item) => String(item.country_cd) === countryCode)
-    ?? countryOptions.find((item) => item.country_nm === "일본") ?? countryOptions[0];
+  const selectedCountry = countryOptions.find((item) => String(item.country_cd) === countryCode);
   const ranked = countries.filter((item) => item.label !== "기타");
   const chartData = ranked.slice(0, 10).map((item, index) => ({ ...item, color: CHART_COLORS[index] }));
   const other = countries.filter((item) => item.label === "기타")
@@ -120,7 +125,7 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
       <div hidden={view !== "basic"}>
       <div className="admin-visits__overview">
       <div className="admin-visits__card admin-visits__summary" aria-busy={isLoading}>
-        {isLoading && <p role="status">{config.name} 통계를 불러오는 중입니다.</p>}
+        {isLoading && <LoadingSpinner label={`${config.name} 통계를 불러오는 중입니다.`} />}
         {error && <p role="alert">{error}</p>}
         {result && (
           <>
@@ -153,7 +158,7 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
       </div>
       <div className={`country-statistics-details country-statistics-details--${metric}`} hidden={view !== "detail"}>
       {result && metric === "sales" && (
-        <CountryMonthlySpend countries={result.data} country={selectedCountry} onCountryChange={setCountryCode} start={result.start_ym} end={result.end_ym} height={Math.max(220, Math.min(280, viewportHeight - 620))} />
+        <CountryMonthlySpend countries={result.data} country={selectedCountry} countryCode={countryCode} onCountryChange={setCountryCode} start={result.start_ym} end={result.end_ym} height={Math.max(220, Math.min(280, viewportHeight - 620))} />
       )}
       {result && metric === "visits" && (
         <CountryDistrictVisits countries={result.data} start={result.start_ym} end={result.end_ym} height={detailHeight} />
@@ -170,17 +175,11 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
 }
 
 export default function CountryStatistics() {
-  const [metric, setMetric] = useState("visits");
+  const [, setSearchParams] = useSearchParams();
+  const [metric, setMetric] = useState(() => new URLSearchParams(window.location.search).get("metric") === "types" ? "types" : "visits");
+  const [typesOpened, setTypesOpened] = useState(metric === "types");
   const [view, setView] = useState("basic");
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [period, setPeriod] = useState(() => {
-    const start = searchParams.get("start_ym") ?? "2018-01";
-    const currentMonth = new Intl.DateTimeFormat("sv-SE", {
-      timeZone: "Asia/Seoul", year: "numeric", month: "2-digit",
-    }).format(new Date());
-    const end = searchParams.get("end_ym") ?? currentMonth;
-    return { ...(start && { start_ym: start }), ...(end && { end_ym: end }) };
-  });
+  const [period, setPeriod] = useAnalysisFilter("period");
   const [periodError, setPeriodError] = useState("");
   const [bounds, setBounds] = useState({});
   const [requestId, setRequestId] = useState(0);
@@ -223,16 +222,17 @@ export default function CountryStatistics() {
   const years = availableYears.length ? Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index) : [];
 
   return (
-    <div className="country-statistics-layout">
+    <div className="country-statistics-layout" data-chat-context={JSON.stringify({ period, metric, view })}>
       <aside className="country-statistics-sidebar" aria-label="통계 선택 및 공통 조회 조건">
         <nav className="country-statistics-tabs" aria-label="국가별 통계">
           <button type="button" aria-pressed={metric === "visits"} onClick={() => setMetric("visits")}>방문</button>
           <button type="button" aria-pressed={metric === "sales"} onClick={() => setMetric("sales")}>소비</button>
+          <button type="button" aria-pressed={metric === "types"} onClick={() => { setTypesOpened(true); setMetric("types"); }}>국가별 특성 유형화</button>
         </nav>
         <form className="admin-visits__filters" onSubmit={handleSearch} aria-labelledby="country-period-title">
           <h2 id="country-period-title">공통 조회 기간</h2>
-          <MonthPicker key={`start:${years.join()}`} name="start" label="시작월" years={years} value={period.start_ym} />
-          <MonthPicker key={`end:${years.join()}`} name="end" label="종료월" years={years} value={period.end_ym} />
+          <MonthPicker key={`start:${period.start_ym}:${years.join()}`} name="start" label="시작월" years={years} value={period.start_ym} />
+          <MonthPicker key={`end:${period.end_ym}:${years.join()}`} name="end" label="종료월" years={years} value={period.end_ym} />
           <button type="submit">조회</button>
           {periodError && <p role="alert">{periodError}</p>}
         </form>
@@ -245,6 +245,7 @@ export default function CountryStatistics() {
         {Object.keys(METRICS).map((item) => (
           <StatisticsPanel key={`${item}:${requestId}`} metric={item} period={period} active={metric === item} view={view} onBoundsChange={setBounds} />
         ))}
+        <div hidden={metric !== "types"}>{typesOpened && <CountryTypes period={period} view={view} />}</div>
       </div>
     </div>
   );

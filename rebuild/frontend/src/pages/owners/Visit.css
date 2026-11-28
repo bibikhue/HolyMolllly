@@ -1,0 +1,41 @@
+.owners-visits { padding: 24px 28px; text-align: left; min-width: 0; }
+.owners-visits__filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid #e5edf3; }
+.owners-visits__district { display: grid; gap: 8px; color: #4f6577; font-size: 12px; }
+.owners-visits__district select { min-width: 130px; height: 40px; padding: 0 12px; border: 1px solid #cbdbea; border-radius: 7px; color: #12324a; background: #fff; font: inherit; font-size: 14px; }
+.owners-visits__filters .month-picker { width: 170px; }
+.owners-visits__filters .month-picker summary { height: 40px; padding: 0 12px; }
+.owners-visits__separator { padding-bottom: 12px; }
+.owners-visits__filters > button { height: 40px; padding: 0 24px; border: 0; border-radius: 7px; background: #0068a9; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.owners-visits__filters > button:disabled { opacity: .65; cursor: wait; }
+.owners-visits__filters > p { flex-basis: 100%; margin: 0; color: #bb4d4d; font-size: 12px; }
+.owners-visits__period { margin: 16px 0; color: #7a8e9f; font-size: 12px; }
+.owners-visits__overview { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 28px; }
+.owners-visits__age { min-width: 0; }
+.owners-visits__age .donut-chart-container { margin: 0 auto; }
+.owners-visits__age .donut-chart__title, .comparison-bar-chart h2 { margin: 0 0 16px; font-size: 18px; text-align: center; font-weight: 700; }
+.owners-visits__age .donut-chart__center span { text-align: center; font-size: 13px; }
+.owners-visits__age .donut-chart__legend { gap: 10px 14px; max-width: 350px; margin: 0 auto; }
+.comparison-bar-chart { min-width: 0; width: 100%; }
+.comparison-bar-chart__legend { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px 20px; margin-bottom: 4px; font-size: 12px; }
+.comparison-bar-chart__legend > button { display: flex; align-items: center; gap: 6px; padding: 4px 2px; border: 0; border-radius: 3px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.comparison-bar-chart__legend > button[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+.comparison-bar-chart__legend > button:focus-visible { outline: 2px solid #0068a9; outline-offset: 2px; }
+.comparison-bar-chart__legend i { display: block; width: 12px; height: 9px; }
+.owners-visits__interests { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e5edf3; }
+.owners-visits__source { margin: 8px 0 0; font-size: 11px; color: #7a8e9f; text-align: center; }
+.owners-visits__region-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 20px; }
+.owners-visits__region-comparison .comparison-bar-chart__legend { min-height: 32px; gap: 8px 12px; }
+.owners-visits__empty { padding: 40px 0; text-align: center; color: #7a8e9f; font-size: 13px; }
+.owners-visits__error { color: #bb4d4d; }
+@media (max-width: 900px) {
+  .owners-visits { padding: 20px 16px; }
+  .owners-visits__overview { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .owners-visits__region-comparison { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .owners-visits__filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owners-visits__filters .month-picker { width: 100%; }
+  .owners-visits__district, .owners-visits__filters > p { grid-column: 1 / -1; }
+  .owners-visits__separator { display: none; }
+  .owners-visits__filters > button { grid-column: 1 / -1; }
+}

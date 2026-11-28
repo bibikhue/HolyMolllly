@@ -1,0 +1,1 @@
+`nl2sql` is copied from [MohamedElghobary/nl2sql-py](https://github.com/MohamedElghobary/nl2sql-py), commit `f4c242ec5aff5af86325e6a1587941966e45741e` (package metadata declares MIT). ChocoDB uses its OpenAI provider and adds `GeminiProvider` for SQL generation. ChocoDB handles database inspection separately.

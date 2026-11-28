@@ -98,7 +98,7 @@ main:has(.country-statistics-layout) { display: flex; flex-direction: column; }
   .country-statistics-layout > .admin-visits { grid-column: 1; padding: 24px 16px 0; border-left: 0; border-top: 1px solid #e1e8ee; }
   .country-statistics-sidebar .admin-visits__filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .country-statistics-sidebar .admin-visits__filters > :is(h2, button, p) { grid-column: 1 / -1; }
-  .country-statistics-tabs { grid-template-columns: repeat(2, 1fr); }
+  .country-statistics-tabs { grid-template-columns: repeat(3, 1fr); }
   .country-statistics-tabs button { text-align: center; }
 }
 

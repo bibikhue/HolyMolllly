@@ -188,7 +188,7 @@ def get_sales_per_visitor_period_bounds(country_cd=None, sgg_cd=None):
 
 def get_sales_per_visitor(start_ym=None, end_ym=None, country_cd=None, sgg_cd=None):
     query = """
-        SELECT c.country_nm, SUM(tc.tourist_cnt) AS tourist_cnt, SUM(cs.spend_amt) AS sales_amt
+        SELECT c.country_cd, c.country_nm, SUM(tc.tourist_cnt) AS tourist_cnt, SUM(cs.spend_amt) AS sales_amt
         FROM tourist_counts AS tc
         JOIN country_tourism_spending AS cs
           ON cs.base_ym = tc.base_ym AND cs.sgg_cd = tc.sgg_cd AND cs.country_id = tc.country_id
@@ -208,7 +208,7 @@ def get_sales_per_visitor(start_ym=None, end_ym=None, country_cd=None, sgg_cd=No
     if sgg_cd is not None:
         query += " AND tc.sgg_cd = :sgg_cd"
         params["sgg_cd"] = sgg_cd
-    query += " GROUP BY c.country_id, c.country_nm HAVING SUM(tc.tourist_cnt) > 0"
+    query += " GROUP BY c.country_id, c.country_cd, c.country_nm HAVING SUM(tc.tourist_cnt) > 0"
 
     with get_connection() as connection:
         rows = connection.execute(text(query), params).mappings().all()

@@ -16,8 +16,10 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-leaflet": "^5.0.0",
+    "react-markdown": "^10.1.0",
     "react-plotly.js": "^4.1.0",
-    "react-router-dom": "^7.18.7"
+    "react-router-dom": "^7.18.7",
+    "remark-cjk-friendly": "^2.3.4"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
