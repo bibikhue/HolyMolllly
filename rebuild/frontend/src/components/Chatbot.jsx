@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { sendChatMessage, sendPlanningMessage } from "../apis/chatbot";
+import { sendChatMessage, sendPlanningMessage, sendDataMessage } from "../apis/chatbot";
 import LoadingSpinner from "./LoadingSpinner";
 import Markdown from "react-markdown";
 import remarkCjkFriendly from "remark-cjk-friendly";
@@ -20,7 +20,10 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
   const end = useRef(null);
   const composer = useRef(null);
   const interpretGraphs = draft.includes("@그래프해석");
-  const planningEvent = draft.includes("@행사기획") || (chatMode === "planning" && !interpretGraphs);
+  const mode = interpretGraphs ? "chat" : draft.includes("@데이터질문") ? "data" : draft.includes("@행사기획") ? "planning" : chatMode;
+  const planningEvent = mode === "planning";
+  const dataQuestion = mode === "data";
+  const requiresLogin = planningEvent;
   const dataCounts = countChatDatasets(graphContext);
   useEffect(() => () => request.current?.abort(), []);
   useEffect(() => { end.current?.scrollIntoView({ block: "nearest" }); }, [messages, sending, isOpen]);
@@ -36,14 +39,25 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
     planningScope.current = null;
   };
 
+  const toggleMode = (nextMode, keyword) => {
+    const active = nextMode === "chat" ? interpretGraphs : mode === nextMode;
+    setChatMode(active ? "chat" : nextMode);
+    planningScope.current = null;
+    setDraft((previous) => {
+      const text = previous.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").replaceAll("@데이터질문", "").trim();
+      return active ? text : `${keyword} ${text}`;
+    });
+    composer.current?.focus();
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     const message = draft.trim();
     if (!message || request.current) return;
-    if (!message.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").trim()) { setError("키워드 뒤에 질문을 입력해 주세요."); return; }
-    if (planningEvent && !isAuthenticated) { setError("행사 기획 상담은 로그인 후 이용해 주세요."); onRequireLogin(); return; }
-    if (planningEvent) {
-      setChatMode("planning");
+    if (!message.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").replaceAll("@데이터질문", "").trim()) { setError("키워드 뒤에 질문을 입력해 주세요."); return; }
+    if (requiresLogin && !isAuthenticated) { setError("행사 기획 상담은 로그인 후 이용해 주세요."); onRequireLogin(); return; }
+    if (planningEvent || dataQuestion) {
+      setChatMode(mode);
       planningScope.current ??= structuredClone(filters);
     } else if (interpretGraphs) {
       setChatMode("chat");
@@ -53,15 +67,15 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
     request.current = controller;
     setSending(true);
     setError("");
-    const history = messages.slice(-24).map(({ role, content }) => ({ role, content }));
+    const history = messages.filter((item) => (item.mode ?? "chat") === mode).slice(-24).map(({ role, content }) => ({ role, content }));
     try {
       const context = message.includes("@그래프해석") ? refreshGraphContext() : null;
-      const { data } = planningEvent ? await sendPlanningMessage(message, history, planningScope.current, controller.signal) : await sendChatMessage(message, history, context, controller.signal);
+      const { data } = dataQuestion ? await sendDataMessage(message, history, planningScope.current, controller.signal) : planningEvent ? await sendPlanningMessage(message, history, planningScope.current, controller.signal) : await sendChatMessage(message, history, context, controller.signal);
       if (controller.signal.aborted) return;
-      setMessages((previous) => [...previous, { role: "user", content: message }, { role: "assistant", content: data.answer, sources: data.sources, incomplete: data.incomplete }]);
+      setMessages((previous) => [...previous, { role: "user", content: message, mode }, { role: "assistant", content: data.answer, sources: data.sources, incomplete: data.incomplete, mode }]);
       setDraft("");
     } catch (failure) {
-      if (!controller.signal.aborted && planningEvent && failure.response?.status === 401) onRequireLogin();
+      if (!controller.signal.aborted && requiresLogin && failure.response?.status === 401) onRequireLogin();
       if (!controller.signal.aborted) setError(failure.response?.data?.message || "답변을 받지 못했습니다. 다시 시도해 주세요.");
     } finally {
       if (request.current === controller) {
@@ -112,9 +126,10 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
             <div ref={end} />
           </div>
           <div className="chatbot-context">
-            <button type="button" className="chatbot-interpret" aria-pressed={interpretGraphs} disabled={sending} onClick={() => { setChatMode("chat"); planningScope.current = null; setDraft((previous) => previous.includes("@그래프해석") ? previous.replaceAll("@그래프해석", "").trim() : `@그래프해석 ${previous.replaceAll("@행사기획", "").trim()}`); composer.current?.focus(); }}>그래프 해석</button>
-            {isAuthenticated && <button type="button" className="chatbot-interpret" aria-pressed={planningEvent} disabled={sending} onClick={() => { setChatMode(planningEvent ? "chat" : "planning"); planningScope.current = null; setDraft((previous) => planningEvent ? previous.replaceAll("@행사기획", "").trim() : `@행사기획 ${previous.replaceAll("@그래프해석", "").trim()}`); composer.current?.focus(); }}>행사 기획 상담</button>}
-            {isAuthenticated && planningEvent && <span className="chatbot-planning-hint">상담 이어가는 중</span>}
+            <button type="button" className="chatbot-interpret" aria-pressed={interpretGraphs} disabled={sending} onClick={() => toggleMode("chat", "@그래프해석")}>그래프 해석</button>
+            {isAuthenticated && <button type="button" className="chatbot-interpret" aria-pressed={planningEvent} disabled={sending} onClick={() => toggleMode("planning", "@행사기획")}>행사 기획 상담</button>}
+            <button type="button" className="chatbot-interpret" aria-pressed={dataQuestion} disabled={sending} onClick={() => toggleMode("data", "@데이터질문")}>데이터 질문</button>
+            {(dataQuestion || (isAuthenticated && planningEvent)) && <span className="chatbot-planning-hint">{dataQuestion ? "질문 이어가는 중" : "상담 이어가는 중"}</span>}
             {interpretGraphs && <>
               <span className="chatbot-data-counts" aria-live="polite" title="기본·상세 그래프의 해석 자료를 모두 포함합니다.">
                 {[["visits", "방문"], ["sales", "소비"], ["types", "국가별 특성 유형화"]].filter(([category]) => dataCounts[category].total > 0).map(([category, label]) => `${label} ${dataCounts[category].total}건`).join(" · ")}
@@ -126,14 +141,14 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
             <textarea
               ref={composer}
               aria-label="메시지"
-              placeholder={planningEvent ? "기획 조건이나 후속 질문을 입력해주세요" : "메시지를 입력해주세요"}
+              placeholder={dataQuestion ? "궁금한 관광 데이터나 후속 질문을 입력해주세요" : planningEvent ? "기획 조건이나 후속 질문을 입력해주세요" : "메시지를 입력해주세요"}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               maxLength={2000}
               disabled={sending}
               onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }}
             />
-            <button type="submit" aria-label="메시지 보내기" disabled={sending || !draft.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").trim()}>
+            <button type="submit" aria-label="메시지 보내기" disabled={sending || !draft.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").replaceAll("@데이터질문", "").trim()}>
               ↑
             </button>
           </form>

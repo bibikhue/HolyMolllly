@@ -51,16 +51,20 @@ def request_response(payload):
         raise ValueError(504, "챗봇 응답 시간이 초과되었습니다. 다시 시도해 주세요.") from None
 
 
-def reply(message, history, context, planning_filters=None):
+def reply(message, history, context, planning_filters=None, data_filters=None):
     message = message.strip()
     if not message:
         raise ValueError(400, "질문을 입력해 주세요.")
     planning = planning_filters is not None
+    data_question = data_filters is not None
+    database = planning or data_question
     if "@행사기획" in message and not planning:
         raise ValueError(401, "행사 기획 상담은 로그인 후 이용해 주세요.")
+    if "@데이터질문" in message and not data_question:
+        raise ValueError(400, "데이터 질문 기능을 선택해 이용해 주세요.")
     interpret = "@그래프해석" in message
     context = context if interpret else None
-    question = message.replace("@그래프해석", "").replace("@행사기획", "").strip()
+    question = message.replace("@그래프해석", "").replace("@행사기획", "").replace("@데이터질문", "").strip()
     if not question:
         raise ValueError(400, "상담 키워드 뒤에 질문을 입력해 주세요.")
     if any(item.get("role") not in ("user", "assistant") or not isinstance(item.get("content"), str) or not 1 <= len(item["content"]) <= 20000 for item in history):
@@ -75,20 +79,22 @@ def reply(message, history, context, planning_filters=None):
     key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
         raise ValueError(503, "챗봇 API 키가 설정되지 않았습니다.")
-    if planning:
+    if database:
         from services.planning_nl2sql import retrieve
         retrieval_question = "\n".join([item["content"] for item in history if item["role"] == "user"][-12:] + [question])
-        context = retrieve(retrieval_question, planning_filters)
+        context = retrieve(retrieval_question, planning_filters if planning else data_filters, mode="planning" if planning else "data")
         screen = json.dumps(context, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     instructions = INSTRUCTIONS
     if planning:
         instructions += PLANNING_INSTRUCTIONS
         instructions += "\n행사 기획 근거는 서버가 NL2SQL로 실제 DB를 읽기 전용 집계한 결과입니다. 자료에 있는 범위에서 조회 결과를 설명하세요. 대상·지역·시기는 사용자 발언으로만 확정하며, 미정 지역은 여러 구군을 비교 추천하세요."
+    elif data_question:
+        instructions += "\n당신은 부산 관광 데이터 분석 도우미입니다. 서버가 실제 DB를 읽기 전용 집계한 결과를 근거로 데이터 질문에 직접 답하세요. 행사 기획 상담이나 개최지 추천으로 유도하지 마세요. 최근 대화의 비교 대상·기간·지역과 수정 조건을 유지하세요. 수치와 단위를 명확하게 설명하고 인과관계나 원인을 단정하지 마세요. 빈 결과·잘린 결과의 한계를 알리고 숫자를 만들지 마세요. 조회 SQL과 내부 인용 ID는 출력하지 마세요."
     payload = {
         "model": os.getenv("OPENAI_MODEL", "gpt-6-luna"),
         "instructions": instructions,
-        "input": [*history, {"role": "user", "content": f"분석 근거 자료(JSON):\n{screen}\n\n질문: {question}" if interpret or planning else question}],
-        "max_output_tokens": 6000 if planning else 4000,
+        "input": [*history, {"role": "user", "content": f"분석 근거 자료(JSON):\n{screen}\n\n질문: {question}" if interpret or database else question}],
+        "max_output_tokens": 6000 if database else 4000,
         "store": False,
     }
     if payload["model"].startswith("gpt-6"):
@@ -105,7 +111,7 @@ def reply(message, history, context, planning_filters=None):
     answer = "\n".join(part.get("text", "") for item in result.get("output", []) if item.get("type") == "message" for part in item.get("content", []) if part.get("type") == "output_text").strip()
     if not answer:
         raise ValueError(502, "챗봇 답변이 비어 있습니다. 다시 시도해 주세요.")
-    if planning:
+    if database:
         answer = re.sub(r"\s*\[(?:P|D)\d+\]", "", unescape(answer)).strip()
-    sources = list(dict.fromkeys(item["source"] for item in context["documents"])) if planning else []
-    return {"answer": answer, "incomplete": result.get("status") == "incomplete", **({"sources": [{"id": name, "title": name, "source": name} for name in sources]} if planning else {})}
+    sources = list(dict.fromkeys(item["source"] for item in context["documents"])) if database else []
+    return {"answer": answer, "incomplete": result.get("status") == "incomplete", **({"sources": [{"id": name, "title": name, "source": name} for name in sources]} if database else {})}

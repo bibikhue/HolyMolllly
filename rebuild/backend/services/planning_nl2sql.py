@@ -25,7 +25,7 @@ country_tourism_spending.spend_amt는 원, foreign_epay_spending.spend_amt는 �
 """
 
 
-def retrieve(question, filters):
+def retrieve(question, filters, mode="planning"):
     from services.chatbot import request_response
     period = filters.get("period") or {}
     if not isinstance(period, dict):
@@ -35,12 +35,15 @@ def retrieve(question, filters):
     provider = OpenAIProvider(os.environ["OPENAI_API_KEY"], model=os.getenv("OPENAI_MODEL", "gpt-6-luna"))
     domains = planning_sql.query("SELECT DISTINCT age_group, gender FROM visitor_demographics")
     info = json.dumps({"columns": planning_sql.schema(), "demographic_values": domains["rows"], "default_analysis_period": period}, ensure_ascii=False)
-    sql = provider.generate_sql(question, info, transport=request_response, instructions=RULES)
+    instructions = RULES
+    if mode == "data":
+        instructions += "\n현재는 일반 데이터 질문 모드이다. 행사 개최지나 후보 추천을 가정하지 말고 사용자 질문의 집계·비교를 수행한다. 지역을 지정하지 않았으면 부산 전체 기준으로 집계하고, 구군 비교를 요청한 경우에만 구군별로 나눈다."
+    sql = provider.generate_sql(question, info, transport=request_response, instructions=instructions)
     try:
         data = planning_sql.query(sql)
     except SQLAlchemyError:
         raise ValueError(502, "분석 데이터 조회에 실패했습니다. 대상·지역·기간을 구체화해 다시 질문해 주세요.") from None
-    documents = [{"source": "행사 기획 DB 분석", "title": "질문에 따른 관광 데이터 집계", "data": data,
+    documents = [{"source": "관광 데이터 DB 분석" if mode == "data" else "행사 기획 DB 분석", "title": "질문에 따른 관광 데이터 집계", "data": data,
                   "query": planning_sql.validate(sql),
                   "definitions": "visitor_demographics는 외지인 성별·연령별 방문 건수. tourist_counts는 국적별 외국인 방문객 수. 일반 관광소비액은 원, 간편결제 소비액은 천원. SQL의 WHERE 기간/월 조건을 확인해 집계 범위를 설명한다. SQL 자체는 사용자에게 출력하지 않는다."}]
     if any(word in question for word in ("군집", "유형화", "클러스터")):
@@ -52,7 +55,9 @@ def retrieve(question, filters):
             documents.append({"source": "국가별 특성 유형화", "title": "국가별 군집 분석", "data": clusters})
         except ValueError as error:
             documents.append({"source": "국가별 특성 유형화", "title": "조회 제한", "data": {"reason": str(error.args[-1])}})
-    context = jsonable_encoder({"mode": "event_planning_nl2sql", "location_note": "개최지는 사용자 발언에서 확정한 경우에만 확정이다. 미정이면 여러 구군을 비교 추천한다.", "period": period, "documents": documents})
+    context = jsonable_encoder({"mode": "data_question_nl2sql" if mode == "data" else "event_planning_nl2sql", "period": period, "documents": documents})
+    if mode == "planning":
+        context["location_note"] = "개최지는 사용자 발언에서 확정한 경우에만 확정이다. 미정이면 여러 구군을 비교 추천한다."
     if len(json.dumps(context, ensure_ascii=False).encode("utf-8")) > 120000:
         raise ValueError(413, "분석 결과가 너무 큽니다. 질문 범위를 좁혀 주세요.")
     return context
