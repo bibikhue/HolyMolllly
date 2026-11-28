@@ -1,6 +1,7 @@
 from collections import deque
 from threading import Lock
 from time import monotonic
+from typing import Literal
 
 from fastapi import Body, Request, Response
 from fastapi.responses import JSONResponse
@@ -42,9 +43,10 @@ def send_message(
     message: str = Body(min_length=1, max_length=2000),
     history: list[dict] = Body(default=[], max_length=24),
     context: dict | None = Body(default=None),
+    language: Literal["ko", "en", "ja", "zh-CN", "zh-TW"] = Body(default="ko"),
 ):
     response.headers["Cache-Control"] = "no-store"
-    return handle_service_error(chatbot.reply, message, history, context)
+    return handle_service_error(chatbot.reply, message, history, context, language=language)
 
 
 def plan_event(
@@ -53,11 +55,12 @@ def plan_event(
     message: str = Body(min_length=1, max_length=2000),
     history: list[dict] = Body(default=[], max_length=24),
     filters: dict = Body(default={}),
+    language: Literal["ko", "en", "ja", "zh-CN", "zh-TW"] = Body(default="ko"),
 ):
     if isinstance(request.state.user, JSONResponse):
         return request.state.user
     response.headers["Cache-Control"] = "no-store"
-    return handle_service_error(chatbot.reply, message, history, None, filters)
+    return handle_service_error(chatbot.reply, message, history, None, filters, language=language)
 
 
 def ask_data(
@@ -66,8 +69,9 @@ def ask_data(
     message: str = Body(min_length=1, max_length=2000),
     history: list[dict] = Body(default=[], max_length=24),
     filters: dict = Body(default={}),
+    language: Literal["ko", "en", "ja", "zh-CN", "zh-TW"] = Body(default="ko"),
 ):
     if isinstance(request.state.data_access, JSONResponse):
         return request.state.data_access
     response.headers["Cache-Control"] = "no-store"
-    return handle_service_error(chatbot.reply, message, history, None, data_filters=filters)
+    return handle_service_error(chatbot.reply, message, history, None, data_filters=filters, language=language)

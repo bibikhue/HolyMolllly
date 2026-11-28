@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -175,6 +176,7 @@ function StatisticsPanel({ metric, period, active, view, onBoundsChange }) {
 }
 
 export default function CountryStatistics() {
+  const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const [metric, setMetric] = useState(() => new URLSearchParams(window.location.search).get("metric") === "types" ? "types" : "visits");
   const [typesOpened, setTypesOpened] = useState(metric === "types");
@@ -225,22 +227,22 @@ export default function CountryStatistics() {
     <div className="country-statistics-layout" data-chat-context={JSON.stringify({ period, metric, view })}>
       <aside className="country-statistics-sidebar" aria-label="통계 선택 및 공통 조회 조건">
         <nav className="country-statistics-tabs" aria-label="국가별 통계">
-          <button type="button" aria-pressed={metric === "visits"} onClick={() => setMetric("visits")}>방문</button>
-          <button type="button" aria-pressed={metric === "sales"} onClick={() => setMetric("sales")}>소비</button>
-          <button type="button" aria-pressed={metric === "types"} onClick={() => { setTypesOpened(true); setMetric("types"); }}>국가별 특성 유형화</button>
+          <button type="button" aria-pressed={metric === "visits"} onClick={() => setMetric("visits")}>{t("방문")}</button>
+          <button type="button" aria-pressed={metric === "sales"} onClick={() => setMetric("sales")}>{t("소비")}</button>
+          <button type="button" aria-pressed={metric === "types"} onClick={() => { setTypesOpened(true); setMetric("types"); }}>{t("국가별 특성 유형화")}</button>
         </nav>
         <form className="admin-visits__filters" onSubmit={handleSearch} aria-labelledby="country-period-title">
-          <h2 id="country-period-title">공통 조회 기간</h2>
+          <h2 id="country-period-title">{t("공통 조회 기간")}</h2>
           <MonthPicker key={`start:${period.start_ym}:${years.join()}`} name="start" label="시작월" years={years} value={period.start_ym} />
           <MonthPicker key={`end:${period.end_ym}:${years.join()}`} name="end" label="종료월" years={years} value={period.end_ym} />
-          <button type="submit">조회</button>
-          {periodError && <p role="alert">{periodError}</p>}
+          <button type="submit">{t("조회")}</button>
+          {periodError && <p role="alert">{t(periodError)}</p>}
         </form>
       </aside>
       <div className="admin-visits">
         <nav className="country-statistics-view-tabs" aria-label="분석 상세 수준">
-          <button type="button" aria-pressed={view === "basic"} onClick={() => setView("basic")}>기본</button>
-          <button type="button" aria-pressed={view === "detail"} onClick={() => setView("detail")}>상세</button>
+          <button type="button" aria-pressed={view === "basic"} onClick={() => setView("basic")}>{t("기본")}</button>
+          <button type="button" aria-pressed={view === "detail"} onClick={() => setView("detail")}>{t("상세")}</button>
         </nav>
         {Object.keys(METRICS).map((item) => (
           <StatisticsPanel key={`${item}:${requestId}`} metric={item} period={period} active={metric === item} view={view} onBoundsChange={setBounds} />

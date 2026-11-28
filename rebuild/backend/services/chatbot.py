@@ -51,7 +51,7 @@ def request_response(payload):
         raise ValueError(504, "챗봇 응답 시간이 초과되었습니다. 다시 시도해 주세요.") from None
 
 
-def reply(message, history, context, planning_filters=None, data_filters=None):
+def reply(message, history, context, planning_filters=None, data_filters=None, language="ko"):
     message = message.strip()
     if not message:
         raise ValueError(400, "질문을 입력해 주세요.")
@@ -90,6 +90,11 @@ def reply(message, history, context, planning_filters=None, data_filters=None):
         instructions += "\n행사 기획 근거는 서버가 NL2SQL로 실제 DB를 읽기 전용 집계한 결과입니다. 자료에 있는 범위에서 조회 결과를 설명하세요. 대상·지역·시기는 사용자 발언으로만 확정하며, 미정 지역은 여러 구군을 비교 추천하세요."
     elif data_question:
         instructions += "\n당신은 부산 관광 데이터 분석 도우미입니다. 서버가 실제 DB를 읽기 전용 집계한 결과를 근거로 데이터 질문에 직접 답하세요. 행사 기획 상담이나 개최지 추천으로 유도하지 마세요. 최근 대화의 비교 대상·기간·지역과 수정 조건을 유지하세요. 수치와 단위를 명확하게 설명하고 인과관계나 원인을 단정하지 마세요. 빈 결과·잘린 결과의 한계를 알리고 숫자를 만들지 마세요. 조회 SQL과 내부 인용 ID는 출력하지 마세요."
+    languages = {"ko": "한국어", "en": "English", "ja": "日本語", "zh-CN": "简体中文", "zh-TW": "繁體中文"}
+    if language not in languages:
+        raise ValueError(400, "지원하지 않는 언어입니다.")
+    instructions = instructions.replace("한국어로 간결하게 답하세요.", "간결하게 답하세요.")
+    instructions += f"\n반드시 {languages[language]}로 답변하세요. 자료나 이전 대화의 언어와 관계없이 이 응답 언어를 따르세요. 데이터의 숫자, 코드, 화폐 단위와 통계 범위는 바꾸지 마세요."
     payload = {
         "model": os.getenv("OPENAI_MODEL", "gpt-6-luna"),
         "instructions": instructions,

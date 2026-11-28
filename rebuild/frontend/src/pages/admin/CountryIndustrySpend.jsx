@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { getBusanDistricts, getCountryDistrictIndustrySales } from "../../apis/admin";
@@ -53,6 +54,7 @@ function IndustryChart({ country, district, start, end }) {
 }
 
 export default function CountryIndustrySpend({ country, start, end }) {
+  const { t } = useTranslation();
   const [districts, setDistricts] = useState(null);
   const [error, setError] = useState("");
   const [sharedDistrict, setSharedDistrict] = useAnalysisFilter("district");
@@ -82,15 +84,14 @@ export default function CountryIndustrySpend({ country, start, end }) {
       {error ? <p role="alert">{error}</p> : !districts ? <LoadingSpinner label="구군 목록을 불러오는 중입니다." /> : country && firstDistrict && secondDistrict ? selectedDistricts.map((district, index) => (
         <div className="admin-visits__card" key={index}>
           <div className="admin-visits__chart-controls">
-            <label className="admin-visits__country-select">구·군
-              <select aria-label={`${index + 1}번째 비교 구·군`} value={String(district.sgg_cd)} onChange={(event) => {
+            <label className="admin-visits__country-select">{t("구·군")}<select aria-label={`${index + 1}번째 비교 구·군`} value={String(district.sgg_cd)} onChange={(event) => {
                 const code = event.target.value;
                 if (code === String(selectedDistricts[1 - index].sgg_cd)) return;
                 setDistrictCodes(selectedDistricts.map((item, position) => position === index ? code : String(item.sgg_cd)));
                 setSharedDistrict(code);
               }}>
                 {districts.filter((item) => String(item.sgg_cd) !== String(selectedDistricts[1 - index].sgg_cd))
-                  .map((item) => <option key={item.sgg_cd} value={String(item.sgg_cd)}>{item.sgg_nm}</option>)}
+                  .map((item) => <option key={t(item.sgg_cd)} value={String(item.sgg_cd)}>{t(item.sgg_nm)}</option>)}
               </select>
             </label>
           </div>

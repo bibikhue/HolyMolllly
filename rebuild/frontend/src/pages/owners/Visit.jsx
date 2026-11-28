@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { getBusanDistricts } from "../../apis/admin";
@@ -19,6 +20,7 @@ const AUDIENCES = [
 ];
 
 export default function OwnersVisit({ period, view }) {
+  const { t } = useTranslation();
   const [districtCode, setDistrictCode] = useAnalysisFilter("district");
   const [districts, setDistricts] = useState([]);
   const [districtError, setDistrictError] = useState("");
@@ -66,9 +68,8 @@ export default function OwnersVisit({ period, view }) {
         <RegionVisitorComparison start={period.start_ym} end={period.end_ym} />
       </div>
       <div hidden={view !== "detail"}>
-        <label className="owners-visits__district owners-visits__district-filter">구·군
-          <select name="sgg_cd" value={districtCode} onChange={(event) => setDistrictCode(event.target.value)} aria-label="분석 구·군">
-            {districts.length ? districts.map((item) => <option key={item.sgg_cd} value={item.sgg_cd}>{item.sgg_nm}</option>) : <option value="26440">강서구</option>}
+        <label className="owners-visits__district owners-visits__district-filter">{t("구·군")}<select name="sgg_cd" value={districtCode} onChange={(event) => setDistrictCode(event.target.value)} aria-label="분석 구·군">
+            {districts.length ? districts.map((item) => <option key={t(item.sgg_cd)} value={t(item.sgg_cd)}>{t(item.sgg_nm)}</option>) : <option value="26440">{t("강서구")}</option>}
           </select>
         </label>
         {(error || districtError) && <p className="owners-visits__error" role="alert">{error || districtError}</p>}

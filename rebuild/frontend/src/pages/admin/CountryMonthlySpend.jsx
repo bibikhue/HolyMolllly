@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { getMonthlySalesPerVisitor } from "../../apis/admin";
@@ -50,15 +51,14 @@ function CountryYearChart({ country, start, end, height }) {
 }
 
 export default function CountryMonthlySpend({ countries, country: selected, countryCode, onCountryChange, start, end, height = 420 }) {
+  const { t } = useTranslation();
   const options = countries.filter((item) => item.country_cd != null && item.country_nm !== "기타");
 
   return (
     <div className="admin-visits__card admin-visits__monthly">
-          <label className="admin-visits__country-select">
-            국가
-            <select value={countryCode} onChange={(event) => onCountryChange(event.target.value)}>
-              {!selected && <option value={countryCode} disabled>선택 국가 데이터 없음</option>}
-              {options.map((item) => <option key={item.country_cd} value={String(item.country_cd)}>{item.country_nm}</option>)}
+          <label className="admin-visits__country-select">{t("국가")}<select value={countryCode} onChange={(event) => onCountryChange(event.target.value)}>
+              {!selected && <option value={t(countryCode)} disabled>선택 국가 데이터 없음</option>}
+              {options.map((item) => <option key={t(item.country_cd)} value={String(item.country_cd)}>{t(item.country_nm)}</option>)}
             </select>
           </label>
       {selected ? <CountryYearChart key={`${selected.country_cd}:${start}:${end}`} country={selected} start={start} end={end} height={height} /> : <p>선택 국가의 데이터가 없습니다.</p>}

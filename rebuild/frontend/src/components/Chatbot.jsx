@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useContext, useEffect, useRef, useState } from "react";
 import { sendChatMessage, sendPlanningMessage, sendDataMessage } from "../apis/chatbot";
 import LoadingSpinner from "./LoadingSpinner";
@@ -8,6 +9,7 @@ import { AnalysisFiltersContext } from "./analysisFilters";
 import "./Chatbot.css";
 
 function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequireLogin }) {
+  const { t } = useTranslation();
   const { filters } = useContext(AnalysisFiltersContext);
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -88,18 +90,18 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
   return (
     <>
       {isOpen && (
-        <section id="chatbot-panel" className="chatbot-panel" aria-label="챗봇">
+        <section id="chatbot-panel" className="chatbot-panel" aria-label={t("챗봇")}>
           <div className="chatbot-toolbar">
             <img src="/mapsosa-chat-mabi.png" alt="" />
             <div>
-              <p>관광 데이터로 보는 부산</p>
+              <p>{t("관광 데이터로 보는 부산")}</p>
               <div className="chatbot-title">
-                <strong>홀리모올리</strong>
-                <span>부산 관광 도우미</span>
+                <strong>{t("홀리모올리")}</strong>
+                <span>{t("부산 관광 도우미")}</span>
               </div>
             </div>
             <span className="chatbot-toolbar-actions">
-            <button type="button" aria-label="채팅 초기화" title="채팅 초기화" onClick={resetChat}>
+            <button type="button" aria-label={t("채팅 초기화")} title={t("채팅 초기화")} onClick={resetChat}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3 10a9 9 0 1 1 2.5 8.3" />
                 <path d="M3 4v6h6" />
@@ -107,7 +109,7 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
             </button>
             <button
               type="button"
-              aria-label="챗봇 닫기"
+              aria-label={t("챗봇 닫기")}
               onClick={() => setIsOpen(false)}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19" /></svg>
@@ -115,40 +117,40 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
             </span>
           </div>
           <div className="chatbot-messages" role="log" aria-live="polite">
-            {!messages.length && <p className="chatbot-hint">그래프를 함께 참고하려면 @그래프해석을 넣어 주세요.</p>}
+            {!messages.length && <p className="chatbot-hint">{t("그래프를 함께 참고하려면 @그래프해석을 넣어 주세요.")}</p>}
             {messages.map((message, index) => <div className={`chatbot-message chatbot-message--${message.role}`} key={index}>
               {message.role === "assistant" ? <Markdown remarkPlugins={[remarkCjkFriendly]} skipHtml disallowedElements={["img"]}>{message.sources?.length ? message.content.replace(/\s*\[(?:P|D)\d+\]/g, "") : message.content}</Markdown> : message.content}
-              {message.incomplete && <p className="chatbot-error">답변이 완전히 끝나지 않았습니다. 이어서 설명해 달라고 요청해 주세요.</p>}
-              {message.sources?.length > 0 && <details className="chatbot-sources"><summary>참고 데이터</summary><ul>{[...new Set(message.sources.map((source) => source.source || source.title))].map((name) => <li key={name}>{name}</li>)}</ul></details>}
+              {message.incomplete && <p className="chatbot-error">{t("답변이 완전히 끝나지 않았습니다. 이어서 설명해 달라고 요청해 주세요.")}</p>}
+              {message.sources?.length > 0 && <details className="chatbot-sources"><summary>{t("참고 데이터")}</summary><ul>{[...new Set(message.sources.map((source) => source.source || source.title))].map((name) => <li key={name}>{t(name)}</li>)}</ul></details>}
             </div>)}
             {sending && <LoadingSpinner label="답변을 작성하고 있습니다." />}
-            {error && <p className="chatbot-error" role="alert">{error}</p>}
+            {error && <p className="chatbot-error" role="alert">{t(error)}</p>}
             <div ref={end} />
           </div>
           <div className="chatbot-context">
-            <button type="button" className="chatbot-interpret" aria-pressed={interpretGraphs} disabled={sending} onClick={() => toggleMode("chat", "@그래프해석")}>그래프 해석</button>
-            {isAuthenticated && <button type="button" className="chatbot-interpret" aria-pressed={planningEvent} disabled={sending} onClick={() => toggleMode("planning", "@행사기획")}>행사 기획 상담</button>}
-            <button type="button" className="chatbot-interpret" aria-pressed={dataQuestion} disabled={sending} onClick={() => toggleMode("data", "@데이터질문")}>데이터 질문</button>
-            {(dataQuestion || (isAuthenticated && planningEvent)) && <span className="chatbot-planning-hint">{dataQuestion ? "질문 이어가는 중" : "상담 이어가는 중"}</span>}
+            <button type="button" className="chatbot-interpret" aria-pressed={interpretGraphs} disabled={sending} onClick={() => toggleMode("chat", "@그래프해석")}>{t("그래프 해석")}</button>
+            {isAuthenticated && <button type="button" className="chatbot-interpret" aria-pressed={planningEvent} disabled={sending} onClick={() => toggleMode("planning", "@행사기획")}>{t("행사 기획 상담")}</button>}
+            <button type="button" className="chatbot-interpret" aria-pressed={dataQuestion} disabled={sending} onClick={() => toggleMode("data", "@데이터질문")}>{t("데이터 질문")}</button>
+            {(dataQuestion || (isAuthenticated && planningEvent)) && <span className="chatbot-planning-hint">{dataQuestion ? t("질문 이어가는 중") : t("상담 이어가는 중")}</span>}
             {interpretGraphs && <>
-              <span className="chatbot-data-counts" aria-live="polite" title="기본·상세 그래프의 해석 자료를 모두 포함합니다.">
-                {[["visits", "방문"], ["sales", "소비"], ["types", "국가별 특성 유형화"]].filter(([category]) => dataCounts[category].total > 0).map(([category, label]) => `${label} ${dataCounts[category].total}건`).join(" · ")}
+              <span className="chatbot-data-counts" aria-live="polite" title={t("기본·상세 그래프의 해석 자료를 모두 포함합니다.")}>
+                {[["visits", "방문"], ["sales", "소비"], ["types", "국가별 특성 유형화"]].filter(([category]) => dataCounts[category].total > 0).map(([category, label]) => t("chartCount", { name: t(label), count: dataCounts[category].total })).join(" · ")}
               </span>
-              {(graphContext?.status === "loading" || graphContext?.status === "partial") && <span>일부 데이터 로딩 중</span>}
+              {(graphContext?.status === "loading" || graphContext?.status === "partial") && <span>{t("일부 데이터 로딩 중")}</span>}
             </>}
           </div>
           <form className="chatbot-composer" onSubmit={submit}>
             <textarea
               ref={composer}
-              aria-label="메시지"
-              placeholder={dataQuestion ? "궁금한 관광 데이터나 후속 질문을 입력해주세요" : planningEvent ? "기획 조건이나 후속 질문을 입력해주세요" : "메시지를 입력해주세요"}
+              aria-label={t("메시지")}
+              placeholder={dataQuestion ? t("궁금한 관광 데이터나 후속 질문을 입력해주세요") : planningEvent ? t("기획 조건이나 후속 질문을 입력해주세요") : t("메시지를 입력해주세요")}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               maxLength={2000}
               disabled={sending}
               onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }}
             />
-            <button type="submit" aria-label="메시지 보내기" disabled={sending || !draft.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").replaceAll("@데이터질문", "").trim()}>
+            <button type="submit" aria-label={t("메시지 보내기")} disabled={sending || !draft.replaceAll("@그래프해석", "").replaceAll("@행사기획", "").replaceAll("@데이터질문", "").trim()}>
               ↑
             </button>
           </form>
@@ -157,7 +159,7 @@ function Chatbot({ graphContext, refreshGraphContext, isAuthenticated, onRequire
       <button
         type="button"
         className={isOpen ? "chatbot-button chatbot-close" : "chatbot-button"}
-        aria-label={isOpen ? "챗봇 닫기" : "챗봇 열기"}
+        aria-label={isOpen ? t("챗봇 닫기") : t("챗봇 열기")}
         aria-expanded={isOpen}
         aria-controls="chatbot-panel"
         onClick={() => setIsOpen((open) => !open)}

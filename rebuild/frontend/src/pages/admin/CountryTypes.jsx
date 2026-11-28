@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { getBusanDistricts } from "../../apis/admin";
 import CountryTypeComparison from "./CountryTypeComparison";
 import { useAnalysisFilter } from "../../components/analysisFilters";
 
 export default function CountryTypes({ period, view }) {
+  const { t } = useTranslation();
   const [district, setDistrict] = useAnalysisFilter("district");
   const [districts, setDistricts] = useState([]);
   const [error, setError] = useState("");
@@ -18,8 +20,8 @@ export default function CountryTypes({ period, view }) {
   return <div className="country-types">
     <div hidden={view !== "basic"}><CountryTypeComparison period={period} /></div>
     <div hidden={view !== "detail"}>
-      <div className="country-types__filters"><label>구·군<select aria-label="국가별 특성 유형화 구·군" value={district} onChange={(event) => setDistrict(event.target.value)}>
-        {districts.length ? districts.map((row) => <option key={row.sgg_cd} value={row.sgg_cd}>{row.sgg_nm}</option>) : <option value="26350">해운대구</option>}
+      <div className="country-types__filters"><label>{t("구·군")}<select aria-label="국가별 특성 유형화 구·군" value={district} onChange={(event) => setDistrict(event.target.value)}>
+        {districts.length ? districts.map((row) => <option key={t(row.sgg_cd)} value={t(row.sgg_cd)}>{t(row.sgg_nm)}</option>) : <option value="26350">{t("해운대구")}</option>}
       </select></label></div>
       {error && <p role="alert">{error}</p>}
       <CountryTypeComparison period={period} district={district} />

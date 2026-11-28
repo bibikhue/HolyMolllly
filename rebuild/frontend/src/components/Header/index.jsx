@@ -3,9 +3,12 @@ import { NavLink } from "react-router-dom";
 
 import "./index.css";
 import Logo from "../Logo";
+import LanguageSelect from "../LanguageSelect";
+import { useTranslation } from "react-i18next";
 import { HEADER_LIST } from "../../constants/navigation";
 
 function LogoutButton({ onLogout, onCloseMenu }) {
+  const { t } = useTranslation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,14 +29,15 @@ function LogoutButton({ onLogout, onCloseMenu }) {
   return (
     <div className="header-actions">
       <button type="button" className="header-logout" onClick={handleLogout} disabled={isLoggingOut}>
-        {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
+        {t(isLoggingOut ? "로그아웃 중…" : "로그아웃")}
       </button>
-      {error && <p className="header-logout-error" role="alert">{error}</p>}
+      {error && <p className="header-logout-error" role="alert">{t(error)}</p>}
     </div>
   );
 }
 
 function Header({ onNavigate, isLoggedIn, onLogout }) {
+  const { t } = useTranslation();
   const headerRef = useRef(null);
   const menuRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +71,7 @@ function Header({ onNavigate, isLoggedIn, onLogout }) {
       <div className="header-bar">
         <Logo />
         <nav
-          aria-label="주 메뉴"
+          aria-label={t("주 메뉴")}
           onMouseEnter={() => setIsOpen(true)}
           onTouchStart={() => setIsOpen((open) => !open)}
         >
@@ -81,18 +85,18 @@ function Header({ onNavigate, isLoggedIn, onLogout }) {
                     isActive || hoveredMenu === link ? "active" : undefined
                   }
                 >
-                  {name}
+                  {t(name)}
                 </NavLink>
               </li>
             ))}
           </ul>
         </nav>
-        {isLoggedIn && (
+        <div className="header-utilities"><LanguageSelect />{isLoggedIn && (
           <LogoutButton onLogout={onLogout} onCloseMenu={closeMenu} />
-        )}
+        )}</div>
       </div>
       {isOpen && (
-        <nav className="header-dropdown" aria-label="하위 메뉴">
+        <nav className="header-dropdown" aria-label={t("하위 메뉴")}>
           <ul className="header-columns">
             {HEADER_LIST.map(({ name, link, children }) => (
               <li
@@ -101,7 +105,7 @@ function Header({ onNavigate, isLoggedIn, onLogout }) {
                 onMouseLeave={() => setHoveredMenu(null)}
               >
                 {children && (
-                  <ul className="header-submenu" aria-label={name}>
+                  <ul className="header-submenu" aria-label={t(name)}>
                     {children.map((item) => (
                       <li key={item.link}>
                         <NavLink
@@ -111,7 +115,7 @@ function Header({ onNavigate, isLoggedIn, onLogout }) {
                             closeMenu();
                           }}
                         >
-                          {item.name}
+                          {t(item.name)}
                         </NavLink>
                       </li>
                     ))}

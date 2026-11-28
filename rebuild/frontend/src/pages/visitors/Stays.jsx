@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import MapLoading from "../../components/Map/MapLoading.jsx";
 import "./Stays.css";
@@ -5,14 +6,13 @@ import "./Stays.css";
 const Subway = lazy(() => import("../../components/public_TransPort/Subway.jsx"));
 
 function VisitorsStays() {
+  const { t } = useTranslation();
   return (
     <section className="stays-page">
       <header className="stays-page__intro">
         <p className="stays-page__eyebrow">BUSAN TRANSIT</p>
-        <h1>교통이 편리한 숙박시설</h1>
-        <p className="stays-page__description">
-          노선을 선택해 부산의 지하철과 역 위치를 확인해 보세요.
-        </p>
+        <h1>{t("교통이 편리한 숙박시설")}</h1>
+        <p className="stays-page__description">{t("노선을 선택해 부산의 지하철과 역 위치를 확인해 보세요.")}</p>
       </header>
       <div className="stays-page__map-card">
         <Suspense fallback={<MapLoading />}>

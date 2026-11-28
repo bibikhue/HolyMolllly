@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FAQ_CATEGORIES } from "../../constants/faq.js";
 import "./FAQ.css";
 
 function FAQ() {
+  const { t } = useTranslation();
   const [category, setCategory] = useState(FAQ_CATEGORIES[0].id);
   const [openQuestion, setOpenQuestion] = useState(null);
   const sections = FAQ_CATEGORIES.find(({ id }) => id === category).sections;
@@ -10,11 +12,11 @@ function FAQ() {
   return (
     <article className="faq-page">
       <header className="faq-page__header">
-        <span className="faq-page__eyebrow">서비스 이용 안내</span>
-        <h1>주요 질문 및 답변</h1>
+        <span className="faq-page__eyebrow">{t("서비스 이용 안내")}</span>
+        <h1>{t("주요 질문 및 답변")}</h1>
       </header>
 
-      <div className="faq-page__categories" aria-label="질문 대상">
+      <div className="faq-page__categories" aria-label={t("질문 대상")}>
         {FAQ_CATEGORIES.map(({ id, label }) => (
           <button
             key={id}
@@ -30,7 +32,7 @@ function FAQ() {
               setOpenQuestion(null);
             }}
           >
-            {label}
+            {t(label)}
           </button>
         ))}
       </div>
@@ -38,7 +40,7 @@ function FAQ() {
       {sections.length > 0 ? (
         sections.map(({ id, title, questions }) => (
           <section className="faq-page__section" key={id}>
-            <h2>{title}</h2>
+            <h2>{t(title)}</h2>
             <div className="faq-page__list">
               {questions.map(({ id: questionId, question, answer }) => {
                 const itemId = `${id}-${questionId}`;
@@ -54,12 +56,12 @@ function FAQ() {
                       onClick={() => setOpenQuestion(isOpen ? null : itemId)}
                     >
                       <span className="faq-page__q">Q</span>
-                      <span>{question}</span>
+                      <span>{t(question)}</span>
                       <span className="faq-page__toggle" aria-hidden="true">
                         {isOpen ? "−" : "+"}
                       </span>
                     </button>
-                    <p id={`faq-answer-${itemId}`} hidden={!isOpen}>{answer}</p>
+                    <p id={`faq-answer-${itemId}`} hidden={!isOpen}>{t(answer)}</p>
                   </div>
                 );
               })}
@@ -67,7 +69,7 @@ function FAQ() {
           </section>
         ))
       ) : (
-        <p className="faq-page__empty">등록된 질문이 없습니다.</p>
+        <p className="faq-page__empty">{t("등록된 질문이 없습니다.")}</p>
       )}
     </article>
   );

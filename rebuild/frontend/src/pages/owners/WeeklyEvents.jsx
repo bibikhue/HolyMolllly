@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import "./OwnersLayout.css";
 import "./WeeklyEvents.css";
@@ -22,6 +23,8 @@ function Icon({ name }) {
 }
 
 export default function WeeklyEvents() {
+  const { t, i18n } = useTranslation();
+  const weekdayLabel = (day) => new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: "short" }).format(new Date(2023, 0, 1 + ["일", "월", "화", "수", "목", "금", "토"].indexOf(day)));
   const [today] = useState(() => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date()));
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(() => {
@@ -46,57 +49,57 @@ export default function WeeklyEvents() {
     <section className="weekly-events" aria-labelledby="weekly-events-title">
       <div className="weekly-events__schedule weekly-events__panel">
         <header className="weekly-events__intro">
-          <div className="weekly-events__heading"><Icon name="calendar" /><h1 id="weekly-events-title">주간 행사 일정 알림</h1></div>
-          <p>관심 있는 부산 행사 소식을 원하는 요일에 이메일로 받아보세요.</p>
+          <div className="weekly-events__heading"><Icon name="calendar" /><h1 id="weekly-events-title">{t("주간 행사 일정 알림")}</h1></div>
+          <p>{t("관심 있는 부산 행사 소식을 원하는 요일에 이메일로 받아보세요.")}</p>
         </header>
         <fieldset className="weekly-events__period">
-          <legend>알림 기간</legend>
+          <legend>{t("알림 기간")}</legend>
           <div className="weekly-events__date-row">
-            <label><span>시작일</span><input aria-label="알림 시작일" type="date" value={start} required onChange={(event) => { setStart(event.target.value); if (event.target.value) setMonth(event.target.value.slice(0, 7)); }} /></label>
+            <label><span>{t("시작일")}</span><input aria-label={t("알림 시작일")} type="date" value={start} required onChange={(event) => { setStart(event.target.value); if (event.target.value) setMonth(event.target.value.slice(0, 7)); }} /></label>
             <span className="weekly-events__date-divider">~</span>
-            <label><span>종료일</span><input aria-label="알림 종료일" type="date" value={end} min={start} required disabled={ongoing} onChange={(event) => setEnd(event.target.value)} /></label>
+            <label><span>{t("종료일")}</span><input aria-label={t("알림 종료일")} type="date" value={end} min={start} required disabled={ongoing} onChange={(event) => setEnd(event.target.value)} /></label>
           </div>
-          <label className="weekly-events__check weekly-events__ongoing"><input type="checkbox" checked={ongoing} onChange={(event) => setOngoing(event.target.checked)} />종료일 없이 계속 받기</label>
-          {!ongoing && start > end && <p role="alert">종료일은 시작일 이후로 선택해 주세요.</p>}
+          <label className="weekly-events__check weekly-events__ongoing"><input type="checkbox" checked={ongoing} onChange={(event) => setOngoing(event.target.checked)} />{t("종료일 없이 계속 받기")}</label>
+          {!ongoing && start > end && <p role="alert">{t("종료일은 시작일 이후로 선택해 주세요.")}</p>}
         </fieldset>
         <fieldset className="weekly-events__types">
-          <legend>행사 유형</legend>
-          <div>{TYPES.map((type) => <label className="weekly-events__check" key={type.name}><input type="checkbox" checked={types.includes(type.name)} onChange={() => toggle(type.name, types, setTypes)} />{type.name}</label>)}</div>
+          <legend>{t("행사 유형")}</legend>
+          <div>{TYPES.map((type) => <label className="weekly-events__check" key={type.name}><input type="checkbox" checked={types.includes(type.name)} onChange={() => toggle(type.name, types, setTypes)} />{t(type.name)}</label>)}</div>
         </fieldset>
-        <div className="weekly-events__calendar" aria-label="알림 기간 달력">
-          <div className="weekly-events__month"><button type="button" aria-label="이전 달" onClick={() => moveMonth(-1)}>‹</button><h2>{year}년 {monthNumber}월</h2><button type="button" aria-label="다음 달" onClick={() => moveMonth(1)}>›</button></div>
+        <div className="weekly-events__calendar" aria-label={t("알림 기간 달력")}>
+          <div className="weekly-events__month"><button type="button" aria-label={t("이전 달")} onClick={() => moveMonth(-1)}>‹</button><h2>{t("monthYear", { year, month: monthNumber })}</h2><button type="button" aria-label={t("다음 달")} onClick={() => moveMonth(1)}>›</button></div>
           <div className="weekly-events__calendar-grid">
-            {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => <span className={`weekly-events__weekday ${index === 0 ? "is-sunday" : index === 6 ? "is-saturday" : ""}`} key={day}>{day}</span>)}
+            {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => <span className={`weekly-events__weekday ${index === 0 ? "is-sunday" : index === 6 ? "is-saturday" : ""}`} key={day}>{weekdayLabel(day)}</span>)}
             {Array.from({ length: cellCount }, (_, index) => {
               const day = index - firstWeekday + 1;
               if (day < 1 || day > daysInMonth) return <span key={index} />;
               const date = `${month}-${String(day).padStart(2, "0")}`;
               const inPeriod = !!start && date >= start && (ongoing || (!!end && date <= end));
-              return <button key={index} type="button" aria-label={`${year}년 ${monthNumber}월 ${day}일`} aria-pressed={date === selectedDate} aria-current={date === today ? "date" : undefined}
+              return <button key={index} type="button" aria-label={new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: "full" }).format(new Date(year, monthNumber - 1, day))} aria-pressed={date === selectedDate} aria-current={date === today ? "date" : undefined}
                 className={`${index % 7 === 0 ? "is-sunday" : index % 7 === 6 ? "is-saturday" : ""} ${inPeriod ? "is-in-period" : ""} ${date === selectedDate ? "is-selected" : ""}`}
                 onClick={() => setSelectedDate(date)}>{day}{date === today && <span className="weekly-events__today-dot" />}</button>;
             })}
           </div>
-          <div className="weekly-events__legend">{TYPES.map((type) => <span key={type.name}><i style={{ backgroundColor: type.color }} />{type.name}</span>)}</div>
-          <p className="weekly-events__calendar-note">행사 일정 연동을 준비 중입니다. 달력의 배경은 선택한 알림 기간입니다.</p>
+          <div className="weekly-events__legend">{TYPES.map((type) => <span key={type.name}><i style={{ backgroundColor: type.color }} />{t(type.name)}</span>)}</div>
+          <p className="weekly-events__calendar-note">{t("행사 일정 연동을 준비 중입니다. 달력의 배경은 선택한 알림 기간입니다.")}</p>
         </div>
       </div>
       <div className="weekly-events__settings">
         <div className="weekly-events__delivery">
-          <fieldset className="weekly-events__panel"><legend className="weekly-events__sr-only">발송 요일</legend>
-            <div className="weekly-events__heading"><Icon name="calendar" /><h2>발송 요일</h2></div>
-            <div className="weekly-events__days">{WEEKDAYS.map((day) => <label className="weekly-events__check" key={day}><input type="checkbox" checked={days.includes(day)} onChange={() => toggle(day, days, setDays)} />{day}</label>)}</div>
+          <fieldset className="weekly-events__panel"><legend className="weekly-events__sr-only">{t("발송 요일")}</legend>
+            <div className="weekly-events__heading"><Icon name="calendar" /><h2>{t("발송 요일")}</h2></div>
+            <div className="weekly-events__days">{WEEKDAYS.map((day) => <label className="weekly-events__check" key={day}><input type="checkbox" checked={days.includes(day)} onChange={() => toggle(day, days, setDays)} />{weekdayLabel(day)}</label>)}</div>
           </fieldset>
-          <div className="weekly-events__panel"><div className="weekly-events__heading"><Icon name="clock" /><h2>발송 시간</h2></div>
-            <select aria-label="발송 시간" defaultValue="09:00">{Array.from({ length: 24 }, (_, hour) => <option key={hour} value={`${String(hour).padStart(2, "0")}:00`}>{String(hour).padStart(2, "0")}시</option>)}</select>
-            <p className="weekly-events__subtle">한국 시간 기준</p>
+          <div className="weekly-events__panel"><div className="weekly-events__heading"><Icon name="clock" /><h2>{t("발송 시간")}</h2></div>
+            <select aria-label={t("발송 시간")} defaultValue="09:00">{Array.from({ length: 24 }, (_, hour) => <option key={hour} value={`${String(hour).padStart(2, "0")}:00`}>{String(hour).padStart(2, "0")}:00</option>)}</select>
+            <p className="weekly-events__subtle">{t("한국 시간 기준")}</p>
           </div>
         </div>
-        <div className="weekly-events__panel weekly-events__email"><div className="weekly-events__heading"><Icon name="mail" /><h2><label htmlFor="weekly-events-email">이메일</label></h2></div><input id="weekly-events-email" type="email" autoComplete="email" placeholder="이메일 주소를 입력해 주세요" /></div>
+        <div className="weekly-events__panel weekly-events__email"><div className="weekly-events__heading"><Icon name="mail" /><h2><label htmlFor="weekly-events-email">{t("이메일")}</label></h2></div><input id="weekly-events-email" type="email" autoComplete="email" placeholder={t("이메일 주소를 입력해 주세요")} /></div>
         <div className="weekly-events__panel weekly-events__actions">
-          <div className="weekly-events__action-row"><button type="button" className="weekly-events__primary" disabled><Icon name="plus" />알림 등록</button><button type="button" disabled><Icon name="bell" />알림 해지</button></div>
-          <button type="button" disabled><Icon name="send" />테스트 전송</button>
-          <p>이메일 알림 등록과 발송 기능은 준비 중입니다.</p>
+          <div className="weekly-events__action-row"><button type="button" className="weekly-events__primary" disabled><Icon name="plus" />{t("알림 등록")}</button><button type="button" disabled><Icon name="bell" />{t("알림 해지")}</button></div>
+          <button type="button" disabled><Icon name="send" />{t("테스트 전송")}</button>
+          <p>{t("이메일 알림 등록과 발송 기능은 준비 중입니다.")}</p>
         </div>
       </div>
     </section>

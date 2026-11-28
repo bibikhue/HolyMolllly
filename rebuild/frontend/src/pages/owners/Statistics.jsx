@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import MonthPicker from "../../components/MonthPicker";
@@ -8,6 +9,7 @@ import "./Statistics.css";
 import { useAnalysisFilter } from "../../components/analysisFilters";
 
 export default function OwnersStatistics() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [metric, setMetric] = useState(() => searchParams.get("metric") === "sales" ? "sales" : "visits");
   const [view, setView] = useState("basic");
@@ -38,21 +40,21 @@ export default function OwnersStatistics() {
     <div className="owners-layout owners-statistics" data-chat-context={JSON.stringify({ period, metric, view })}>
       <aside className="owners-statistics__sidebar" aria-label="상권 분석 조회 조건">
         <nav className="owners-statistics__metrics" aria-label="상권 분석 선택">
-          <button type="button" aria-pressed={metric === "visits"} onClick={() => setMetric("visits")}>방문</button>
-          <button type="button" aria-pressed={metric === "sales"} onClick={() => setMetric("sales")}>소비</button>
+          <button type="button" aria-pressed={metric === "visits"} onClick={() => setMetric("visits")}>{t("방문")}</button>
+          <button type="button" aria-pressed={metric === "sales"} onClick={() => setMetric("sales")}>{t("소비")}</button>
         </nav>
         <form className="owners-statistics__period" onSubmit={handleSearch}>
-          <h2>공통 조회 기간</h2>
+          <h2>{t("공통 조회 기간")}</h2>
           <MonthPicker key={`start:${period.start_ym}`} name="owners_start" label="시작월" years={years} value={period.start_ym} />
           <MonthPicker key={`end:${period.end_ym}`} name="owners_end" label="종료월" years={years} value={period.end_ym} />
-          <button type="submit">조회</button>
-          {error && <p role="alert">{error}</p>}
+          <button type="submit">{t("조회")}</button>
+          {error && <p role="alert">{t(error)}</p>}
         </form>
       </aside>
       <div className="owners-statistics__content">
         <nav className="owners-statistics__views" aria-label="기본·상세 선택">
-          <button type="button" aria-pressed={view === "basic"} onClick={() => setView("basic")}>기본</button>
-          <button type="button" aria-pressed={view === "detail"} onClick={() => setView("detail")}>상세</button>
+          <button type="button" aria-pressed={view === "basic"} onClick={() => setView("basic")}>{t("기본")}</button>
+          <button type="button" aria-pressed={view === "detail"} onClick={() => setView("detail")}>{t("상세")}</button>
         </nav>
         <div hidden={metric !== "visits"}><OwnersVisit period={period} view={view} /></div>
         <div hidden={metric !== "sales"}><OwnersSales period={period} view={view} /></div>

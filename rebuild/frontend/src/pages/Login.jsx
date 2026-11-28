@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { login } from "../apis/auth";
 import "./Login.css";
 
 function Login({ onClose, onLogin, requireAdmin = true }) {
+  const { t } = useTranslation();
   const dialogRef = useRef(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,19 +55,19 @@ function Login({ onClose, onLogin, requireAdmin = true }) {
       }}
     >
       <section className="login-content">
-        <button type="button" className="login-close" aria-label="로그인 닫기" onClick={onClose}>×</button>
-        <h2 id="login-title">{requireAdmin ? "관리자 로그인" : "로그인"}</h2>
-        <p>{requireAdmin ? "해당 페이지는 사이트 관리자만 이용할 수 있습니다." : "행사 기획 상담은 로그인 후 이용할 수 있습니다."}</p>
-        <p>계정 발급이 필요하시면 이메일로 문의해 주세요.</p>
+        <button type="button" className="login-close" aria-label={t("로그인 닫기")} onClick={onClose}>×</button>
+        <h2 id="login-title">{requireAdmin ? t("관리자 로그인") : t("로그인")}</h2>
+        <p>{requireAdmin ? t("해당 페이지는 사이트 관리자만 이용할 수 있습니다.") : t("행사 기획 상담은 로그인 후 이용할 수 있습니다.")}</p>
+        <p>{t("계정 발급이 필요하시면 이메일로 문의해 주세요.")}</p>
         <a href="mailto:admin@example.com">admin@example.com</a>
         <form onSubmit={submitLogin}>
-          <label htmlFor="login-id">아이디</label>
+          <label htmlFor="login-id">{t("아이디")}</label>
           <input id="login-id" name="username" autoComplete="username" required autoFocus />
-          <label htmlFor="login-password">비밀번호</label>
+          <label htmlFor="login-password">{t("비밀번호")}</label>
           <input id="login-password" name="password" type="password" autoComplete="current-password" required />
-          {error && <p role="alert">{error}</p>}
+          {error && <p role="alert">{t(error)}</p>}
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "로그인 중…" : "로그인"}
+            {isSubmitting ? t("로그인 중…") : t("로그인")}
           </button>
         </form>
       </section>

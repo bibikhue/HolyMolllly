@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { getSalesOverview, getSalesPatterns, getPerVisitorCountries } from "../../apis/owners";
@@ -37,6 +38,7 @@ function PerVisitorTrend({ district, countryCode, period }) {
 }
 
 export default function OwnersSales({ period, view }) {
+  const { t } = useTranslation();
   const [overview, setOverview] = useState(null);
   const [overviewError, setOverviewError] = useState(null);
   const [patterns, setPatterns] = useState(null);
@@ -111,9 +113,9 @@ export default function OwnersSales({ period, view }) {
   }
   const monthlySeries = SALES_COUNTRIES.map((country) => ({ ...country, x: seriesMonths.map((ym) => `${ym}-01`), y: seriesMonths.map((ym) => monthCounts.get(`${country.name}:${ym}`) ?? null) }));
   const monthlyMaximum = Math.max(0, ...monthlySeries.flatMap((row) => row.y.filter(Number.isFinite))) / 100000;
-  const districtSelect = <label>구·군<select aria-label="소비 분석 구·군" value={district} onChange={(event) => setDistrict(event.target.value)}>{districts.length ? districts.map((row) => <option value={row.code} key={row.code}>{row.name}</option>) : <option value="26350">해운대구</option>}</select></label>;
-  const industrySelect = <label>업종<select aria-label="소비 분석 업종" value={industry} onChange={(event) => setIndustry(event.target.value)}><option value="">전체 업종</option>{industries.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>;
-  const monthSelect = <label>월<select aria-label="소비 지도 월" value={selectedMonth} onChange={(event) => setMonth(event.target.value)} disabled={!months.length}>{months.map((ym) => <option value={ym} key={ym}>{ym.replace("-", "년 ")}월</option>)}</select></label>;
+  const districtSelect = <label>{t("구·군")}<select aria-label="소비 분석 구·군" value={district} onChange={(event) => setDistrict(event.target.value)}>{districts.length ? districts.map((row) => <option value={t(row.code)} key={t(row.code)}>{t(row.name)}</option>) : <option value="26350">{t("해운대구")}</option>}</select></label>;
+  const industrySelect = <label>{t("업종")}<select aria-label="소비 분석 업종" value={industry} onChange={(event) => setIndustry(event.target.value)}><option value="">{t("전체 업종")}</option>{industries.map((name) => <option value={t(name)} key={t(name)}>{t(name)}</option>)}</select></label>;
+  const monthSelect = <label>{t("월")}<select aria-label="소비 지도 월" value={selectedMonth} onChange={(event) => setMonth(event.target.value)} disabled={!months.length}>{months.map((ym) => <option value={t(ym)} key={t(ym)}>{ym.replace("-", "년 ")}{t("월")}</option>)}</select></label>;
 
   return <div className="owners-sales" data-chat-context={JSON.stringify({ district: districtName, industry: industry || "전체 업종", month: selectedMonth })}>
     {overviewError?.key === periodKey && <p role="alert">{overviewError.message}</p>}
@@ -125,7 +127,7 @@ export default function OwnersSales({ period, view }) {
         <SalesDistrictMap values={mapValues} selected={district} onSelect={setDistrict} />
       </section>
 
-      <section className="owners-sales__chart owners-sales__divider"><div className="owners-sales__filters">{districtSelect}<label>국가<select aria-label="1인당 소비 추이 국가" value={countryCode} disabled={!countryOptions.length} onChange={(event) => setCountryCode(event.target.value)}>{!selectedCountryCode && <option value={countryCode} disabled>선택 국가 데이터 없음</option>}{countryOptions.map((country) => <option value={country.country_cd} key={country.country_cd}>{country.country_nm}</option>)}</select></label></div>
+      <section className="owners-sales__chart owners-sales__divider"><div className="owners-sales__filters">{districtSelect}<label>{t("국가")}<select aria-label="1인당 소비 추이 국가" value={countryCode} disabled={!countryOptions.length} onChange={(event) => setCountryCode(event.target.value)}>{!selectedCountryCode && <option value={t(countryCode)} disabled>선택 국가 데이터 없음</option>}{countryOptions.map((country) => <option value={t(country.country_cd)} key={t(country.country_cd)}>{t(country.country_nm)}</option>)}</select></label></div>
         {countriesError?.key === countriesKey ? <p role="alert">{countriesError.message}</p> : availableCountries?.key !== countriesKey ? <LoadingSpinner label="지원 국가를 불러오는 중입니다." /> : selectedCountryCode ? <PerVisitorTrend district={district} countryCode={selectedCountryCode} period={period} /> : <p>선택한 구·군과 기간에 1인당 소비를 계산할 수 있는 국가가 없습니다.</p>}
       </section>
       <div className="owners-sales__divider">
